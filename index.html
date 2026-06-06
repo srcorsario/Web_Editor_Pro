@@ -1,1 +1,88 @@
-el index aqui
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ADMIN CARTA V 13.0 - WINE SYNC</title>
+    <link rel="icon" type="image/png" href="setting.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="header-admin">
+        <h1>⚙️ GESTOR DE CARTA V 13.0</h1>
+        <div id="status-carga">Cargando datos...</div>
+    </div>
+    <div id="editor-dinamico"></div>
+</div>
+
+<button class="btn-add-float" onclick="abrirSelector()">+</button>
+<button class="btn-guardar-main" onclick="enviarAlExcel()">💾 GUARDAR Y REORDENAR EXCEL</button>
+
+<div id="modal-editor" class="modal">
+    <div class="modal-content">
+        <h2 id="modal-titulo" style="margin-top:0; color:var(--primario); border-bottom: 2px solid #eee; padding-bottom: 10px;">Editar Elemento</h2>
+        
+        <div class="input-group">
+            <label id="label-uvas">Nombres y Detalles del Plato</label>
+            
+            <div class="input-row-lang row-es-control">
+                <div class="lang-tag tag-es-main">ES</div>
+                <div style="flex:1">
+                    <input id="edit-es" class="input-estandar" placeholder="Nombre en Español" oninput="comprobarRequisitosTraduccion()">
+                    <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Uvas / Detalles (Opcional)">
+                </div>
+            </div>
+            
+            <div class="input-row-lang row-en-control">
+                <div class="lang-tag tag-en-main">EN</div>
+                <div style="flex:1">
+                    <input id="edit-en" class="input-estandar" placeholder="Name in English" oninput="comprobarRequisitosTraduccion()">
+                    <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
+                </div>
+            </div>
+
+            <button id="btn-autotraducir" class="btn-traductor-magico" disabled onclick="ejecutarTraduccionAutomatica()">
+                ✨ Traducir los otros 19 idiomas (Requiere ES y EN)
+            </button>
+
+            <div id="contenedor-resto-idiomas" class="langs-scroll-container"></div>
+        </div>
+        
+        <div class="meta-grid">
+            <div class="input-group">
+                <label>Precio (€)</label>
+                <input type="number" id="edit-precio" class="input-estandar" step="0.01">
+            </div>
+            <div class="input-group">
+                <label>Imagen</label>
+                <input type="text" id="edit-imagen" class="input-estandar" placeholder="plato01.webp">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>Alérgenos y Dietas</label>
+            <div id="alergenos-grid" class="alergenos-grid"></div>
+        </div>
+        
+        <div style="margin-top: 30px; display: flex; gap: 10px;">
+            <button onclick="aplicarCambiosPlato()" style="flex:2; background:var(--verde); color:white; padding:18px; border:none; border-radius:12px; font-weight:700; cursor:pointer;">ACEPTAR</button>
+            <button onclick="cerrarModal('modal-editor')" style="flex:1; background:#eee; padding:18px; border:none; border-radius:12px; font-weight:600; cursor:pointer;">CANCELAR</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-selector" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <h3 style="text-align:center; color:var(--primario);">AÑADIR NUEVO A...</h3>
+        <div id="lista-agrupada" style="max-height: 65vh; overflow-y: auto;"></div>
+        <button onclick="cerrarModal('modal-selector')" style="width:100%; margin-top:15px; padding:15px; border:none; background:#eee; border-radius:10px; font-weight:bold;">CERRAR</button>
+    </div>
+</div>
+
+<script src="languages.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
