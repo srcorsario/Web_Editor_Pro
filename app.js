@@ -228,7 +228,8 @@ function aplicarCambiosPlato() {
         p[minusc] = uvas ? `${nom} // ${uvas}` : nom;
     });
 
-    p.precio = parseFloat(document.getElementById('edit-precio').value || 0).toFixed(2);
+    // Cambiado: Captura estricta sin redondeo nativo de .toFixed(2)
+    p.precio = document.getElementById('edit-precio').value.trim() || "0.00";
     p.imagen = superLimpiar(document.getElementById('edit-imagen').value);
     p.alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => el.innerText).join(', ');
     cerrarModal('modal-editor');
@@ -272,6 +273,7 @@ function prepararNuevoPlato(baseId, folder) {
     Object.keys(IDIOMAS_CONFIG).forEach(l => datosTempNuevo[l.toLowerCase()] = "");
 
     cerrarModal('modal-selector');
+    openEditor(nuevoId, true); // Nota: En tu código original ponía abrirEditor, mantengo coherencia
     abrirEditor(nuevoId, true);
 }
 
@@ -305,7 +307,38 @@ async function enviarAlExcel() {
 
 function toggleActivo(id, v) { datosLocales.find(x => x.id === id).activa = v; }
 function abrirSelector() { document.getElementById('modal-selector').style.display = 'block'; }
-    function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+
+// --- CONTROL ESTRICTO DEL INPUT PRECIO (MÁX 2 DECIMALES Y TRADUCCIÓN DE COMAS) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const inputPrecio = document.getElementById('edit-precio');
+    if (!inputPrecio) return;
+
+    inputPrecio.addEventListener('input', function () {
+        // 1. Traducir comas a puntos instantáneamente
+        let valor = this.value.replace(/,/g, '.');
+
+        // 2. Permitir solo números y un único punto decimal
+        valor = valor.replace(/[^0-9.]/g, '');
+        
+        const partesPunto = valor.split('.');
+        if (partesPunto.length > 2) {
+            valor = partesPunto[0] + '.' + partesPunto.slice(1).join('');
+        }
+
+        // 3. Corte estricto en el segundo decimal (sin redondear nada)
+        if (valor.includes('.')) {
+            const [entero, decimal] = valor.split('.');
+            if (decimal.length > 2) {
+                valor = entero + '.' + decimal.substring(0, 2);
+            }
+        }
+
+        // Aplicamos el valor filtrado al input en tiempo real
+        this.value = valor;
+    });
+});
 
 // Inicialización Automática
 cargar();
