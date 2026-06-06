@@ -228,7 +228,7 @@ function aplicarCambiosPlato() {
         p[minusc] = uvas ? `${nom} // ${uvas}` : nom;
     });
 
-    // Cambiado: Captura estricta sin redondeo nativo de .toFixed(2)
+    // Captura estricta sin redondeo nativo de .toFixed(2)
     p.precio = document.getElementById('edit-precio').value.trim() || "0.00";
     p.imagen = superLimpiar(document.getElementById('edit-imagen').value);
     p.alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => el.innerText).join(', ');
@@ -252,6 +252,7 @@ function generarMenuAgrupado() {
     document.getElementById('lista-agrupada').innerHTML = h;
 }
 
+// CORREGIDO: Se elimina la función fantasma 'openEditor' que crasheaba el script
 function prepararNuevoPlato(baseId, folder) {
     let maxPermitido = baseId + 99;
     ESTRUCTURA.forEach(cat => {
@@ -273,7 +274,6 @@ function prepararNuevoPlato(baseId, folder) {
     Object.keys(IDIOMAS_CONFIG).forEach(l => datosTempNuevo[l.toLowerCase()] = "");
 
     cerrarModal('modal-selector');
-    openEditor(nuevoId, true); // Nota: En tu código original ponía abrirEditor, mantengo coherencia
     abrirEditor(nuevoId, true);
 }
 
