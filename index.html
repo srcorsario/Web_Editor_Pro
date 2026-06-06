@@ -24,7 +24,6 @@
 <div id="modal-editor" class="modal">
     <div class="modal-content">
         <h2 id="modal-titulo" style="margin-top:0; color:var(--primario); border-bottom: 2px solid #eee; padding-bottom: 10px;">Editar Elemento</h2>
-        
         <div class="input-group">
             <label id="label-uvas">Nombres y Detalles del Plato</label>
             <div class="input-row-lang row-es-control">
@@ -34,7 +33,6 @@
                     <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Uvas / Detalles (Opcional)">
                 </div>
             </div>
-            
             <div class="input-row-lang row-en-control">
                 <div class="lang-tag tag-en-main">EN</div>
                 <div style="flex:1">
@@ -42,11 +40,9 @@
                     <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
                 </div>
             </div>
-
             <button id="btn-autotraducir" class="btn-traductor-magico" disabled onclick="ejecutarTraduccionAutomatica()">
                 ✨ Traducir los otros 19 idiomas (Requiere ES y EN)
             </button>
-
             <div id="contenedor-resto-idiomas" class="langs-scroll-container"></div>
         </div>
         
@@ -82,7 +78,9 @@
 </div>
 
 <script src="languages.js"></script>
-<script type="module" src="app.js"></script>
+<script src="state.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
