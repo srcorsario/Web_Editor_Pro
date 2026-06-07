@@ -6,6 +6,24 @@ let platoEditandoId = null;
 let esNuevoPlato = false; 
 let datosTempNuevo = null; 
 
+// --- LISTA MAESTRA DE ALÉRGENOS ---
+const LISTA_ALERGENOS = [
+    { id: "gluten", nombre: "Gluten", icono: "🌾" },
+    { id: "crustaceos", nombre: "Crustáceos", icono: "🦀" },
+    { id: "huevos", nombre: "Huevos", icono: "🥚" },
+    { id: "pescado", nombre: "Pescado", icono: "🐟" },
+    { id: "cacahuetes", nombre: "Cacahuetes", icono: "🥜" },
+    { id: "soja", nombre: "Soja", icono: "🫘" },
+    { id: "lacteos", nombre: "Lácteos", icono: "🥛" },
+    { id: "frutos_cascara", nombre: "Frutos de Cáscara", icono: "🌰" },
+    { id: "apio", nombre: "Apio", icono: "🌱" },
+    { id: "mostaza", nombre: "Mostaza", icono: "🏺" },
+    { id: "sesamo", nombre: "Sésamo", icono: "🥯" },
+    { id: "sulfitos", nombre: "Sulfitos", icono: "🍷" },
+    { id: "altramuces", nombre: "Altramuces", icono: "🌼" },
+    { id: "moluscos", nombre: "Moluscos", icono: "🦑" }
+];
+
 // --- SEGURIDAD: Esperar a que las variables globales de languages.js estén listas ---
 async function esperarDependencias() {
     return new Promise((resolve) => {
@@ -22,6 +40,23 @@ async function esperarDependencias() {
 function superLimpiar(texto) {
     if (!texto) return "";
     return texto.trim().replace(/^"|"$/g, '');
+}
+
+// --- INICIALIZADOR DEL GRID DE ALÉRGENOS EN EL DOM ---
+function inicializarGridAlergenos() {
+    const grid = document.getElementById('alergenos-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = "";
+    LISTA_ALERGENOS.forEach(al => {
+        const item = document.createElement('label');
+        item.style.cssText = "display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; font-size: 0.85rem; font-weight: 600;";
+        item.innerHTML = `
+            <input type="checkbox" id="chk-alergeno-${al.id}" value="${al.id}" style="cursor:pointer;">
+            <span>${al.icono} ${al.nombre}</span>
+        `;
+        grid.appendChild(item);
+    });
 }
 
 // --- MOTOR DE RENDERIZADO DINÁMICO ---
@@ -253,6 +288,7 @@ async function llamarApiTraductor(texto, targetLang) {
 // --- LÓGICA DE CARGA PRINCIPAL DEL SPREADSHEET ---
 async function cargar() {
     await esperarDependencias(); 
+    inicializarGridAlergenos(); // Crear el grid visual en el modal apenas inicie la app
     UI_INTERNA.log("⏳ Cargando datos desde Google Sheets...");
     try {
         const resp = await fetch(CSV_URL + '&t=' + Date.now());
@@ -324,23 +360,41 @@ function abrirEditor(id) {
     document.getElementById('edit-precio').value = plato.precio || "0.00";
     document.getElementById('edit-imagen').value = plato.imagen || "";
 
-    // Importación dinámica de los campos de idiomas adicionales (incluido EN) e inputs de uvas/detalles
+    // Importación dinámica de los campos de idiomas adicionales
     const keysLang = Object.keys(IDIOMAS_CONFIG);
     keysLang.forEach(lang => {
         const langLower = lang.toLowerCase();
         
-        // Asignar nombres principales de idiomas (edit-en, edit-de, etc.)
+        // Asignar nombres principales de idiomas
         const inputNombre = document.getElementById(`edit-${langLower}`);
         if (inputNombre) {
             inputNombre.value = plato[langLower] || "";
         }
         
-        // Asignar nombres secundarios de detalles/uvas (edit-es-uvas, edit-en-uvas, etc.)
+        // Asignar nombres secundarios de detalles/uvas
         const inputUvas = document.getElementById(`edit-${langLower}-uvas`);
         if (inputUvas) {
             inputUvas.value = plato[`${langLower}-uvas`] || plato[`uvas-${langLower}`] || "";
         }
     });
+
+    // --- LEER Y MOSTRAR LOS ALÉRGENOS GUARDADOS ---
+    // Desmarcar todos primero
+    LISTA_ALERGENOS.forEach(al => {
+        const chk = document.getElementById(`chk-alergeno-${al.id}`);
+        if (chk) chk.checked = false;
+    });
+
+    // Marcar los correspondientes si el plato los posee en su string (separados por coma u otro carácter)
+    if (plato.alergenos) {
+        const AlergenosPlato = plato.alergenos.toLowerCase().split(/[\s,;|]+/); // Tolera espacios, comas o puntos y coma
+        LISTA_ALERGENOS.forEach(al => {
+            const chk = document.getElementById(`chk-alergeno-${al.id}`);
+            if (chk && AlergenosPlato.includes(al.id.toLowerCase())) {
+                chk.checked = true;
+            }
+        });
+    }
 
     // Abre el modal manipulando el estilo directo de tus CSS
     document.getElementById('modal-editor').style.display = "block";
@@ -363,7 +417,7 @@ function toggleActivo(id) {
     }
 }
 
-// --- FUNCIONES MOCK DE ACCIONES ADICIONALES ---
+// --- CONTROLADOR DE APLICAR CAMBIOS ---
 function aplicarCambiosPlato() { 
     const plato = datosLocales.find(p => p.id === platoEditandoId);
     if (plato) {
@@ -384,10 +438,20 @@ function aplicarCambiosPlato() {
             
             const inputUvas = document.getElementById(`edit-${langLower}-uvas`);
             if (inputUvas) {
-                // Almacenamos el valor respetando la estructura de propiedades del objeto local
                 plato[`${langLower}-uvas`] = inputUvas.value;
             }
         });
+
+        // --- RECOPILAR Y GUARDAR LOS ALÉRGENOS SELECCIONADOS ---
+        let alergenosSeleccionados = [];
+        LISTA_ALERGENOS.forEach(al => {
+            const chk = document.getElementById(`chk-alergeno-${al.id}`);
+            if (chk && chk.checked) {
+                alergenosSeleccionados.push(al.id);
+            }
+        });
+        // Lo unimos con comas para que mantenga el formato plano compatible con tu CSV
+        plato.alergenos = alergenosSeleccionados.join(', ');
     }
     cerrarModal('modal-editor'); 
     renderizar(); 
