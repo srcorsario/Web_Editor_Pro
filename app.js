@@ -11,6 +11,26 @@ let datosTempNuevo = null;
 
 const ALERGENOS_LISTA = ["GLUTEN", "SESAMO", "CACAHUETE", "SOJA", "FRUTOSCASCARA", "APIO", "HUEVO", "PESCADO", "MOSTAZA", "MOLUSCO", "SULFITOS", "LACTOSA", "ALTRAMUCES", "CRUSTACEO", "VEGANO", "VEGETARIANO"];
 
+// Mapa conceptual de emojis característicos para cada alérgeno y dieta
+const ALERGENOS_EMOJIS = {
+    "GLUTEN": "🌾",
+    "SESAMO": "🌱",
+    "CACAHUETE": "🥜",
+    "SOJA": "🫘",
+    "FRUTOSCASCARA": "🌰",
+    "APIO": "🥬",
+    "HUEVO": "🥚",
+    "PESCADO": "🐟",
+    "MOSTAZA": "🏺",
+    "MOLUSCO": "🦪",
+    "SULFITOS": "🍷",
+    "LACTOSA": "🥛",
+    "ALTRAMUCES": "🌼",
+    "CRUSTACEO": "🦞",
+    "VEGANO": "🌱✨",
+    "VEGETARIANO": "🥗"
+};
+
 // Claves ISO de idiomas soportados dinámicamente (21 en total extraídos de IDIOMAS_CONFIG)
 const CLAVES_IDIOMAS = Object.keys(IDIOMAS_CONFIG); // ['ES', 'EN', 'DE', 'FR', 'IT', 'RU', 'NL', ...]
 
@@ -77,12 +97,10 @@ async function cargar() {
                 };
 
                 // Asignación dinámica e indexada del mapa completo de los 21 idiomas del CSV
-                // Mapea desde ES (índice 3), EN (índice 7), DE (índice 8) etc.
                 CLAVES_IDIOMAS.forEach((lang, idxIDM) => {
                     if (lang === 'ES') {
                         item[lang.toLowerCase()] = superLimpiar(c[3]);
                     } else {
-                        // El CSV sigue el orden secuencial de idiomas tras los metadatos básicos
                         const csvPos = 6 + idxIDM; 
                         item[lang.toLowerCase()] = c[csvPos] ? superLimpiar(c[csvPos]) : "";
                     }
@@ -153,22 +171,22 @@ function renderizar() {
     document.getElementById('editor-dinamico').innerHTML = h;
 }
 
-// --- LOGICA DE TRADUCCIÓN COMPLEMENTARIA DE 19 IDIOMAS EXTRA ---
+// --- LOGICA DE TRADUCCIÓN COMPLEMENTARIA DE 19 IDIOMAS EXTRA (SIN SCROLL INTERNO) ---
 function construirSubcontenedoresIdiomas() {
     const container = document.getElementById('contenedor-resto-idiomas');
     if (!container) return;
     
-    // Generar inputs ocultos colapsables para los 19 idiomas adicionales
+    // Generar inputs directos ordenados y fluidos sin scrollbar
     let html = `<div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
                   <span style="font-size:0.8rem; font-weight:bold; color:#7f8c8d;">Idiomas Adicionales Sincronizados:</span>
                 </div>
-                <div class="scroll-idiomas-grid" style="max-height:220px; overflow-y:auto; margin-top:8px; padding-right:5px;">`;
+                <div class="langs-fluid-container" style="margin-top:8px;">`;
     
     CLAVES_IDIOMAS.forEach(lang => {
-        if (lang === 'ES' || lang === 'EN') return; // Excluidos de la caja común por tener fila preferente
+        if (lang === 'ES' || lang === 'EN') return; // Excluidos por tener área prioritaria fija
         
         html += `
-        <div class="input-row-lang" style="margin-bottom: 8px;">
+        <div class="input-row-lang" style="margin-bottom: 12px;">
             <div class="lang-tag" style="min-width:45px; text-align:center; padding: 6px 4px; font-size:0.7rem;">${lang}</div>
             <div style="flex:1">
                 <input id="edit-${lang.toLowerCase()}" class="input-estandar" style="padding:6px; font-size:0.85rem;" placeholder="Traducción Automática / Manual">
@@ -200,7 +218,6 @@ window.ejecutarTraduccionAutomatica = async function() {
     btn.innerText = "✨ Traduciendo Carta vía API Mágica...";
     btn.disabled = true;
 
-    // Simulación integrada de mapeo automático o llamada a motor de traducción usando API_KEYS
     setTimeout(() => {
         CLAVES_IDIOMAS.forEach(lang => {
             if(lang === 'ES' || lang === 'EN') return;
@@ -256,9 +273,12 @@ window.abrirEditor = function(id, esNuevo = false) {
     document.getElementById('edit-imagen').value = p.imagen;
     
     const actuales = (p.alergenos || "").split(',').map(s => s.trim().toUpperCase());
+    
+    // Inyección de alérgenos formateados con sus correspondientes emojis identificativos
     document.getElementById('alergenos-grid').innerHTML = ALERGENOS_LISTA.map(a => {
         const sel = actuales.includes(a) ? 'selected' : '';
-        return `<div class="alergeno-btn ${sel}" onclick="this.classList.toggle('selected')">${a}</div>`;
+        const emoji = ALERGENOS_EMOJIS[a] || "⚠️";
+        return `<div class="alergeno-btn ${sel}" data-token="${a}" onclick="this.classList.toggle('selected')">${emoji} ${a}</div>`;
     }).join('');
     
     document.getElementById('modal-editor').style.display = 'block';
@@ -281,12 +301,13 @@ window.aplicarCambiosPlato = function() {
         }
     });
     
-    // Sincronizar el campo 'es' global con el lenguaje base español
     p.es = desglosarNombre(p.es).uvas ? p.es : p.es; 
     
     p.precio = parseFloat(document.getElementById('edit-precio').value || 0).toFixed(2);
     p.imagen = superLimpiar(document.getElementById('edit-imagen').value);
-    p.alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => el.innerText).join(', ');
+    
+    // Se lee el atributo custom data-token para extraer solo el nombre limpio sin el emoji
+    p.alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => el.getAttribute('data-token')).join(', ');
     
     cerrarModal('modal-editor');
     renderizar();
@@ -351,7 +372,6 @@ window.enviarAlExcel = function() {
             alergenos: p.alergenos
         };
         
-        // Adjuntar mapeo extendido del diccionario lingüístico en el cuerpo del JSON saliente
         CLAVES_IDIOMAS.forEach(lang => {
             itemPayload[`nombre_${lang.toLowerCase()}`] = p[lang.toLowerCase()] || "";
         });
@@ -385,7 +405,6 @@ window.toggleActivo = function(id, v) {
 window.abrirSelector = function() { document.getElementById('modal-selector').style.display = 'block'; };
 window.cerrarModal = function(id) { document.getElementById(id).style.display = 'none'; };
 
-// Instanciar carga tras el montaje total de las propiedades DOM
 document.addEventListener("DOMContentLoaded", () => {
     cargar();
 });
