@@ -296,7 +296,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     background: #c0392b;
 }
 
-/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Pantalla Completa y 3 Columnas) --- */
+/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Pantalla Completa y 3 Filas) --- */
 #modal-traduccion-en {
     justify-content: center; 
     align-items: center;     
@@ -317,8 +317,8 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 .opciones-en-scroll {
     flex: 1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Divide el espacio en 3 columnas enormes */
+    display: flex;
+    flex-direction: column; /* Distribución en 3 FILAS verticales */
     gap: 25px;
     margin: 25px 0;
     min-height: 0;
@@ -332,15 +332,15 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 .opcion-en-btn {
     width: 100%;
-    height: 100%;
+    flex: 1;                /* Cada fila ocupa exactamente 1/3 del alto disponible */
     text-align: left;
-    padding: 30px 25px;    
+    padding: 0 35px;        /* Padding lateral ancho para aprovechar el espacio */
     background: #f8f9fa;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 1.3rem;     /* Texto ultra legible para pantallas grandes */
+    font-size: 1.4rem;      /* Texto muy claro y grande */
     font-family: 'Montserrat', sans-serif;
     color: var(--texto);
     display: flex;
@@ -369,6 +369,6 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     color: var(--primario); 
     font-weight: 700; 
     text-transform: uppercase; 
-    margin-bottom: 12px; 
+    margin-bottom: 8px; 
     letter-spacing: 1px;
 }
