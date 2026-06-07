@@ -164,7 +164,7 @@ function moverPlato(id, direccion) {
         
         // Intercambio de posiciones en el array maestro
         datosLocales[indexActual] = platoSiguiente;
-        datosLocales[indexSiguienteEnGlobal] = platoActual;
+        datosLocales[indexAnteriorEnGlobal] = platoActual;
     }
 
     renderizar();
@@ -324,6 +324,24 @@ function abrirEditor(id) {
     document.getElementById('edit-precio').value = plato.precio || "0.00";
     document.getElementById('edit-imagen').value = plato.imagen || "";
 
+    // Importación dinámica de los campos de idiomas adicionales (incluido EN) e inputs de uvas/detalles
+    const keysLang = Object.keys(IDIOMAS_CONFIG);
+    keysLang.forEach(lang => {
+        const langLower = lang.toLowerCase();
+        
+        // Asignar nombres principales de idiomas (edit-en, edit-de, etc.)
+        const inputNombre = document.getElementById(`edit-${langLower}`);
+        if (inputNombre) {
+            inputNombre.value = plato[langLower] || "";
+        }
+        
+        // Asignar nombres secundarios de detalles/uvas (edit-es-uvas, edit-en-uvas, etc.)
+        const inputUvas = document.getElementById(`edit-${langLower}-uvas`);
+        if (inputUvas) {
+            inputUvas.value = plato[`${langLower}-uvas`] || plato[`uvas-${langLower}`] || "";
+        }
+    });
+
     // Abre el modal manipulando el estilo directo de tus CSS
     document.getElementById('modal-editor').style.display = "block";
 }
@@ -353,6 +371,23 @@ function aplicarCambiosPlato() {
         let pVal = document.getElementById('edit-precio').value;
         plato.precio = pVal ? parseFloat(pVal).toFixed(2) : "0.00";
         plato.imagen = document.getElementById('edit-imagen').value;
+
+        // Guardar dinámicamente todos los idiomas procesados en el modal
+        const keysLang = Object.keys(IDIOMAS_CONFIG);
+        keysLang.forEach(lang => {
+            const langLower = lang.toLowerCase();
+            
+            const inputNombre = document.getElementById(`edit-${langLower}`);
+            if (inputNombre) {
+                plato[langLower] = inputNombre.value;
+            }
+            
+            const inputUvas = document.getElementById(`edit-${langLower}-uvas`);
+            if (inputUvas) {
+                // Almacenamos el valor respetando la estructura de propiedades del objeto local
+                plato[`${langLower}-uvas`] = inputUvas.value;
+            }
+        });
     }
     cerrarModal('modal-editor'); 
     renderizar(); 
