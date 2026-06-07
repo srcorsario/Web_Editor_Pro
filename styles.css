@@ -296,34 +296,32 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     background: #c0392b;
 }
 
-/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Ocupa 3/4 y centrado) --- */
+/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Pantalla Completa y 3 Columnas) --- */
 #modal-traduccion-en {
-    justify-content: center; /* Centrado vertical */
-    align-items: center;     /* Centrado horizontal */
+    justify-content: center; 
+    align-items: center;     
 }
 
 .modal-box-en {
-    width: 75vw;            /* 3/4 de la pantalla de ancho */
-    max-width: 900px;       /* Un tope para pantallas ultra anchas */
-    height: 75vh;           /* 3/4 de la pantalla de alto */
-    max-height: 850px;      /* Un tope para pantallas ultra altas */
+    width: 95vw;            /* Ocupa de lado a lado casi completo */
+    height: 85vh;           /* Ocupa gran parte de la altura */
+    max-width: none;        
+    max-height: none;
     display: flex;
     flex-direction: column;
-    overflow: hidden;        /* Nunca sobresale */
-    border-radius: 20px;    /* Bordes más redondeados para el box grande */
-    padding: 40px;          /* Espaciado interior cómodo */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;        
+    border-radius: 20px;    
+    padding: 40px;          
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
 }
 
 .opciones-en-scroll {
     flex: 1;
-    overflow-y: auto;       /* Scroll remoto solo por si acaso */
-    margin: 20px 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Divide el espacio en 3 columnas enormes */
+    gap: 25px;
+    margin: 25px 0;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly; /* Reparte el espacio entre las 3 opciones perfectamente */
-    gap: 15px;
 }
 
 .footer-box-en {
@@ -334,36 +332,43 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 .opcion-en-btn {
     width: 100%;
+    height: 100%;
     text-align: left;
-    padding: 25px;          /* Cajas amplias y comodas */
+    padding: 30px 25px;    
     background: #f8f9fa;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 1.15rem;     /* Texto más grande para el box grande */
+    font-size: 1.3rem;     /* Texto ultra legible para pantallas grandes */
     font-family: 'Montserrat', sans-serif;
     color: var(--texto);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .opcion-en-btn:hover { 
     border-color: var(--primario); 
     background: #fff9f4; 
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(230, 126, 34, 0.1);
 }
 
 .opcion-en-btn.selected { 
     border-color: var(--primario); 
     background: #fff4ec; 
     font-weight: 600; 
-    box-shadow: 0 4px 10px rgba(230, 126, 34, 0.15);
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.2);
+    transform: translateY(0);
 }
 
 .opcion-en-label { 
     display: block; 
-    font-size: 0.8rem; 
+    font-size: 0.85rem; 
     color: var(--primario); 
     font-weight: 700; 
     text-transform: uppercase; 
-    margin-bottom: 8px; 
+    margin-bottom: 12px; 
+    letter-spacing: 1px;
 }
