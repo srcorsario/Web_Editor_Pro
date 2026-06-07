@@ -296,7 +296,29 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     background: #c0392b;
 }
 
-/* --- NUEVOS ESTILOS: MODAL DE TRADUCCIONES INGLÉS --- */
+/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Redimensionado y con Flex) --- */
+.modal-box-en {
+    max-width: 600px !important;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Evita que la caja blanca crezca sin control */
+}
+
+.opciones-en-scroll {
+    flex: 1;
+    overflow-y: auto;
+    margin: 10px 0;
+    padding-right: 5px;
+    min-height: 0; /* Clave para que el scroll funcione en flexbox */
+}
+
+.footer-box-en {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
 .opcion-en-btn {
     width: 100%;
     text-align: left;
