@@ -28,6 +28,16 @@ function desglosarNombre(texto) {
     };
 }
 
+// Función robusta para extraer JSON de la respuesta de Gemini
+function extraerJSON(texto) {
+    let limpio = texto.replace(/```json/g, '').replace(/```/g, '').trim();
+    const match = limpio.match(/\{[\s\S]*\}/); // Busca el primer objeto JSON { ... }
+    if (match) {
+        return JSON.parse(match[0]);
+    }
+    throw new Error("No se encontró un JSON válido en la respuesta.");
+}
+
 async function cargar() {
     try {
         const resp = await fetch(CSV_URL + '&t=' + Date.now());
@@ -199,7 +209,7 @@ function comprobarRequisitosTraduccion() {
     document.getElementById('btn-autotraducir').disabled = !esValido;
 }
 
-// --- TRADUCCIÓN INGLÉS: Vinos y Plato unificados con // ---
+// --- TRADUCCIÓN INGLÉS MEJORADA ---
 async function generarTraduccionEN() {
     const nombreEs = document.getElementById('edit-es').value.trim();
     const esVino = (platoEditandoId >= 13000);
@@ -221,7 +231,6 @@ async function generarTraduccionEN() {
     btn.innerText = "🇬🇧 Generando opciones...";
     btn.disabled = true;
 
-    // Unimos el nombre y las uvas con el separador para que Gemini lo traduzca en contexto
     const textoCompletoEs = nombreEs + (uvasEs ? ' // ' + uvasEs : '');
 
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
@@ -232,7 +241,7 @@ async function generarTraduccionEN() {
     2. Traducción gastronómica/descriptiva (más elegante).
     3. Traducción corta/concisa (estilo menú rápido).
     
-    Responde EXCLUSIVAMENTE con un JSON plano, sin formato markdown ni explicaciones, con esta estructura exacta:
+    Responde EXCLUSIVAMENTE con un JSON plano, sin texto adicional, sin formato markdown, con esta estructura exacta:
     {"directa": "...", "gastronomica": "...", "corta": "..."}`;
 
     let exito = false;
@@ -250,37 +259,34 @@ async function generarTraduccionEN() {
 
             const data = await response.json();
 
-            if (data.error) {
-                if (data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED') {
-                    intentos++;
-                } else {
-                    break;
-                }
+            // Si la API da un error (Key inválida, cuota, etc), rotamos automáticamente
+            if (!response.ok || data.error) {
+                console.warn(`Error con Key ${intentos + 1}, rotando...`, data.error?.message);
+                intentos++;
                 continue;
             }
 
             const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (txt) {
-                const jsonClean = txt.replace(/```json/g, '').replace(/```/g, '').trim();
-                opciones = JSON.parse(jsonClean);
+                opciones = extraerJSON(txt); // Usamos el extractor robusto
                 if (opciones.directa || opciones.gastronomica || opciones.corta) {
                     exito = true;
                 } else {
-                    throw new Error("Formato inesperado");
+                    throw new Error("El JSON no contiene las claves esperadas.");
                 }
             } else {
-                throw new Error("Respuesta vacía");
+                throw new Error("Respuesta vacía de Gemini.");
             }
         } catch (err) {
-            console.error("Error generando EN:", err);
-            intentos++;
+            console.error(`Error procesando Key ${intentos + 1}:`, err);
+            intentos++; // Si el JSON falla o hay error, intentamos la siguiente key por si acaso
         }
     }
 
     if (exito) {
         abrirModalTraduccionEN(opciones);
     } else {
-        alert("❌ Error al generar las opciones en Inglés. Revisa las claves API o el formato.");
+        alert("❌ Error al generar las opciones en Inglés. Todas las Keys fallaron o el formato de respuesta no fue el esperado.");
     }
 
     btn.innerText = originalText;
@@ -291,7 +297,7 @@ function abrirModalTraduccionEN(opciones) {
     const container = document.getElementById('opciones-en-container');
     const textarea = document.getElementById('editar-opcion-en');
     textarea.value = "";
-    opcionesENActuales = []; // Limpiamos array de seguridad
+    opcionesENActuales = [];
 
     let html = "";
     const mapaOpciones = {
@@ -304,7 +310,7 @@ function abrirModalTraduccionEN(opciones) {
     for (const [key, value] of Object.entries(opciones)) {
         if (value) {
             const label = mapaOpciones[key] || key;
-            opcionesENActuales.push(value); // Guardamos valor seguro
+            opcionesENActuales.push(value);
             html += `<div class="opcion-en-btn" onclick="seleccionarOpcionEN(this, ${index})">
                 <span class="opcion-en-label">${label}</span>
                 ${value}
@@ -330,7 +336,6 @@ function confirmarTraduccionEN() {
         return;
     }
     
-    // Al confirmar, usamos desglosarNombre para separar automáticamente el Nombre de las Uvas (si contiene //)
     const desglosado = desglosarNombre(textoFinal);
     document.getElementById('edit-en').value = desglosado.nombre;
     
@@ -347,7 +352,7 @@ function cerrarModalTraduccionEN() {
     document.getElementById('modal-traduccion-en').style.display = 'none';
 }
 
-// --- TRADUCCIÓN MASIVA 19 IDIOMAS: Vinos y Plato unificados con // ---
+// --- TRADUCCIÓN MASIVA 19 IDIOMAS MEJORADA ---
 async function ejecutarTraduccionAutomatica() {
     const btn = document.getElementById('btn-autotraducir');
     const originalText = btn.innerText;
@@ -368,7 +373,6 @@ async function ejecutarTraduccionAutomatica() {
         return;
     }
     
-    // Unimos los textos para que Gemini vea el contexto completo del separador //
     const textoCompletoEs = nombreEs + (uvasEs ? ' // ' + uvasEs : '');
     const textoCompletoEn = nombreEn + (uvasEn ? ' // ' + uvasEn : '');
     
@@ -380,7 +384,7 @@ async function ejecutarTraduccionAutomatica() {
     
     Traduce a los siguientes idiomas (usa los códigos ISO proporcionados): ${idiomasObjetivo.join(', ')}.
     
-    Devuelve la respuesta EXCLUSIVAMENTE en formato JSON plano (sin explicaciones ni formato markdown), usando los códigos de idioma como claves.
+    Responde EXCLUSIVAMENTE con un JSON plano, sin texto adicional antes o después, sin formato markdown, usando los códigos de idioma como claves.
     Ejemplo de formato de respuesta esperado: {"de": "Nombre // Uva", "fr": "Nombre // Uva"}`;
     
     let exito = false;
@@ -397,22 +401,17 @@ async function ejecutarTraduccionAutomatica() {
             
             const data = await response.json();
             
-            if (data.error) {
-                console.warn(`Error con Key ${intentos + 1}:`, data.error.message);
-                if (data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED') {
-                    intentos++;
-                } else {
-                    break;
-                }
+            // Si la API da un error (Key inválida, cuota, etc), rotamos automáticamente
+            if (!response.ok || data.error) {
+                console.warn(`Error con Key ${intentos + 1}, rotando...`, data.error?.message);
+                intentos++;
                 continue; 
             }
             
             const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (txt) {
-                const jsonClean = txt.replace(/```json/g, '').replace(/```/g, '').trim();
-                const traducciones = JSON.parse(jsonClean);
+                const traducciones = extraerJSON(txt); // Usamos el extractor robusto
                 
-                // Al recibir la traducción, usamos desglosarNombre para separar lo que viene antes y después del //
                 idiomasObjetivo.forEach(l => {
                     if (traducciones[l]) {
                         const desglosado = desglosarNombre(traducciones[l]);
@@ -430,13 +429,13 @@ async function ejecutarTraduccionAutomatica() {
                 throw new Error("La respuesta de Gemini no contiene texto válido.");
             }
         } catch (err) {
-            console.error(`Error en traducción con Gemini (Intento ${intentos + 1}):`, err);
-            intentos++;
+            console.error(`Error procesando Key ${intentos + 1}:`, err);
+            intentos++; // Si el JSON falla o hay error, intentamos la siguiente key
         }
     }
     
     if (!exito) {
-        alert("❌ Error al traducir con Gemini. Revisa las claves API en el panel superior o el formato del texto.");
+        alert("❌ Error al traducir con Gemini. Todas las Keys fallaron o el formato de respuesta no fue el esperado.");
     }
     
     btn.innerText = originalText;
