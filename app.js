@@ -11,9 +11,9 @@ const ALERGENOS_LISTA = ["GLUTEN", "SESAMO", "CACAHUETE", "SOJA", "FRUTOSCASCARA
 
 const IDIOMAS_ORDEN = ['es', 'en', 'de', 'fr', 'it', 'ru', 'nl', 'pl', 'sv', 'no', 'da', 'fi', 'pt', 'ro', 'hu', 'cs', 'el', 'tr', 'ar', 'zh', 'ja'];
 
-// Configuración de Sabores de Croquetas
+// Configuración de Sabores de Croquetas (Añadido Puchero de cerdo)
 const CROQUETAS_CONFIG = {
-    carne: ["Cecina de vaca", "Rabo de toro", "Pollo", "Jamón Ibérico"],
+    carne: ["Cecina de vaca", "Rabo de toro", "Pollo", "Jamón Ibérico", "Puchero de cerdo"],
     pescado: ["Gamba al ajillo", "Chipirones"],
     vegetariana: ["Setas", "Coliflor con curry"]
 };
@@ -299,7 +299,6 @@ function actualizarNombreCroquetas() {
     const soloVegetarianas = seleccionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
     const cantidad = (soloVegetarianas || esCroquetaVeg) ? 6 : 2;
 
-    // CAMBIO: Usamos ' - ' en lugar de ', ' para separar las variedades
     const textoCroquetas = seleccionadas.map(s => `${cantidad} ${s}`).join(' - ');
     
     let titulo = esCroquetaVeg ? "Croquetas Vegetarianas:" : "Surtido de Croquetas:";
@@ -626,6 +625,13 @@ function prepararNuevoPlato(baseId, folder) {
         imagen: "", 
         alergenos: "" 
     };
+    
+    // Lógica de imagen por defecto para Croquetas
+    if (baseId >= 12200 && baseId <= 12299) {
+        datosTempNuevo.imagen = "croquetasvegetarianas01.webp";
+    } else if (baseId >= 12100 && baseId <= 12199) {
+        datosTempNuevo.imagen = "croquetas01.webp";
+    }
     
     IDIOMAS_ORDEN.forEach(l => { datosTempNuevo[l] = ""; });
     datosTempNuevo['es'] = "NUEVO ELEMENTO";
