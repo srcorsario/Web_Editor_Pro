@@ -213,7 +213,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .opcion-en-btn.selected { border-color: var(--primario); background: #fff4ec; font-weight: 600; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.2); transform: translateY(0); }
 .opcion-en-label { display: block; font-size: 0.85rem; color: var(--primario); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
 
-/* --- NUEVOS ESTILOS: SELECTOR DE CROQUETAS --- */
+/* --- ESTILOS: SELECTOR DE CROQUETAS --- */
 .croquetas-grid { margin-top: 5px; }
 .croqueta-category { margin-bottom: 10px; }
 .croqueta-cat-title { font-size: 0.7rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -236,3 +236,119 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .croqueta-btn.selected.carne { background: #c0392b; color: white; border-color: #c0392b; }
 .croqueta-btn.selected.pescado { background: #2980b9; color: white; border-color: #2980b9; }
 .croqueta-btn.selected.vegetariana { background: #27ae60; color: white; border-color: #27ae60; }
+
+
+/* ======================================================= */
+/* --- MEDIA QUERIES: ADAPTACIÓN MÓVIL (Max-width 768px) --- */
+/* ======================================================= */
+
+@media (max-width: 768px) {
+    /* --- General --- */
+    body {
+        padding: 5px 5px 130px;
+    }
+    
+    .header-admin {
+        padding: 10px;
+    }
+
+    .api-keys-inputs {
+        flex-direction: column;
+    }
+    
+    .api-keys-list {
+        flex-direction: column;
+    }
+    
+    .btn-delete-key {
+        width: 100%;
+        height: 35px;
+    }
+
+    /* --- Listado Principal --- */
+    .plato-item {
+        flex-wrap: wrap;
+    }
+    
+    .plato-meta-footer {
+        min-width: unset;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 1px solid #f1f2f6;
+    }
+
+    /* --- Modal Editor Principal --- */
+    .modal-full-layout {
+        flex-direction: column; /* Apilar columnas en móvil */
+        height: auto !important; /* Que crezca lo que necesite */
+        min-height: 100vh;
+        overflow-y: visible !important; /* El scroll lo lleva el .modal padre */
+        padding: 20px 15px !important;
+        gap: 15px;
+    }
+
+    .modal-col-izquierda {
+        flex: none;
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-right: 0;
+        padding-bottom: 20px;
+    }
+
+    .modal-col-derecha {
+        flex: none;
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
+    }
+    
+    .alergenos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Botones más pequeños en móvil */
+        max-height: none; /* Que crezca sin scroll en móvil para que se vean todos */
+    }
+
+    /* --- Modal Traducción Inglés --- */
+    .modal-box-en {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 20px 15px;
+    }
+
+    .opciones-en-scroll {
+        flex: 1;
+        gap: 15px;
+        margin: 15px 0;
+        overflow-y: auto; /* Scroll interno si no caben las 3 opciones */
+    }
+
+    .opcion-en-btn {
+        padding: 20px 15px; /* Ajuste para táctil */
+        font-size: 1.1rem; /* Texto ligeramente más pequeño para que quepa mejor */
+    }
+
+    .footer-box-en {
+        padding-top: 15px;
+    }
+
+    /* --- Botones Flotantes --- */
+    .btn-add-float {
+        bottom: 80px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 28px;
+    }
+    
+    .btn-guardar-main {
+        width: 95%;
+        padding: 14px;
+    }
+}
