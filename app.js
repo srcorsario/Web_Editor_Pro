@@ -11,6 +11,13 @@ const ALERGENOS_LISTA = ["GLUTEN", "SESAMO", "CACAHUETE", "SOJA", "FRUTOSCASCARA
 
 const IDIOMAS_ORDEN = ['es', 'en', 'de', 'fr', 'it', 'ru', 'nl', 'pl', 'sv', 'no', 'da', 'fi', 'pt', 'ro', 'hu', 'cs', 'el', 'tr', 'ar', 'zh', 'ja'];
 
+// Configuración de Sabores de Croquetas
+const CROQUETAS_CONFIG = {
+    carne: ["Cecina de vaca", "Rabo de toro", "Pollo", "Jamón Ibérico"],
+    pescado: ["Gamba al ajillo", "Chipirones"],
+    vegetariana: ["Setas", "Coliflor con curry"]
+};
+
 function superLimpiar(texto) {
     if (!texto) return "";
     let t = texto.toString().trim();
@@ -28,7 +35,6 @@ function desglosarNombre(texto) {
     };
 }
 
-// Nueva función inteligente: MAYÚSCULAS antes del paréntesis, respeta D.O. dentro
 function formatWineName(texto) {
     if (!texto) return "";
     const partes = texto.split('(');
@@ -184,6 +190,8 @@ function abrirEditor(id, esNuevo = false) {
     esNuevoPlato = esNuevo;
     platoEditandoId = id;
     const esVino = (id >= 13000);
+    const esCroqueta = (id >= 12100 && id <= 12299);
+    const esCroquetaVeg = (id >= 12200 && id <= 12299);
     
     document.getElementById('label-uvas').innerText = esVino ? "Nombres y Detalles del Plato / Vino (Uvas)" : "Nombres y Detalles del Plato";
     
@@ -233,8 +241,72 @@ function abrirEditor(id, esNuevo = false) {
     }
     document.getElementById('alergenos-grid').innerHTML = alergenosHtml;
     
+    // --- LÓGICA DE CROQUETAS ---
+    let croquetasHtml = "";
+    if (esCroqueta) {
+        croquetasHtml += `<div class="input-group"><label class="label-seccion">Sabores de Croquetas</label><div class="croquetas-grid">`;
+        
+        if (!esCroquetaVeg) {
+            croquetasHtml += `<div class="croqueta-category"><div class="croqueta-cat-title carne">Carne</div><div class="croqueta-cat-btns">`;
+            CROQUETAS_CONFIG.carne.forEach(c => {
+                croquetasHtml += `<div class="croqueta-btn carne" onclick="this.classList.toggle('selected'); actualizarNombreCroquetas()">${c}</div>`;
+            });
+            croquetasHtml += `</div></div>`;
+
+            croquetasHtml += `<div class="croqueta-category"><div class="croqueta-cat-title pescado">Pescado</div><div class="croqueta-cat-btns">`;
+            CROQUETAS_CONFIG.pescado.forEach(c => {
+                croquetasHtml += `<div class="croqueta-btn pescado" onclick="this.classList.toggle('selected'); actualizarNombreCroquetas()">${c}</div>`;
+            });
+            croquetasHtml += `</div></div>`;
+        }
+
+        croquetasHtml += `<div class="croqueta-category"><div class="croqueta-cat-title vegetariana">Vegetarianas</div><div class="croqueta-cat-btns">`;
+        CROQUETAS_CONFIG.vegetariana.forEach(c => {
+            croquetasHtml += `<div class="croqueta-btn vegetariana" onclick="this.classList.toggle('selected'); actualizarNombreCroquetas()">${c}</div>`;
+        });
+        croquetasHtml += `</div></div>`;
+
+        croquetasHtml += `</div></div>`;
+    }
+    document.getElementById('contenedor-croquetas').innerHTML = croquetasHtml;
+
+    // Pre-selección si el plato ya tenía sabores en su nombre
+    if (esCroqueta && p['es']) {
+        const todosSabores = [...CROQUETAS_CONFIG.carne, ...CROQUETAS_CONFIG.pescado, ...CROQUETAS_CONFIG.vegetariana];
+        todosSabores.forEach(sabor => {
+            if (p['es'].includes(sabor)) {
+                const btns = document.querySelectorAll('.croqueta-btn');
+                btns.forEach(btn => {
+                    if (btn.innerText.trim() === sabor) btn.classList.add('selected');
+                });
+            }
+        });
+    }
+    
     comprobarRequisitosTraduccion();
     document.getElementById('modal-editor').style.display = 'block';
+}
+
+function actualizarNombreCroquetas() {
+    const esCroquetaVeg = (platoEditandoId >= 12200 && platoEditandoId <= 12299);
+    const seleccionadas = Array.from(document.querySelectorAll('.croqueta-btn.selected')).map(el => el.innerText.trim());
+    
+    if (seleccionadas.length === 0) {
+        document.getElementById('edit-es').value = "";
+        comprobarRequisitosTraduccion();
+        return;
+    }
+
+    const soloVegetarianas = seleccionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
+    const cantidad = (soloVegetarianas || esCroquetaVeg) ? 6 : 2;
+
+    const textoCroquetas = seleccionadas.map(s => `${cantidad} ${s}`).join(', ');
+    
+    let titulo = esCroquetaVeg ? "Croquetas Vegetarianas:" : "Surtido de Croquetas:";
+    if (!esCroquetaVeg && soloVegetarianas) titulo = "Croquetas Vegetarianas:"; // Si en surtido general solo marcamos verdura
+
+    document.getElementById('edit-es').value = `${titulo} ${textoCroquetas}`;
+    comprobarRequisitosTraduccion();
 }
 
 function comprobarRequisitosTraduccion() {
@@ -295,7 +367,6 @@ async function generarTraduccionEN() {
             if (!response.ok || data.error) {
                 ultimoError = data.error?.message || "Error HTTP " + response.status;
                 console.warn(`Error con Key ${intentos + 1}, rotando...`, ultimoError);
-                // Si hay muchas demandas (429), esperamos 3 segundos antes de probar la siguiente clave
                 if (data.error?.code === 429 || response.status === 429) {
                     await new Promise(r => setTimeout(r, 3000));
                 }
@@ -444,7 +515,6 @@ async function ejecutarTraduccionAutomatica() {
             if (!response.ok || data.error) {
                 ultimoError = data.error?.message || "Error HTTP " + response.status;
                 console.warn(`Error con Key ${intentos + 1}, rotando...`, ultimoError);
-                // Si hay muchas demandas (429), esperamos 3 segundos antes de probar la siguiente clave
                 if (data.error?.code === 429 || response.status === 429) {
                     await new Promise(r => setTimeout(r, 3000));
                 }
@@ -499,7 +569,6 @@ function aplicarCambiosPlato() {
         const inputUva = document.getElementById(`edit-${l}-uvas`);
         const uvas = (inputUva && inputUva.style.display !== "none") ? superLimpiar(inputUva.value) : "";
         
-        // Aplicamos el formato de D.O. al guardar por si acaso
         if (esVino) nom = formatWineName(nom);
         
         p[l] = uvas ? `${nom} // ${uvas}` : nom;
