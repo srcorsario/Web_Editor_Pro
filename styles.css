@@ -50,6 +50,7 @@ body {
 .plato-meta-footer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-width: 210px; justify-content: flex-end; }
 
 .btn-config { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px; cursor: pointer; }
+.btn-orden { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; }
 .btn-nav { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; }
 .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -244,47 +245,73 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 @media (max-width: 768px) {
     /* --- General --- */
-    body {
-        padding: 5px 5px 130px;
-    }
-    
-    .header-admin {
-        padding: 10px;
+    body { padding: 5px 5px 130px; }
+    .header-admin { padding: 10px; }
+    .api-keys-inputs, .api-keys-list { flex-direction: column; }
+    .btn-delete-key { width: 100%; height: 35px; }
+
+    /* --- Listado Principal (MÓVIL OPTIMIZADO) --- */
+    .btn-config {
+        display: none !important; /* Ocultar rueda de ajustes en móvil */
     }
 
-    .api-keys-inputs {
-        flex-direction: column;
-    }
-    
-    .api-keys-list {
-        flex-direction: column;
-    }
-    
-    .btn-delete-key {
-        width: 100%;
-        height: 35px;
-    }
-
-    /* --- Listado Principal --- */
     .plato-item {
         flex-wrap: wrap;
+        padding: 10px 12px;
+        gap: 8px;
+        align-items: center;
     }
-    
+
+    .plato-orden-btns {
+        display: flex;
+        flex-direction: row; /* Flechas en horizontal para ahorrar altura */
+        gap: 4px;
+        margin-right: 5px;
+    }
+
+    .btn-orden {
+        padding: 10px 14px; /* Área táctil más grande */
+        font-size: 1rem;
+    }
+
+    .plato-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .plato-nombre {
+        font-size: 0.95rem;
+    }
+
     .plato-meta-footer {
         min-width: unset;
         width: 100%;
         justify-content: space-between;
+        align-items: center;
         margin-top: 5px;
-        padding-top: 5px;
-        border-top: 1px solid #f1f2f6;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-sizing: border-box;
+        border-top: none;
+    }
+    
+    .plato-meta-footer > div:first-child small {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #555;
     }
 
-    /* --- Modal Editor Principal --- */
+    /* --- Modal Editor Principal (MÓVIL) --- */
     .modal-full-layout {
-        flex-direction: column; /* Apilar columnas en móvil */
-        height: auto !important; /* Que crezca lo que necesite */
+        flex-direction: column; 
+        height: auto !important; 
         min-height: 100vh;
-        overflow-y: visible !important; /* El scroll lo lleva el .modal padre */
+        overflow-y: visible !important; 
         padding: 20px 15px !important;
         gap: 15px;
     }
@@ -308,11 +335,11 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     }
     
     .alergenos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Botones más pequeños en móvil */
-        max-height: none; /* Que crezca sin scroll en móvil para que se vean todos */
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+        max-height: none; 
     }
 
-    /* --- Modal Traducción Inglés --- */
+    /* --- Modal Traducción Inglés (MÓVIL) --- */
     .modal-box-en {
         width: 100vw;
         height: 100vh;
@@ -326,19 +353,19 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
         flex: 1;
         gap: 15px;
         margin: 15px 0;
-        overflow-y: auto; /* Scroll interno si no caben las 3 opciones */
+        overflow-y: auto; 
     }
 
     .opcion-en-btn {
-        padding: 20px 15px; /* Ajuste para táctil */
-        font-size: 1.1rem; /* Texto ligeramente más pequeño para que quepa mejor */
+        padding: 20px 15px; 
+        font-size: 1.1rem;
     }
 
     .footer-box-en {
         padding-top: 15px;
     }
 
-    /* --- Botones Flotantes --- */
+    /* --- Botones Flotantes (MÓVIL) --- */
     .btn-add-float {
         bottom: 80px;
         right: 15px;
