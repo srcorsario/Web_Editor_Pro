@@ -81,6 +81,9 @@
                 <div id="alergenos-grid" class="alergenos-grid"></div>
             </div>
             
+            <!-- NUEVO: Contenedor para selector de Croquetas -->
+            <div id="contenedor-croquetas"></div>
+            
             <div class="modal-acciones-footer">
                 <button onclick="aplicarCambiosPlato()" class="btn-modal-aceptar">ACEPTAR</button>
                 <button onclick="cerrarModal('modal-editor')" class="btn-modal-cancelar">CANCELAR</button>
@@ -89,16 +92,14 @@
     </div>
 </div>
 
-<!-- Modal para elegir la traducción al Inglés (Estructura Flex corregida) -->
+<!-- Modal para elegir la traducción al Inglés -->
 <div id="modal-traduccion-en" class="modal">
     <div class="modal-content modal-box-en">
         <h3 style="text-align:center; color:var(--primario); margin-top:0;">Generar Traducción al Inglés</h3>
-        <p style="font-size: 0.85rem; text-align:center; color:#7f8c8d; margin-bottom: 0;">Selecciona una versión o edítala a tu gusto</p>
+        <p style="font-size: 0.85rem; text-align:center; color:#7f8c8d;">Selecciona una versión o edítala a tu gusto</p>
         
-        <!-- Zona de opciones con scroll interno controlado -->
         <div id="opciones-en-container" class="opciones-en-scroll"></div>
         
-        <!-- Zona de edición y botones fijos abajo -->
         <div class="footer-box-en">
             <div>
                 <label class="label-seccion">Editar selección:</label>
