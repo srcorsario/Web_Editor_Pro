@@ -5,7 +5,7 @@ let datosLocales = [];
 let platoEditandoId = null;
 let esNuevoPlato = false; 
 let datosTempNuevo = null; 
-let opcionesENActuales = []; // Almacenamiento seguro para las opciones de traducción
+let opcionesENActuales = [];
 
 const ALERGENOS_LISTA = ["GLUTEN", "SESAMO", "CACAHUETE", "SOJA", "FRUTOSCASCARA", "APIO", "HUEVO", "PESCADO", "MOSTAZA", "MOLUSCO", "SULFITOS", "LACTOSA", "ALTRAMUCES", "CRUSTACEO", "VEGANO", "VEGETARIANO"];
 
@@ -28,14 +28,30 @@ function desglosarNombre(texto) {
     };
 }
 
-// Función robusta para extraer JSON de la respuesta de Gemini
+// Extractor quirúrgico: Busca el primer { y el último }平衡ado para aisar el JSON de texto basura
 function extraerJSON(texto) {
     let limpio = texto.replace(/```json/g, '').replace(/```/g, '').trim();
-    const match = limpio.match(/\{[\s\S]*\}/); // Busca el primer objeto JSON { ... }
-    if (match) {
-        return JSON.parse(match[0]);
+    let braceCount = 0;
+    let startIndex = -1;
+    
+    for (let i = 0; i < limpio.length; i++) {
+        if (limpio[i] === '{') {
+            if (braceCount === 0) startIndex = i;
+            braceCount++;
+        } else if (limpio[i] === '}') {
+            braceCount--;
+            if (braceCount === 0 && startIndex !== -1) {
+                const jsonString = limpio.substring(startIndex, i + 1);
+                try {
+                    return JSON.parse(jsonString);
+                } catch (e) {
+                    console.error("JSON aislado pero inválido:", jsonString);
+                    throw new Error("JSON inválido: " + e.message);
+                }
+            }
+        }
     }
-    throw new Error("No se encontró un JSON válido en la respuesta.");
+    throw new Error("No se encontró un JSON válido en la respuesta de la IA.");
 }
 
 async function cargar() {
@@ -209,7 +225,7 @@ function comprobarRequisitosTraduccion() {
     document.getElementById('btn-autotraducir').disabled = !esValido;
 }
 
-// --- TRADUCCIÓN INGLÉS MEJORADA ---
+// --- TRADUCCIÓN INGLÉS (Con sanitización de comillas) ---
 async function generarTraduccionEN() {
     const nombreEs = document.getElementById('edit-es').value.trim();
     const esVino = (platoEditandoId >= 13000);
@@ -231,7 +247,8 @@ async function generarTraduccionEN() {
     btn.innerText = "🇬🇧 Generando opciones...";
     btn.disabled = true;
 
-    const textoCompletoEs = nombreEs + (uvasEs ? ' // ' + uvasEs : '');
+    // Sanitizamos comillas dobles a simples para no romper el JSON de Gemini
+    const textoCompletoEs = (nombreEs + (uvasEs ? ' // ' + uvasEs : '')).replace(/"/g, "'");
 
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
     const instruccion = `Actúa como un traductor profesional de menús de restaurantes. Te paso un elemento en español: "${textoCompletoEs}".
@@ -241,12 +258,13 @@ async function generarTraduccionEN() {
     2. Traducción gastronómica/descriptiva (más elegante).
     3. Traducción corta/concisa (estilo menú rápido).
     
-    Responde EXCLUSIVAMENTE con un JSON plano, sin texto adicional, sin formato markdown, con esta estructura exacta:
-    {"directa": "...", "gastronomica": "...", "corta": "..."}`;
+    Responde EXCLUSIVAMENTE con un objeto JSON válido. No incluyas texto fuera del JSON. Las comillas dobles dentro de las traducciones deben estar escapadas con barra invertida (\").
+    Estructura exacta: {"directa": "...", "gastronomica": "...", "corta": "..."}`;
 
     let exito = false;
     let intentos = 0;
     let opciones = {};
+    let ultimoError = "";
 
     while (!exito && intentos < keys.length) {
         try {
@@ -259,16 +277,16 @@ async function generarTraduccionEN() {
 
             const data = await response.json();
 
-            // Si la API da un error (Key inválida, cuota, etc), rotamos automáticamente
             if (!response.ok || data.error) {
-                console.warn(`Error con Key ${intentos + 1}, rotando...`, data.error?.message);
+                ultimoError = data.error?.message || "Error HTTP " + response.status;
+                console.warn(`Error con Key ${intentos + 1}, rotando...`, ultimoError);
                 intentos++;
                 continue;
             }
 
             const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (txt) {
-                opciones = extraerJSON(txt); // Usamos el extractor robusto
+                opciones = extraerJSON(txt);
                 if (opciones.directa || opciones.gastronomica || opciones.corta) {
                     exito = true;
                 } else {
@@ -278,15 +296,16 @@ async function generarTraduccionEN() {
                 throw new Error("Respuesta vacía de Gemini.");
             }
         } catch (err) {
+            ultimoError = err.message;
             console.error(`Error procesando Key ${intentos + 1}:`, err);
-            intentos++; // Si el JSON falla o hay error, intentamos la siguiente key por si acaso
+            intentos++;
         }
     }
 
     if (exito) {
         abrirModalTraduccionEN(opciones);
     } else {
-        alert("❌ Error al generar las opciones en Inglés. Todas las Keys fallaron o el formato de respuesta no fue el esperado.");
+        alert("❌ Error al generar las opciones en Inglés.\nDetalles: " + ultimoError);
     }
 
     btn.innerText = originalText;
@@ -352,7 +371,7 @@ function cerrarModalTraduccionEN() {
     document.getElementById('modal-traduccion-en').style.display = 'none';
 }
 
-// --- TRADUCCIÓN MASIVA 19 IDIOMAS MEJORADA ---
+// --- TRADUCCIÓN MASIVA 19 IDIOMAS (Con sanitización y_extractor quirúrgico) ---
 async function ejecutarTraduccionAutomatica() {
     const btn = document.getElementById('btn-autotraducir');
     const originalText = btn.innerText;
@@ -373,8 +392,9 @@ async function ejecutarTraduccionAutomatica() {
         return;
     }
     
-    const textoCompletoEs = nombreEs + (uvasEs ? ' // ' + uvasEs : '');
-    const textoCompletoEn = nombreEn + (uvasEn ? ' // ' + uvasEn : '');
+    // Sanitizamos comillas dobles a simples para no romper el formato JSON
+    const textoCompletoEs = (nombreEs + (uvasEs ? ' // ' + uvasEs : '')).replace(/"/g, "'");
+    const textoCompletoEn = (nombreEn + (uvasEn ? ' // ' + uvasEn : '')).replace(/"/g, "'");
     
     const idiomasObjetivo = IDIOMAS_ORDEN.filter(l => l !== 'es' && l !== 'en');
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
@@ -384,11 +404,13 @@ async function ejecutarTraduccionAutomatica() {
     
     Traduce a los siguientes idiomas (usa los códigos ISO proporcionados): ${idiomasObjetivo.join(', ')}.
     
-    Responde EXCLUSIVAMENTE con un JSON plano, sin texto adicional antes o después, sin formato markdown, usando los códigos de idioma como claves.
+    Responde EXCLUSIVAMENTE con un objeto JSON válido. No incluyas texto fuera del JSON. Las comillas dobles dentro de las traducciones deben estar escapadas con barra invertida (\").
+    Usa los códigos ISO como claves.
     Ejemplo de formato de respuesta esperado: {"de": "Nombre // Uva", "fr": "Nombre // Uva"}`;
     
     let exito = false;
     let intentos = 0;
+    let ultimoError = "";
     
     while (!exito && intentos < keys.length) {
         try {
@@ -401,16 +423,16 @@ async function ejecutarTraduccionAutomatica() {
             
             const data = await response.json();
             
-            // Si la API da un error (Key inválida, cuota, etc), rotamos automáticamente
             if (!response.ok || data.error) {
-                console.warn(`Error con Key ${intentos + 1}, rotando...`, data.error?.message);
+                ultimoError = data.error?.message || "Error HTTP " + response.status;
+                console.warn(`Error con Key ${intentos + 1}, rotando...`, ultimoError);
                 intentos++;
                 continue; 
             }
             
             const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (txt) {
-                const traducciones = extraerJSON(txt); // Usamos el extractor robusto
+                const traducciones = extraerJSON(txt); // Extractor quirúrgico
                 
                 idiomasObjetivo.forEach(l => {
                     if (traducciones[l]) {
@@ -429,13 +451,14 @@ async function ejecutarTraduccionAutomatica() {
                 throw new Error("La respuesta de Gemini no contiene texto válido.");
             }
         } catch (err) {
+            ultimoError = err.message;
             console.error(`Error procesando Key ${intentos + 1}:`, err);
-            intentos++; // Si el JSON falla o hay error, intentamos la siguiente key
+            intentos++;
         }
     }
     
     if (!exito) {
-        alert("❌ Error al traducir con Gemini. Todas las Keys fallaron o el formato de respuesta no fue el esperado.");
+        alert("❌ Error al traducir con Gemini.\nDetalles del error: " + ultimoError);
     }
     
     btn.innerText = originalText;
