@@ -28,6 +28,17 @@ function desglosarNombre(texto) {
     };
 }
 
+// Nueva función inteligente: MAYÚSCULAS antes del paréntesis, respeta D.O. dentro
+function formatWineName(texto) {
+    if (!texto) return "";
+    const partes = texto.split('(');
+    let nombrePrincipal = partes[0].toUpperCase();
+    if (partes.length > 1) {
+        return nombrePrincipal + '(' + partes.slice(1).join('(');
+    }
+    return nombrePrincipal;
+}
+
 function extraerJSON(texto) {
     let limpio = texto.replace(/```json/g, '').replace(/```/g, '').trim();
     let braceCount = 0;
@@ -177,41 +188,28 @@ function abrirEditor(id, esNuevo = false) {
     document.getElementById('label-uvas').innerText = esVino ? "Nombres y Detalles del Plato / Vino (Uvas)" : "Nombres y Detalles del Plato";
     
     const dataEs = desglosarNombre(p['es'] || "");
-    document.getElementById('edit-es').value = esVino ? dataEs.nombre.toUpperCase() : dataEs.nombre;
+    document.getElementById('edit-es').value = esVino ? formatWineName(dataEs.nombre) : dataEs.nombre;
     const inputEsUvas = document.getElementById('edit-es-uvas');
     inputEsUvas.value = dataEs.uvas;
     inputEsUvas.style.display = esVino ? "block" : "none";
-    
-    // Forzar mayúsculas en tiempo real si es vino
-    document.getElementById('edit-es').oninput = function() {
-        if (platoEditandoId >= 13000) this.value = this.value.toUpperCase();
-        comprobarRequisitosTraduccion();
-    };
 
     const dataEn = desglosarNombre(p['en'] || "");
-    document.getElementById('edit-en').value = esVino ? dataEn.nombre.toUpperCase() : dataEn.nombre;
+    document.getElementById('edit-en').value = esVino ? formatWineName(dataEn.nombre) : dataEn.nombre;
     const inputEnUvas = document.getElementById('edit-en-uvas');
     inputEnUvas.value = dataEn.uvas;
     inputEnUvas.style.display = esVino ? "block" : "none";
-    
-    // Forzar mayúsculas en tiempo real si es vino
-    document.getElementById('edit-en').oninput = function() {
-        if (platoEditandoId >= 13000) this.value = this.value.toUpperCase();
-        comprobarRequisitosTraduccion();
-    };
     
     let htmlRestoLangs = `<div class="langs-fluid-container">`;
     IDIOMAS_ORDEN.forEach(l => {
         if (l === 'es' || l === 'en') return;
         const dataLang = desglosarNombre(p[l] || "");
         const labelIdioma = IDIOMAS_CONFIG[l.toUpperCase()] || l.toUpperCase();
-        const oninputUppercase = esVino ? 'oninput="this.value = this.value.toUpperCase()"' : '';
         
         htmlRestoLangs += `
             <div class="input-row-lang">
                 <div class="lang-tag">${l.toUpperCase()}</div>
                 <div style="flex:1">
-                    <input id="edit-${l}" class="input-estandar input-nombre-corto" placeholder="Nombre en ${labelIdioma}" value="${esVino ? dataLang.nombre.toUpperCase() : dataLang.nombre}" ${oninputUppercase}>
+                    <input id="edit-${l}" class="input-estandar input-nombre-corto" placeholder="Nombre en ${labelIdioma}" value="${esVino ? formatWineName(dataLang.nombre) : dataLang.nombre}">
                     <input id="edit-${l}-uvas" class="input-estandar input-uvas" placeholder="Detalles / Grapes (${labelIdioma})" value="${dataLang.uvas}" style="display: ${esVino ? 'block' : 'none'};">
                 </div>
             </div>`;
@@ -223,8 +221,6 @@ function abrirEditor(id, esNuevo = false) {
     document.getElementById('edit-imagen').value = p.imagen;
     
     const actuales = (p.alergenos || "").split(',').map(s => s.trim().toUpperCase());
-    
-    // Lógica de alérgenos: Solo Sulfitos si es Vino, todos si es Plato
     let alergenosHtml = "";
     if (esVino) {
         const sel = actuales.includes("SULFITOS") ? 'selected' : '';
@@ -271,7 +267,7 @@ async function generarTraduccionEN() {
 
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
     const instruccion = `Actúa como un traductor profesional de menús de restaurantes. Te paso un elemento en español: "${textoCompletoEs}".
-    ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado. El nombre del vino debe ir en MAYÚSCULAS.' : ''}
+    ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado. El nombre del vino debe ir en MAYÚSCULAS, pero el contenido entre paréntesis (como la D.O.) debe mantener su formato original (ej: EL COTO (D.O. Rioja)).' : ''}
     Necesito que me des EXACTAMENTE 3 opciones de traducción al inglés con diferentes enfoques para un menú:
     1. Traducción directa/literal.
     2. Traducción gastronómica/descriptiva (más elegante).
@@ -299,6 +295,10 @@ async function generarTraduccionEN() {
             if (!response.ok || data.error) {
                 ultimoError = data.error?.message || "Error HTTP " + response.status;
                 console.warn(`Error con Key ${intentos + 1}, rotando...`, ultimoError);
+                // Si hay muchas demandas (429), esperamos 3 segundos antes de probar la siguiente clave
+                if (data.error?.code === 429 || response.status === 429) {
+                    await new Promise(r => setTimeout(r, 3000));
+                }
                 intentos++;
                 continue;
             }
@@ -376,7 +376,7 @@ function confirmarTraduccionEN() {
     
     const desglosado = desglosarNombre(textoFinal);
     const esVino = (platoEditandoId >= 13000);
-    document.getElementById('edit-en').value = esVino ? desglosado.nombre.toUpperCase() : desglosado.nombre;
+    document.getElementById('edit-en').value = esVino ? formatWineName(desglosado.nombre) : desglosado.nombre;
     
     const inputEnUvas = document.getElementById('edit-en-uvas');
     if (inputEnUvas && inputEnUvas.style.display !== "none") {
@@ -418,7 +418,7 @@ async function ejecutarTraduccionAutomatica() {
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
     
     const instruccion = `Actúa como un traductor experto de menús de restaurantes. Traduce el siguiente elemento basándote en su texto en Español: "${textoCompletoEs}" ${textoCompletoEn ? `y su texto en Inglés (como referencia): "${textoCompletoEn}"` : ''}.
-    ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado para todos los idiomas. El nombre del vino debe ir en MAYÚSCULAS en todos los idiomas.' : ''}
+    ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado para todos los idiomas. El nombre del vino debe ir en MAYÚSCULAS, pero el contenido entre paréntesis (como la D.O.) debe mantener su formato original en todos los idiomas (ej: EL COTO (D.O. Rioja)).' : ''}
     
     Traduce a los siguientes idiomas (usa los códigos ISO proporcionados): ${idiomasObjetivo.join(', ')}.
     
@@ -444,6 +444,10 @@ async function ejecutarTraduccionAutomatica() {
             if (!response.ok || data.error) {
                 ultimoError = data.error?.message || "Error HTTP " + response.status;
                 console.warn(`Error con Key ${intentos + 1}, rotando...`, ultimoError);
+                // Si hay muchas demandas (429), esperamos 3 segundos antes de probar la siguiente clave
+                if (data.error?.code === 429 || response.status === 429) {
+                    await new Promise(r => setTimeout(r, 3000));
+                }
                 intentos++;
                 continue; 
             }
@@ -455,7 +459,7 @@ async function ejecutarTraduccionAutomatica() {
                 idiomasObjetivo.forEach(l => {
                     if (traducciones[l]) {
                         const desglosado = desglosarNombre(traducciones[l]);
-                        const finalName = esVino ? desglosado.nombre.toUpperCase() : desglosado.nombre;
+                        const finalName = esVino ? formatWineName(desglosado.nombre) : desglosado.nombre;
                         document.getElementById(`edit-${l}`).value = finalName;
                         
                         const inputUva = document.getElementById(`edit-${l}-uvas`);
@@ -488,10 +492,16 @@ function aplicarCambiosPlato() {
     let p = esNuevoPlato ? datosTempNuevo : datosLocales.find(x => x.id === platoEditandoId);
     if (esNuevoPlato) datosLocales.push(p);
     
+    const esVino = (platoEditandoId >= 13000);
+
     IDIOMAS_ORDEN.forEach(l => {
-        const nom = superLimpiar(document.getElementById(`edit-${l}`).value);
+        let nom = superLimpiar(document.getElementById(`edit-${l}`).value);
         const inputUva = document.getElementById(`edit-${l}-uvas`);
         const uvas = (inputUva && inputUva.style.display !== "none") ? superLimpiar(inputUva.value) : "";
+        
+        // Aplicamos el formato de D.O. al guardar por si acaso
+        if (esVino) nom = formatWineName(nom);
+        
         p[l] = uvas ? `${nom} // ${uvas}` : nom;
     });
     
