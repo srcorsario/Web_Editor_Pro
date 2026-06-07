@@ -270,7 +270,6 @@ function abrirEditor(id, esNuevo = false) {
     }
     document.getElementById('contenedor-croquetas').innerHTML = croquetasHtml;
 
-    // Pre-selección si el plato ya tenía sabores en su nombre
     if (esCroqueta && p['es']) {
         const todosSabores = [...CROQUETAS_CONFIG.carne, ...CROQUETAS_CONFIG.pescado, ...CROQUETAS_CONFIG.vegetariana];
         todosSabores.forEach(sabor => {
@@ -300,10 +299,11 @@ function actualizarNombreCroquetas() {
     const soloVegetarianas = seleccionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
     const cantidad = (soloVegetarianas || esCroquetaVeg) ? 6 : 2;
 
-    const textoCroquetas = seleccionadas.map(s => `${cantidad} ${s}`).join(', ');
+    // CAMBIO: Usamos ' - ' en lugar de ', ' para separar las variedades
+    const textoCroquetas = seleccionadas.map(s => `${cantidad} ${s}`).join(' - ');
     
     let titulo = esCroquetaVeg ? "Croquetas Vegetarianas:" : "Surtido de Croquetas:";
-    if (!esCroquetaVeg && soloVegetarianas) titulo = "Croquetas Vegetarianas:"; // Si en surtido general solo marcamos verdura
+    if (!esCroquetaVeg && soloVegetarianas) titulo = "Croquetas Vegetarianas:";
 
     document.getElementById('edit-es').value = `${titulo} ${textoCroquetas}`;
     comprobarRequisitosTraduccion();
