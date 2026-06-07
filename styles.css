@@ -110,7 +110,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     overflow: hidden;
 }
 
-/* Columna Izquierda: Idiomas (Aprovecha 3/4 partes verticales de la pantalla con scroll nativo si fuera requerido por el viewport) */
+/* Columna Izquierda */
 .modal-col-izquierda {
     flex: 0 0 75%;
     display: flex;
@@ -121,7 +121,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     border-right: 1px solid #eee;
 }
 
-/* Columna Derecha: Precio, Imagen, Alérgenos y Botones */
+/* Columna Derecha */
 .modal-col-derecha {
     flex: 1;
     display: flex;
@@ -194,6 +194,14 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .btn-traductor-magico { width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 0; }
 .btn-traductor-magico:disabled { background: #bdc3c7; cursor: not-allowed; }
 
+/* Botón nuevo para generar inglés */
+.btn-traducir-en { 
+    width: 100%; padding: 10px; background: #34495e; color: white; border: none; border-radius: 8px; 
+    font-weight: bold; cursor: pointer; margin: 5px 0 2px; font-size: 0.9rem; transition: background 0.2s; 
+}
+.btn-traducir-en:hover { background: #2c3e50; }
+.btn-traducir-en:disabled { background: #bdc3c7; cursor: not-allowed; }
+
 /* Contenedor fluido sin límites de altura máxima ni scrolls intermedios forzados */
 .langs-fluid-container {
     display: flex;
@@ -208,7 +216,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .btn-modal-cancelar { background: #eee; color: var(--texto); padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; }
 
 
-/* --- NUEVOS ESTILOS: PANEL DE API KEYS --- */
+/* --- ESTILOS: PANEL DE API KEYS --- */
 .api-keys-manager {
     margin-top: 15px;
     padding: 12px;
@@ -286,4 +294,40 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 .btn-delete-key:hover {
     background: #c0392b;
+}
+
+/* --- NUEVOS ESTILOS: MODAL DE TRADUCCIONES INGLÉS --- */
+.opcion-en-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--texto);
+}
+
+.opcion-en-btn:hover { 
+    border-color: var(--primario); 
+    background: #fff9f4; 
+}
+
+.opcion-en-btn.selected { 
+    border-color: var(--primario); 
+    background: #fff4ec; 
+    font-weight: 600; 
+}
+
+.opcion-en-label { 
+    display: block; 
+    font-size: 0.7rem; 
+    color: var(--primario); 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    margin-bottom: 4px; 
 }
