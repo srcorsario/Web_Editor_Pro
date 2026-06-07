@@ -7,11 +7,17 @@ let esNuevoPlato = false;
 let datosTempNuevo = null; 
 let opcionesENActuales = [];
 
-const ALERGENOS_LISTA = ["GLUTEN", "SESAMO", "CACAHUETE", "SOJA", "FRUTOSCASCARA", "APIO", "HUEVO", "PESCADO", "MOSTAZA", "MOLUSCO", "SULFITOS", "LACTOSA", "ALTRAMUCES", "CRUSTACEO", "VEGANO", "VEGETARIANO"];
+// Lista de Alérgenos con Emojis Restaurados
+const ALERGENOS_LISTA = [
+    "🌾 GLUTEN", "🫘 SESAMO", "🥜 CACAHUETE", "🌱 SOJA", "🌰 FRUTOSCASCARA", 
+    "🥬 APIO", "🥚 HUEVO", "🐟 PESCADO", "🟡 MOSTAZA", "🐚 MOLUSCO", 
+    "🧪 SULFITOS", "🥛 LACTOSA", "🌼 ALTRAMUCES", "🦐 CRUSTACEO", 
+    "🌿 VEGANO", "🥗 VEGETARIANO"
+];
 
 const IDIOMAS_ORDEN = ['es', 'en', 'de', 'fr', 'it', 'ru', 'nl', 'pl', 'sv', 'no', 'da', 'fi', 'pt', 'ro', 'hu', 'cs', 'el', 'tr', 'ar', 'zh', 'ja'];
 
-// Configuración de Sabores de Croquetas (Añadido Puchero de cerdo)
+// Configuración de Sabores de Croquetas
 const CROQUETAS_CONFIG = {
     carne: ["Cecina de vaca", "Rabo de toro", "Pollo", "Jamón Ibérico", "Puchero de cerdo"],
     pescado: ["Gamba al ajillo", "Chipirones"],
@@ -231,11 +237,13 @@ function abrirEditor(id, esNuevo = false) {
     const actuales = (p.alergenos || "").split(',').map(s => s.trim().toUpperCase());
     let alergenosHtml = "";
     if (esVino) {
-        const sel = actuales.includes("SULFITOS") ? 'selected' : '';
-        alergenosHtml = `<div class="alergeno-btn ${sel}" onclick="this.classList.toggle('selected')">SULFITOS</div>`;
+        // Comprobamos si existe SULFITOS con o sin emoji para mantener compatibilidad
+        const sel = actuales.includes("🧪 SULFITOS") || actuales.includes("SULFITOS") ? 'selected' : '';
+        alergenosHtml = `<div class="alergeno-btn ${sel}" onclick="this.classList.toggle('selected')">🧪 SULFITOS</div>`;
     } else {
         alergenosHtml = ALERGENOS_LISTA.map(a => {
-            const sel = actuales.includes(a) ? 'selected' : '';
+            // Comprobamos coincidencia ignorando el emoji previo por si acaso
+            const sel = actuales.some(act => act.includes(a.split(" ").pop())) ? 'selected' : '';
             return `<div class="alergeno-btn ${sel}" onclick="this.classList.toggle('selected')">${a}</div>`;
         }).join('');
     }
@@ -626,7 +634,6 @@ function prepararNuevoPlato(baseId, folder) {
         alergenos: "" 
     };
     
-    // Lógica de imagen por defecto para Croquetas
     if (baseId >= 12200 && baseId <= 12299) {
         datosTempNuevo.imagen = "croquetasvegetarianas01.webp";
     } else if (baseId >= 12100 && baseId <= 12199) {
