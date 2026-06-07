@@ -294,7 +294,6 @@ function abrirModalTraduccionEN(opciones) {
     for (const [key, value] of Object.entries(opciones)) {
         if (value) {
             const label = mapaOpciones[key] || key;
-            // Escapar comillas simples para el onclick
             const valorSeguro = value.replace(/'/g, "\\'");
             html += `<div class="opcion-en-btn" onclick="seleccionarOpcionEN(this, '${valorSeguro}')">
                 <span class="opcion-en-label">${label}</span>
@@ -304,7 +303,8 @@ function abrirModalTraduccionEN(opciones) {
     }
 
     container.innerHTML = html;
-    document.getElementById('modal-traduccion-en').style.display = 'block';
+    // Usamos flex para que el cuadro se centre perfectamente vertical y horizontalmente
+    document.getElementById('modal-traduccion-en').style.display = 'flex';
 }
 
 function seleccionarOpcionEN(elemento, texto) {
@@ -321,7 +321,7 @@ function confirmarTraduccionEN() {
     }
     document.getElementById('edit-en').value = textoFinal;
     cerrarModalTraduccionEN();
-    comprobarRequisitosTraduccion(); // Esto habilitará el botón principal de traducir 19 idiomas
+    comprobarRequisitosTraduccion();
 }
 
 function cerrarModalTraduccionEN() {
