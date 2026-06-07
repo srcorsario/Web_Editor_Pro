@@ -95,8 +95,6 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 /* Modales e Interfaz de Pantalla Completa del Editor */
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); overflow-y: auto; }
-
-/* El modal ahora abarca todo el espacio real disponible */
 .modal-content { background: white; width: 96%; max-width: 1000px; margin: 15px auto; border-radius: 15px; padding: 25px; box-sizing: border-box; }
 
 /* Nueva distribución a Pantalla Completa Dividida en Columnas */
@@ -112,7 +110,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     overflow: hidden;
 }
 
-/* Columna Izquierda: Idiomas (Ocupa las 3/4 partes verticales de la pantalla) */
+/* Columna Izquierda: Idiomas (Aprovecha 3/4 partes verticales de la pantalla con scroll nativo si fuera requerido por el viewport) */
 .modal-col-izquierda {
     flex: 0 0 75%;
     display: flex;
@@ -146,14 +144,14 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
 /* Contenedor optimizado y ultra-reducido para el precio lateral */
 .panel-control-precio { display: flex; gap: 12px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
-.input-precio-super-mini { flex: 0 0 90px !important; } /* Botón/caja de precio reducida drásticamente */
+.input-precio-super-mini { flex: 0 0 90px !important; }
 .input-precio-mini { text-align: center; font-weight: bold; padding: 8px; }
 .input-imagen-flexible { flex: 1; }
 
 /* Distribución exacta de Alérgenos transformados en Botones */
 .alergenos-grid { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); 
     gap: 6px; 
     margin-top: 5px;
     max-height: 45vh;
@@ -174,6 +172,10 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     text-transform: uppercase;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .alergeno-btn:hover {
@@ -192,8 +194,13 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .btn-traductor-magico { width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 0; }
 .btn-traductor-magico:disabled { background: #bdc3c7; cursor: not-allowed; }
 
-/* Scroll extendido de los 19 idiomas para aprovechar el alto vertical de 3/4 */
-.langs-scroll-container { max-height: calc(100vh - 310px); overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px; background: #fafafa; margin-top: 10px; }
+/* Contenedor fluido sin límites de altura máxima ni scrolls intermedios forzados */
+.langs-fluid-container {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 0;
+    background: transparent;
+}
 
 /* Acciones Aceptar y Cancelar integradas en el panel derecho */
 .modal-acciones-footer { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 15px; }
