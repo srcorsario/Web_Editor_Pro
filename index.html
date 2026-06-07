@@ -15,7 +15,7 @@
         <h1>⚙️ GESTOR DE CARTA V 13.0</h1>
         <div id="status-carga">Cargando datos...</div>
         
-        <!-- Nuevo Panel de API Keys -->
+        <!-- Panel de API Keys -->
         <div class="api-keys-manager">
             <label class="label-seccion" style="margin-bottom: 5px;">🔑 Claves API Gemini (Local)</label>
             <div class="api-keys-inputs">
@@ -56,6 +56,7 @@
                         <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
                     </div>
                 </div>
+                <button id="btn-generar-en" class="btn-traducir-en" onclick="generarTraduccionEN()">🇬🇧 Generar Inglés desde Español</button>
                 <button id="btn-autotraducir" class="btn-traductor-magico" disabled onclick="ejecutarTraduccionAutomatica()">
                     ✨ Traducir los otros 19 idiomas (Requiere ES y EN)
                 </button>
@@ -88,6 +89,26 @@
     </div>
 </div>
 
+<!-- Nuevo Modal para elegir la traducción al Inglés -->
+<div id="modal-traduccion-en" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <h3 style="text-align:center; color:var(--primario); margin-top:0;">Generar Traducción al Inglés</h3>
+        <p style="font-size: 0.85rem; text-align:center; color:#7f8c8d;">Selecciona una versión o edítala a tu gusto</p>
+        
+        <div id="opciones-en-container" style="margin: 15px 0;"></div>
+        
+        <div style="margin-top: 15px;">
+            <label class="label-seccion">Editar selección:</label>
+            <textarea id="editar-opcion-en" class="input-estandar" rows="3" placeholder="Selecciona una opción arriba o escribe la tuya..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button onclick="confirmarTraduccionEN()" class="btn-modal-aceptar" style="flex:1;">CONFIRMAR</button>
+            <button onclick="cerrarModalTraduccionEN()" class="btn-modal-cancelar" style="flex:1;">CANCELAR</button>
+        </div>
+    </div>
+</div>
+
 <div id="modal-selector" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <h3 style="text-align:center; color:var(--primario);">AÑADIR NUEVO A...</h3>
@@ -102,39 +123,24 @@
 <script src="app.js"></script>
 
 <script>
-    // Inyección de función de control estricto para el input de precio (Máx 3 enteros, 2 decimales, máx 5 dígitos en total de números)
     function validarFormatoPrecio(input) {
-        // Reemplazar comas por puntos de forma automática para homogeneidad
         let valor = input.value.replace(',', '.');
-        
-        // Eliminar cualquier caracter que no sea número o punto decimal
         valor = valor.replace(/[^0-9.]/g, '');
-        
-        // Evitar múltiples puntos decimales
         const partes = valor.split('.');
         if (partes.length > 2) {
             valor = partes[0] + '.' + partes.slice(1).join('');
         }
-        
-        // Volver a dividir para validar longitudes de enteros y decimales por separado
         const fragmentos = valor.split('.');
         let enteros = fragmentos[0];
         let decimales = fragmentos[1];
-        
-        // Limitar parte entera a 3 dígitos máximo
         if (enteros.length > 3) {
             enteros = enteros.substring(0, 3);
         }
-        
-        // Limitar parte decimal a 2 dígitos máximo
         if (decimales !== undefined && decimales.length > 2) {
             decimales = decimales.substring(0, 2);
         }
-        
-        // Control de seguridad adicional: no permitir más de 5 dígitos totales entre enteros y decimales
         if (decimales !== undefined) {
             if ((enteros.length + decimales.length) > 5) {
-                // Si excede los 5 dígitos en combinación conjunta se recorta del decimal sobrante
                 decimales = decimales.substring(0, 5 - enteros.length);
             }
             input.value = enteros + '.' + decimales;
@@ -142,8 +148,6 @@
             input.value = enteros;
         }
     }
-    
-    // Vinculación global por si se invoca desde dependencias externas
     window.validarPrecio = validarFormatoPrecio;
 </script>
 
