@@ -24,19 +24,20 @@
 <div id="modal-editor" class="modal">
     <div class="modal-content">
         <h2 id="modal-titulo" style="margin-top:0; color:var(--primario); border-bottom: 2px solid #eee; padding-bottom: 10px;">Editar Elemento</h2>
+        
         <div class="input-group">
-            <label id="label-uvas">Nombres y Detalles del Plato</label>
+            <label id="label-uvas" class="label-seccion">Nombres y Detalles del Plato</label>
             <div class="input-row-lang row-es-control">
                 <div class="lang-tag tag-es-main">ES</div>
                 <div style="flex:1">
-                    <input id="edit-es" class="input-estandar" placeholder="Nombre en Español" oninput="comprobarRequisitosTraduccion()">
+                    <input id="edit-es" class="input-estandar input-nombre-corto" placeholder="Nombre en Español" oninput="comprobarRequisitosTraduccion()">
                     <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Uvas / Detalles (Opcional)">
                 </div>
             </div>
             <div class="input-row-lang row-en-control">
                 <div class="lang-tag tag-en-main">EN</div>
                 <div style="flex:1">
-                    <input id="edit-en" class="input-estandar" placeholder="Name in English" oninput="comprobarRequisitosTraduccion()">
+                    <input id="edit-en" class="input-estandar input-nombre-corto" placeholder="Name in English" oninput="comprobarRequisitosTraduccion()">
                     <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
                 </div>
             </div>
@@ -46,19 +47,19 @@
             <div id="contenedor-resto-idiomas" class="langs-scroll-container"></div>
         </div>
         
-        <div class="meta-grid">
-            <div class="input-group">
-                <label>Precio (€)</label>
-                <input type="text" id="edit-precio" class="input-estandar" placeholder="0.00" oninput="window.validarPrecio(this)">
+        <div class="meta-row-compacta">
+            <div class="input-group input-precio-contenedor">
+                <label class="label-seccion">Precio (€)</label>
+                <input type="text" id="edit-precio" class="input-estandar" placeholder="0.00" oninput="validarFormatoPrecio(this)">
             </div>
-            <div class="input-group">
-                <label>Imagen</label>
+            <div class="input-group input-imagen-contenedor">
+                <label class="label-seccion">Imagen</label>
                 <input type="text" id="edit-imagen" class="input-estandar" placeholder="plato01.webp">
             </div>
         </div>
         
         <div class="input-group">
-            <label>Alérgenos y Dietas</label>
+            <label class="label-seccion">Alérgenos y Dietas</label>
             <div id="alergenos-grid" class="alergenos-grid"></div>
         </div>
         
@@ -81,6 +82,48 @@
 <script src="state.js"></script>
 <script src="ui.js"></script>
 <script src="app.js"></script>
+
+<script>
+    // Inyección de función de control estricto para el input de precio (Máx 3 enteros, 2 decimales, máx 5 dígitos en total de números)
+    function validarFormatoPrecio(input) {
+        // Reemplazar comas por puntos de forma automática para homogeneidad
+        let valor = input.value.replace(',', '.');
+        
+        // Eliminar cualquier caracter que no sea número o punto decimal
+        valor = valor.replace(/[^0-9.]/g, '');
+        
+        // Evitar múltiples puntos decimales
+        const partes = valor.split('.');
+        if (partes.length > 2) {
+            valor = partes[0] + '.' + partes.slice(1).join('');
+        }
+        
+        // Volver a dividir para validar longitudes de enteros y decimales por separado
+        const fragmentos = valor.split('.');
+        let enteros = fragmentos[0];
+        let decimales = fragmentes[1];
+        
+        // Limitar parte entera a 3 dígitos máximo
+        if (enteros.length > 3) {
+            enteros = enteros.substring(0, 3);
+        }
+        
+        // Limitar parte decimal a 2 dígitos máximo
+        if (decimales !== undefined && decimales.length > 2) {
+            decimales = decimales.substring(0, 2);
+        }
+        
+        // Recomponer valor final estructurado
+        if (decimales !== undefined) {
+            input.value = enteros + '.' + decimales;
+        } else {
+            input.value = enteros;
+        }
+    }
+    
+    // Vinculación global por si se invoca desde dependencias externas
+    window.validarPrecio = validarFormatoPrecio;
+</script>
 
 </body>
 </html>
