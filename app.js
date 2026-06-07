@@ -18,33 +18,112 @@ async function esperarDependencias() {
     });
 }
 
-// --- NUEVA: Función de limpieza auxiliar para evitar caídas ---
+// --- FUNCIÓN AUXILIAR: Limpieza de textos provenientes de CSV ---
 function superLimpiar(texto) {
     if (!texto) return "";
-    // Elimina comillas dobles sobrantes típicas del formato CSV
     return texto.trim().replace(/^"|"$/g, '');
 }
 
-// --- NUEVAS: Funciones de renderizado base para que no falle la carga ---
+// --- MOTOR DE RENDERIZADO DINÁMICO ---
 function renderizar() {
     console.log("Datos listos para renderizar:", datosLocales);
     const contenedor = document.getElementById('editor-dinamico');
-    if (contenedor) {
-        contenedor.innerHTML = `<p style="padding: 20px; color: var(--texto);">Se han procesado <strong>${datosLocales.length}</strong> elementos de la carta. Estructura de renderizado lista.</p>`;
+    if (!contenedor) return;
+
+    // Limpiamos el contenedor antes de renderizar la lista real
+    contenedor.innerHTML = "";
+
+    // Recorremos la estructura maestra declarada en languages.js
+    ESTRUCTURA.forEach(cat => {
+        // Buscamos si hay platos cargados que correspondan al rango de IDs de esta categoría
+        let platosDeCategoria = [];
+        
+        if (cat.sub && cat.sub.length > 0) {
+            // Caso para categorías con subsecciones específicas (como los Vinos o Arroces)
+            cat.sub.forEach(subcat => {
+                const maxId = subcat.max || (subcat.id + 99);
+                const filtrados = datosLocales.filter(p => p.id >= subcat.id && p.id <= maxId);
+                platosDeCategoria = platosDeCategoria.concat(filtrados);
+            });
+        } else {
+            // Caso para categorías directas usando su ID base y un rango estándar (como Postres o Cervezas)
+            const maxId = cat.id + (cat.rango || 999);
+            platosDeCategoria = datosLocales.filter(p => p.id >= cat.id && p.id <= maxId);
+        }
+
+        // Si la categoría tiene platos asociados, dibujamos su tarjeta contenedora
+        if (platosDeCategoria.length > 0) {
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'categoria-tarjeta';
+
+            // Cabecera de la categoría utilizando el nombre mapeado
+            let HTMLTarjeta = `
+                <div class="categoria-titulo">
+                    ${cat.name.toUpperCase()} (${platosDeCategoria.length})
+                </div>
+                <div class="categoria-cuerpo">
+            `;
+
+            // Construcción de la fila/item para cada plato individual de la lista
+            platosDeCategoria.forEach(plato => {
+                const indicadorActivo = plato.activa ? '🟢' : '🔴';
+                
+                HTMLTarjeta += `
+                    <div class="plato-item">
+                        <div style="font-size: 1.1rem; cursor: pointer;" onclick="window.toggleActivo(${plato.id})">
+                            ${indicadorActivo}
+                        </div>
+                        <div class="plato-info">
+                            <span class="plato-nombre">${plato.es || 'Sin Nombre'}</span>
+                            <small style="color: #7f8c8d; font-size: 0.75rem;">ID: ${plato.id} | Carpeta: ${plato.carpeta || 'Ninguna'}</small>
+                        </div>
+                        <div class="plato-meta-footer">
+                            <span style="font-weight: bold; color: var(--primario);">${parseFloat(plato.precio).toFixed(2)} €</span>
+                            <button class="btn-config" onclick="window.abrirEditor(${plato.id})">⚙️</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            HTMLTarjeta += `</div>`; // Cierre de categoria-cuerpo
+            tarjeta.innerHTML = HTMLTarjeta;
+            contenedor.appendChild(tarjeta);
+        }
+    });
+
+    // Si tras procesar todo no encontramos elementos que encajen en ESTRUCTURA
+    if (contenedor.innerHTML === "") {
+        contenedor.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--texto);">No se encontraron elementos que coincidan con los rangos numéricos de las categorías configuradas.</p>`;
     }
 }
 
+// --- MOTOR DE GENERACIÓN DE MENÚS AGRUPADOS ---
 function generarMenuAgrupado() {
     console.log("Menú agrupado generado según ESTRUCTURA.");
+    const listaAgrupadaContenedor = document.getElementById('lista-agrupada');
+    if (!listaAgrupadaContenedor) return;
+
+    listaAgrupadaContenedor.innerHTML = "";
+    
+    // Rellena de forma dinámica el modal de asignación rápida para cuando se quiera añadir un nuevo plato
+    ESTRUCTURA.forEach(cat => {
+        const btnCat = document.createElement('button');
+        btnCat.style.cssText = "width:100%; text-align:left; padding:12px; margin-bottom:6px; border:1px solid #ddd; background:#fff; border-radius:8px; font-weight:600; cursor:pointer;";
+        btnCat.innerText = `➕ ${cat.name}`;
+        btnCat.onclick = () => {
+            window.prepararNuevoPlato(cat.id);
+        };
+        listaAgrupadaContenedor.appendChild(btnCat);
+    });
 }
 
-// --- ACTUALIZADA: Funciones de control UI directas ---
+// --- CONTROLADOR DE INTERFAZ INTEGRADO ---
 const UI_INTERNA = {
     log: (mensaje, tipo = '') => {
         const statusElement = document.getElementById('status-carga');
         if (statusElement) {
             statusElement.innerText = mensaje;
-            statusElement.className = ''; // Limpiar clases anteriores
+            statusElement.className = ''; 
             if (tipo === 'success') statusElement.classList.add('status-ok');
             if (tipo === 'error') statusElement.classList.add('status-error');
         }
@@ -54,7 +133,6 @@ const UI_INTERNA = {
 // --- MOTOR DE TRADUCCIÓN ---
 async function llamarApiTraductor(texto, targetLang) {
     if (!texto) return "";
-    // Validación segura de getKeys
     const keys = (typeof getKeys === 'function') ? getKeys() : [];
     if (!keys || keys.length === 0 || keys[0].includes("TU_PRIMERA_API_KEY")) { 
         UI_INTERNA.log("Error: Configura tus API Keys reales en state.js", "error"); 
@@ -75,9 +153,9 @@ async function llamarApiTraductor(texto, targetLang) {
     }
 }
 
-// --- LÓGICA PRINCIPAL ---
+// --- LÓGICA DE CARGA PRINCIPAL DEL SPREADSHEET ---
 async function cargar() {
-    await esperarDependencias(); // Asegura que languages.js haya cargado
+    await esperarDependencias(); 
     UI_INTERNA.log("⏳ Cargando datos desde Google Sheets...");
     try {
         const resp = await fetch(CSV_URL + '&t=' + Date.now());
@@ -86,9 +164,8 @@ async function cargar() {
         datosLocales = [];
         
         filas.forEach((f, i) => {
-            if (i === 0) return; // Omitir cabecera del CSV
+            if (i === 0) return; 
             
-            // Regex para separar comas respetando textos entre comillas
             const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             const id = parseInt(c[0]);
             
@@ -120,8 +197,8 @@ async function cargar() {
     }
 }
 
+// --- TRADUCCIONES AUTOMÁTICAS ---
 async function ejecutarTraduccionAutomatica() {
-    // Implementación segura usando UI global o UI_INTERNA
     const log_ui = (typeof UI !== 'undefined' && UI.setLoadingState) ? UI : { setLoadingState: () => {} };
     log_ui.setLoadingState('btn-autotraducir', true, 'TRADUCIENDO...');
     
@@ -138,22 +215,57 @@ async function ejecutarTraduccionAutomatica() {
     log_ui.setLoadingState('btn-autotraducir', false, '✨ Traducir los otros 19 idiomas');
 }
 
-// --- FUNCIONES MOCK PARA EVITAR ERRORES DE ASIGNACIÓN EN WINDOW ---
-function abrirEditor() {} function aplicarCambiosPlato() {} function enviarAlExcel() {} 
-function abrirSelector() {} function cerrarModal() {} function moverPlato() {} 
-function prepararNuevoPlato() {} function toggleActivo() {} function comprobarRequisitosTraduccion() {}
+// --- INTERFACES DE INTERACCIÓN DE USUARIO (MODALES Y BOTONES) ---
+function abrirEditor(id) {
+    platoEditandoId = id;
+    const plato = datosLocales.find(p => p.id === id);
+    if (!plato) return;
 
-// --- EXPOSICIÓN GLOBAL ---
+    esNuevoPlato = false;
+    document.getElementById('modal-titulo').innerText = `Editar Elemento (ID: ${id})`;
+    document.getElementById('edit-es').value = plato.es || "";
+    document.getElementById('edit-precio').value = plato.precio || "0.00";
+    document.getElementById('edit-imagen').value = plato.imagen || "";
+
+    // Abre el modal manipulando el estilo directo de tus CSS
+    document.getElementById('modal-editor').style.display = "block";
+}
+
+function abrirSelector() {
+    document.getElementById('modal-selector').style.display = "block";
+}
+
+function cerrarModal(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+function toggleActivo(id) {
+    const plato = datosLocales.find(p => p.id === id);
+    if (plato) {
+        plato.activa = !plato.activa;
+        UI_INTERNA.log("Estado modificado localmente. Recuerda guardar cambios.", "success");
+        renderizar();
+    }
+}
+
+// --- FUNCIONES MOCK DE ACCIONES ADICIONALES ---
+function aplicarCambiosPlato() { cerrarModal('modal-editor'); renderizar(); } 
+function enviarAlExcel() { alert("Simulación: Datos sincronizados de vuelta a Google Sheets."); } 
+function moverPlato() {} 
+function prepararNuevoPlato(catId) { cerrarModal('modal-selector'); alert(`Listo para añadir en categoría base: ${catId}`); } 
+function comprobarRequisitosTraduccion() {}
+
+// --- ASIGNACIONES GLOBALES (Para interactuar desde el HTML) ---
 window.ejecutarTraduccionAutomatica = ejecutarTraduccionAutomatica;
-window.abrirEditor = window.abrirEditor || abrirEditor;
-window.aplicarCambiosPlato = window.aplicarCambiosPlato || aplicarCambiosPlato;
-window.enviarAlExcel = window.enviarAlExcel || enviarAlExcel;
-window.abrirSelector = window.abrirSelector || abrirSelector;
-window.cerrarModal = window.cerrarModal || cerrarModal;
-window.moverPlato = window.moverPlato || moverPlato;
-window.prepararNuevoPlato = window.prepararNuevoPlato || prepararNuevoPlato;
-window.toggleActivo = window.toggleActivo || toggleActivo;
-window.comprobarRequisitosTraduccion = window.comprobarRequisitosTraduccion || comprobarRequisitosTraduccion;
+window.abrirEditor = abrirEditor;
+window.aplicarCambiosPlato = aplicarCambiosPlato;
+window.enviarAlExcel = enviarAlExcel;
+window.abrirSelector = abrirSelector;
+window.cerrarModal = cerrarModal;
+window.moverPlato = moverPlato;
+window.prepararNuevoPlato = prepararNuevoPlato;
+window.toggleActivo = toggleActivo;
+window.comprobarRequisitosTraduccion = comprobarRequisitosTraduccion;
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', cargar);
