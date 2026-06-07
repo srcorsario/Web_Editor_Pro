@@ -89,22 +89,26 @@
     </div>
 </div>
 
-<!-- Nuevo Modal para elegir la traducción al Inglés -->
+<!-- Modal para elegir la traducción al Inglés (Estructura Flex corregida) -->
 <div id="modal-traduccion-en" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-content modal-box-en">
         <h3 style="text-align:center; color:var(--primario); margin-top:0;">Generar Traducción al Inglés</h3>
-        <p style="font-size: 0.85rem; text-align:center; color:#7f8c8d;">Selecciona una versión o edítala a tu gusto</p>
+        <p style="font-size: 0.85rem; text-align:center; color:#7f8c8d; margin-bottom: 0;">Selecciona una versión o edítala a tu gusto</p>
         
-        <div id="opciones-en-container" style="margin: 15px 0;"></div>
+        <!-- Zona de opciones con scroll interno controlado -->
+        <div id="opciones-en-container" class="opciones-en-scroll"></div>
         
-        <div style="margin-top: 15px;">
-            <label class="label-seccion">Editar selección:</label>
-            <textarea id="editar-opcion-en" class="input-estandar" rows="3" placeholder="Selecciona una opción arriba o escribe la tuya..."></textarea>
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button onclick="confirmarTraduccionEN()" class="btn-modal-aceptar" style="flex:1;">CONFIRMAR</button>
-            <button onclick="cerrarModalTraduccionEN()" class="btn-modal-cancelar" style="flex:1;">CANCELAR</button>
+        <!-- Zona de edición y botones fijos abajo -->
+        <div class="footer-box-en">
+            <div>
+                <label class="label-seccion">Editar selección:</label>
+                <textarea id="editar-opcion-en" class="input-estandar" rows="3" placeholder="Selecciona una opción arriba o escribe la tuya..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="confirmarTraduccionEN()" class="btn-modal-aceptar" style="flex:1;">CONFIRMAR</button>
+                <button onclick="cerrarModalTraduccionEN()" class="btn-modal-cancelar" style="flex:1;">CANCELAR</button>
+            </div>
         </div>
     </div>
 </div>
