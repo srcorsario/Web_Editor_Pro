@@ -296,40 +296,52 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     background: #c0392b;
 }
 
-/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Redimensionado y con Flex) --- */
+/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Ocupa 3/4 y centrado) --- */
+#modal-traduccion-en {
+    justify-content: center; /* Centrado vertical */
+    align-items: center;     /* Centrado horizontal */
+}
+
 .modal-box-en {
-    max-width: 600px !important;
-    max-height: 90vh;
+    width: 75vw;            /* 3/4 de la pantalla de ancho */
+    max-width: 900px;       /* Un tope para pantallas ultra anchas */
+    height: 75vh;           /* 3/4 de la pantalla de alto */
+    max-height: 850px;      /* Un tope para pantallas ultra altas */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Evita que la caja blanca crezca sin control */
+    overflow: hidden;        /* Nunca sobresale */
+    border-radius: 20px;    /* Bordes más redondeados para el box grande */
+    padding: 40px;          /* Espaciado interior cómodo */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .opciones-en-scroll {
     flex: 1;
-    overflow-y: auto;
-    margin: 10px 0;
-    padding-right: 5px;
-    min-height: 0; /* Clave para que el scroll funcione en flexbox */
+    overflow-y: auto;       /* Scroll remoto solo por si acaso */
+    margin: 20px 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly; /* Reparte el espacio entre las 3 opciones perfectamente */
+    gap: 15px;
 }
 
 .footer-box-en {
     margin-top: auto;
-    padding-top: 15px;
+    padding-top: 20px;
     border-top: 1px solid #eee;
 }
 
 .opcion-en-btn {
     width: 100%;
     text-align: left;
-    padding: 12px 15px;
-    margin-bottom: 8px;
+    padding: 25px;          /* Cajas amplias y comodas */
     background: #f8f9fa;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.9rem;
+    font-size: 1.15rem;     /* Texto más grande para el box grande */
     font-family: 'Montserrat', sans-serif;
     color: var(--texto);
 }
@@ -337,19 +349,21 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .opcion-en-btn:hover { 
     border-color: var(--primario); 
     background: #fff9f4; 
+    transform: translateY(-2px);
 }
 
 .opcion-en-btn.selected { 
     border-color: var(--primario); 
     background: #fff4ec; 
     font-weight: 600; 
+    box-shadow: 0 4px 10px rgba(230, 126, 34, 0.15);
 }
 
 .opcion-en-label { 
     display: block; 
-    font-size: 0.7rem; 
+    font-size: 0.8rem; 
     color: var(--primario); 
     font-weight: 700; 
     text-transform: uppercase; 
-    margin-bottom: 4px; 
+    margin-bottom: 8px; 
 }
