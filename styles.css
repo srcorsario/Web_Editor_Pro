@@ -255,23 +255,20 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
         display: none !important; /* Ocultar rueda de ajustes en móvil */
     }
 
+    .plato-orden-btns {
+        display: none !important; /* Ocultar flechas en móvil */
+    }
+
+    .plato-info > div:last-child {
+        display: none !important; /* Ocultar la línea que contiene el nombre de imagen/categoría en móvil */
+    }
+
     .plato-item {
+        display: flex;
         flex-wrap: wrap;
-        padding: 10px 12px;
+        padding: 12px 15px;
         gap: 8px;
         align-items: center;
-    }
-
-    .plato-orden-btns {
-        display: flex;
-        flex-direction: row; /* Flechas en horizontal para ahorrar altura */
-        gap: 4px;
-        margin-right: 5px;
-    }
-
-    .btn-orden {
-        padding: 10px 14px; /* Área táctil más grande */
-        font-size: 1rem;
     }
 
     .plato-info {
@@ -280,24 +277,23 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
     }
 
     .plato-nombre {
         font-size: 0.95rem;
+        margin: 0;
+        padding-right: 10px;
     }
 
     .plato-meta-footer {
         min-width: unset;
         width: 100%;
+        display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 5px;
-        padding: 8px 12px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        box-sizing: border-box;
-        border-top: none;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #f1f2f6;
     }
     
     .plato-meta-footer > div:first-child small {
