@@ -206,39 +206,98 @@ function comprobarRequisitosTraduccion() {
     document.getElementById('btn-autotraducir').disabled = !esValido;
 }
 
+// --- FUNCIÓN ACTUALIZADA: TRADUCCIÓN CON GEMINI 2.5 ---
 async function ejecutarTraduccionAutomatica() {
     const btn = document.getElementById('btn-autotraducir');
     const originalText = btn.innerText;
-    btn.innerText = "✨ Traduciendo en tiempo real...";
+    btn.innerText = "✨ Traduciendo con Gemini 2.5...";
     btn.disabled = true;
     
     const nombreEs = document.getElementById('edit-es').value.trim();
+    const nombreEn = document.getElementById('edit-en').value.trim();
     const esVino = (platoEditandoId >= 13000);
-    const keys = getKeys();
-    const apiKey = keys[0]; // Usar la clave primaria configurada en state.js
+    const uvasEs = esVino ? document.getElementById('edit-es-uvas').value.trim() : "";
+    const keys = getKeys(); // Ahora obtenemos las claves dinámicas desde LocalStorage
     
-    // Iteramos por los 19 idiomas restantes para traducirlos mediante la API de Google Translate
-    for (let l of IDIOMAS_ORDEN) {
-        if (l === 'es' || l === 'en') continue;
+    if (keys.length === 0) {
+        alert("❌ No hay API Keys de Gemini configuradas. Añade al menos una en el panel superior.");
+        btn.innerText = originalText;
+        btn.disabled = false;
+        return;
+    }
+    
+    const idiomasObjetivo = IDIOMAS_ORDEN.filter(l => l !== 'es' && l !== 'en');
+    const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
+    
+    // Se construye un prompt profesional basado en el repositorio de referencia
+    const instruccion = `Actúa como un traductor experto de menús de restaurantes. Traduce el siguiente plato basándote en su nombre en Español: "${nombreEs}" ${nombreEn ? `y su nombre en Inglés (como referencia): "${nombreEn}"` : ''}.
+    ${esVino && uvasEs ? `También traduce estos detalles/uvas: "${uvasEs}".` : ''}
+    
+    Traduce a los siguientes idiomas (usa los códigos ISO proporcionados): ${idiomasObjetivo.join(', ')}.
+    
+    Devuelve la respuesta EXCLUSIVAMENTE en formato JSON plano (sin explicaciones ni formato markdown), usando los códigos de idioma como claves. ${esVino && uvasEs ? 'Incluye un objeto adicional llamado "uvas" con las traducciones de los detalles/uvas usando los mismos códigos de idioma.' : ''}
+    Ejemplo de formato de respuesta esperado: {"de": "...", "fr": "...", "it": "..."} o si hay uvas: {"de": "...", "uvas": {"de": "..."}}`;
+    
+    let exito = false;
+    let intentos = 0;
+    
+    // Sistema de rotación de claves por si una falla por límite de cuota
+    while (!exito && intentos < keys.length) {
         try {
-            const urlTranslate = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
-            const response = await fetch(urlTranslate, {
+            const apiKey = keys[intentos];
+            const response = await fetch(`${URL_MODELO}?key=${apiKey}`, {
                 method: 'POST',
-                body: JSON.stringify({ q: nombreEs, target: l, source: 'es', format: 'text' })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }] })
             });
-            const resData = await response.json();
-            if (resData.data && resData.data.translations && resData.data.translations[0]) {
-                document.getElementById(`edit-${l}`).value = resData.data.translations[0].translatedText;
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                console.warn(`Error con Key ${intentos + 1}:`, data.error.message);
+                if (data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED') {
+                    intentos++; // Rotar clave si hay límite de cuota
+                } else {
+                    break; // Romper si es otro tipo de error de API
+                }
+                continue; 
             }
             
-            // Si es un vino, replicamos las uvas del input ES a los demás de forma inteligente
-            if (esVino) {
-                document.getElementById(`edit-${l}-uvas`).value = document.getElementById('edit-es-uvas').value.trim();
+            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (txt) {
+                const jsonClean = txt.replace(/```json/g, '').replace(/```/g, '').trim();
+                const traducciones = JSON.parse(jsonClean);
+                
+                // Rellenar los inputs dinámicamente en el modal con las traducciones de Gemini
+                idiomasObjetivo.forEach(l => {
+                    if (traducciones[l]) {
+                        document.getElementById(`edit-${l}`).value = traducciones[l];
+                    }
+                    
+                    const inputUva = document.getElementById(`edit-${l}-uvas`);
+                    if (inputUva && inputUva.style.display !== "none") {
+                        if (traducciones.uvas && traducciones.uvas[l]) {
+                            inputUva.value = traducciones.uvas[l];
+                        } else if (uvasEs) {
+                            inputUva.value = uvasEs; // Fallback inteligente si Gemini no separó las uvas
+                        }
+                    }
+                });
+                
+                exito = true;
+            } else {
+                throw new Error("La respuesta de Gemini no contiene texto válido.");
             }
         } catch (err) {
-            console.error(`Error en traducción automática al idioma [${l}]:`, err);
+            console.error(`Error en traducción con Gemini (Intento ${intentos + 1}):`, err);
+            intentos++;
         }
     }
+    
+    if (!exito) {
+        alert("❌ Error al traducir con Gemini. Revisa las claves API en el panel superior o el formato del texto.");
+    }
+    
     btn.innerText = originalText;
     btn.disabled = false;
 }
@@ -379,5 +438,44 @@ function toggleActivo(id, v) {
 function abrirSelector() { document.getElementById('modal-selector').style.display = 'block'; }
 function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
 
+
+// --- NUEVAS FUNCIONES: SISTEMA DE GESTIÓN DE API KEYS EN LOCAL ---
+function actualizarListaKeys() {
+    const select = document.getElementById('selectKeys');
+    const keys = getKeys();
+    
+    if (keys.length === 0) {
+        select.innerHTML = '<option value="">No hay API Keys</option>';
+        select.disabled = true;
+        return;
+    }
+    
+    select.disabled = false;
+    select.innerHTML = keys.map((k, i) => {
+        const resumida = `${k.substring(0, 6)}...${k.substring(k.length - 4)}`;
+        return `<option value="${k}">Key ${i + 1}: ${resumida}</option>`;
+    }).join('');
+}
+
+function agregarKey() {
+    const input = document.getElementById('nuevaKey');
+    if (input.value.trim()) {
+        saveKey(input.value.trim());
+        input.value = "";
+        actualizarListaKeys();
+    }
+}
+
+function eliminarKeySeleccionada() {
+    const select = document.getElementById('selectKeys');
+    if (select.value) {
+        deleteKey(select.value);
+        actualizarListaKeys();
+    } else {
+        alert("No hay ninguna Key seleccionada para eliminar.");
+    }
+}
+
 // Inicialización automática
 cargar();
+actualizarListaKeys();
