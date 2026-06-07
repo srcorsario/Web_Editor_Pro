@@ -97,6 +97,59 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); overflow-y: auto; }
 .modal-content { background: white; width: 96%; max-width: 1000px; margin: 15px auto; border-radius: 15px; padding: 25px; box-sizing: border-box; }
 
-.input-row-lang { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-.lang-tag { background: #34495e; color: white; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; }
-.input-estandar { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 5px; }
+.input-group { margin-bottom: 15px; }
+.label-seccion { display: block; font-size: 0.75rem; font-weight: 700; color: var(--primario); text-transform: uppercase; margin-bottom: 8px; }
+
+.input-row-lang { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.lang-tag { background: #34495e; color: white; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; width: 35px; text-align: center; flex-shrink: 0; }
+.input-estandar { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 5px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; }
+
+/* Optimización de los Espacios de nombres */
+.input-nombre-corto { padding: 8px 10px; font-size: 0.9rem; max-height: 38px; }
+.input-uvas { background: #fff9f4; border: 1px dashed var(--primario); margin-top: 4px; font-size: 0.8rem; padding: 6px 10px; }
+
+/* Contenedor en línea optimizado para Precio e Imagen en lugar de filas completas gigantes */
+.meta-row-compacta { display: flex; gap: 20px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
+.input-precio-contenedor { flex: 0 0 140px; } /* Ancho fijo y controlado y pequeño para el precio */
+.input-imagen-contenedor { flex: 1; }
+
+/* Distribución exacta de Alérgenos transformados en Botones (4 o 5 por fila) */
+.alergenos-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+    gap: 8px; 
+    margin-top: 5px;
+}
+
+.alergeno-btn { 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    padding: 10px 5px; 
+    font-size: 0.72rem; 
+    text-align: center; 
+    cursor: pointer; 
+    background: #fff; 
+    font-weight: 600; 
+    color: var(--texto);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    user-select: none;
+}
+
+.alergeno-btn:hover {
+    background: #fdfefe;
+    border-color: #bbb;
+}
+
+.alergeno-btn.selected { 
+    background: var(--primario); 
+    color: white; 
+    border-color: var(--primario); 
+    box-shadow: 0 2px 5px rgba(230, 126, 34, 0.3);
+}
+
+/* Clases adicionales necesarias del Modal de traducciones */
+.btn-traductor-magico { width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 0; }
+.btn-traductor-magico:disabled { background: #bdc3c7; cursor: not-allowed; }
+.langs-scroll-container { max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px; background: #fafafa; margin-top: 10px; }
