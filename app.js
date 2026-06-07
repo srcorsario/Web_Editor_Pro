@@ -5,6 +5,7 @@ let datosLocales = [];
 let platoEditandoId = null;
 let esNuevoPlato = false; 
 let datosTempNuevo = null; 
+let opcionesENActuales = []; // Almacenamiento seguro para las opciones de traducción
 
 const ALERGENOS_LISTA = ["GLUTEN", "SESAMO", "CACAHUETE", "SOJA", "FRUTOSCASCARA", "APIO", "HUEVO", "PESCADO", "MOSTAZA", "MOLUSCO", "SULFITOS", "LACTOSA", "ALTRAMUCES", "CRUSTACEO", "VEGANO", "VEGETARIANO"];
 
@@ -198,9 +199,12 @@ function comprobarRequisitosTraduccion() {
     document.getElementById('btn-autotraducir').disabled = !esValido;
 }
 
-// --- NUEVA FUNCIONALIDAD: TRADUCCIÓN INGLÉS DESDE ESPAÑOL CON SELECCIÓN ---
+// --- TRADUCCIÓN INGLÉS: Vinos y Plato unificados con // ---
 async function generarTraduccionEN() {
     const nombreEs = document.getElementById('edit-es').value.trim();
+    const esVino = (platoEditandoId >= 13000);
+    const uvasEs = esVino ? document.getElementById('edit-es-uvas').value.trim() : "";
+    
     if (!nombreEs) {
         alert("❌ Debes introducir primero el nombre en Español.");
         return;
@@ -217,8 +221,12 @@ async function generarTraduccionEN() {
     btn.innerText = "🇬🇧 Generando opciones...";
     btn.disabled = true;
 
+    // Unimos el nombre y las uvas con el separador para que Gemini lo traduzca en contexto
+    const textoCompletoEs = nombreEs + (uvasEs ? ' // ' + uvasEs : '');
+
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
-    const instruccion = `Actúa como un traductor profesional de menús de restaurantes. Te paso un plato en español: "${nombreEs}".
+    const instruccion = `Actúa como un traductor profesional de menús de restaurantes. Te paso un elemento en español: "${textoCompletoEs}".
+    ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado.' : ''}
     Necesito que me des EXACTAMENTE 3 opciones de traducción al inglés con diferentes enfoques para un menú:
     1. Traducción directa/literal.
     2. Traducción gastronómica/descriptiva (más elegante).
@@ -283,6 +291,7 @@ function abrirModalTraduccionEN(opciones) {
     const container = document.getElementById('opciones-en-container');
     const textarea = document.getElementById('editar-opcion-en');
     textarea.value = "";
+    opcionesENActuales = []; // Limpiamos array de seguridad
 
     let html = "";
     const mapaOpciones = {
@@ -291,26 +300,27 @@ function abrirModalTraduccionEN(opciones) {
         corta: "Corta / Menú"
     };
 
+    let index = 0;
     for (const [key, value] of Object.entries(opciones)) {
         if (value) {
             const label = mapaOpciones[key] || key;
-            const valorSeguro = value.replace(/'/g, "\\'");
-            html += `<div class="opcion-en-btn" onclick="seleccionarOpcionEN(this, '${valorSeguro}')">
+            opcionesENActuales.push(value); // Guardamos valor seguro
+            html += `<div class="opcion-en-btn" onclick="seleccionarOpcionEN(this, ${index})">
                 <span class="opcion-en-label">${label}</span>
                 ${value}
             </div>`;
+            index++;
         }
     }
 
     container.innerHTML = html;
-    // Usamos flex para que el cuadro se centre perfectamente vertical y horizontalmente
     document.getElementById('modal-traduccion-en').style.display = 'flex';
 }
 
-function seleccionarOpcionEN(elemento, texto) {
+function seleccionarOpcionEN(elemento, index) {
     document.querySelectorAll('.opcion-en-btn').forEach(el => el.classList.remove('selected'));
     elemento.classList.add('selected');
-    document.getElementById('editar-opcion-en').value = texto;
+    document.getElementById('editar-opcion-en').value = opcionesENActuales[index];
 }
 
 function confirmarTraduccionEN() {
@@ -319,7 +329,16 @@ function confirmarTraduccionEN() {
         alert("❌ Selecciona una opción o escribe la traducción antes de confirmar.");
         return;
     }
-    document.getElementById('edit-en').value = textoFinal;
+    
+    // Al confirmar, usamos desglosarNombre para separar automáticamente el Nombre de las Uvas (si contiene //)
+    const desglosado = desglosarNombre(textoFinal);
+    document.getElementById('edit-en').value = desglosado.nombre;
+    
+    const inputEnUvas = document.getElementById('edit-en-uvas');
+    if (inputEnUvas && inputEnUvas.style.display !== "none") {
+        inputEnUvas.value = desglosado.uvas;
+    }
+    
     cerrarModalTraduccionEN();
     comprobarRequisitosTraduccion();
 }
@@ -328,7 +347,7 @@ function cerrarModalTraduccionEN() {
     document.getElementById('modal-traduccion-en').style.display = 'none';
 }
 
-// --- TRADUCCIÓN MASIVA 19 IDIOMAS CON GEMINI 2.5 ---
+// --- TRADUCCIÓN MASIVA 19 IDIOMAS: Vinos y Plato unificados con // ---
 async function ejecutarTraduccionAutomatica() {
     const btn = document.getElementById('btn-autotraducir');
     const originalText = btn.innerText;
@@ -339,6 +358,7 @@ async function ejecutarTraduccionAutomatica() {
     const nombreEn = document.getElementById('edit-en').value.trim();
     const esVino = (platoEditandoId >= 13000);
     const uvasEs = esVino ? document.getElementById('edit-es-uvas').value.trim() : "";
+    const uvasEn = esVino ? document.getElementById('edit-en-uvas').value.trim() : "";
     const keys = getKeys();
     
     if (keys.length === 0) {
@@ -348,16 +368,20 @@ async function ejecutarTraduccionAutomatica() {
         return;
     }
     
+    // Unimos los textos para que Gemini vea el contexto completo del separador //
+    const textoCompletoEs = nombreEs + (uvasEs ? ' // ' + uvasEs : '');
+    const textoCompletoEn = nombreEn + (uvasEn ? ' // ' + uvasEn : '');
+    
     const idiomasObjetivo = IDIOMAS_ORDEN.filter(l => l !== 'es' && l !== 'en');
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
     
-    const instruccion = `Actúa como un traductor experto de menús de restaurantes. Traduce el siguiente plato basándote en su nombre en Español: "${nombreEs}" ${nombreEn ? `y su nombre en Inglés (como referencia): "${nombreEn}"` : ''}.
-    ${esVino && uvasEs ? `También traduce estos detalles/uvas: "${uvasEs}".` : ''}
+    const instruccion = `Actúa como un traductor experto de menús de restaurantes. Traduce el siguiente elemento basándote en su texto en Español: "${textoCompletoEs}" ${textoCompletoEn ? `y su texto en Inglés (como referencia): "${textoCompletoEn}"` : ''}.
+    ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado para todos los idiomas.' : ''}
     
     Traduce a los siguientes idiomas (usa los códigos ISO proporcionados): ${idiomasObjetivo.join(', ')}.
     
-    Devuelve la respuesta EXCLUSIVAMENTE en formato JSON plano (sin explicaciones ni formato markdown), usando los códigos de idioma como claves. ${esVino && uvasEs ? 'Incluye un objeto adicional llamado "uvas" con las traducciones de los detalles/uvas usando los mismos códigos de idioma.' : ''}
-    Ejemplo de formato de respuesta esperado: {"de": "...", "fr": "...", "it": "..."} o si hay uvas: {"de": "...", "uvas": {"de": "..."}}`;
+    Devuelve la respuesta EXCLUSIVAMENTE en formato JSON plano (sin explicaciones ni formato markdown), usando los códigos de idioma como claves.
+    Ejemplo de formato de respuesta esperado: {"de": "Nombre // Uva", "fr": "Nombre // Uva"}`;
     
     let exito = false;
     let intentos = 0;
@@ -388,17 +412,15 @@ async function ejecutarTraduccionAutomatica() {
                 const jsonClean = txt.replace(/```json/g, '').replace(/```/g, '').trim();
                 const traducciones = JSON.parse(jsonClean);
                 
+                // Al recibir la traducción, usamos desglosarNombre para separar lo que viene antes y después del //
                 idiomasObjetivo.forEach(l => {
                     if (traducciones[l]) {
-                        document.getElementById(`edit-${l}`).value = traducciones[l];
-                    }
-                    
-                    const inputUva = document.getElementById(`edit-${l}-uvas`);
-                    if (inputUva && inputUva.style.display !== "none") {
-                        if (traducciones.uvas && traducciones.uvas[l]) {
-                            inputUva.value = traducciones.uvas[l];
-                        } else if (uvasEs) {
-                            inputUva.value = uvasEs;
+                        const desglosado = desglosarNombre(traducciones[l]);
+                        document.getElementById(`edit-${l}`).value = desglosado.nombre;
+                        
+                        const inputUva = document.getElementById(`edit-${l}-uvas`);
+                        if (inputUva && inputUva.style.display !== "none") {
+                            inputUva.value = desglosado.uvas;
                         }
                     }
                 });
