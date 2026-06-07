@@ -1,17 +1,16 @@
-// state.js
-export const STATE = {
-    // Aquí puedes mantener otros estados de la App
-};
+// --- state.js ---
+const API_KEYS = [
+    "TU_PRIMERA_API_KEY_AQUI",
+    "TU_SEGUNDA_API_KEY_AQUI" 
+];
 
-export function getKeys() {
-    const keys = localStorage.getItem('geminiKeys');
-    return keys ? JSON.parse(keys) : [];
+// Endpoint oficial de Google Apps Script para persistencia multidireccional (A-AA)
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyDQEGNn8pLpVu-7n4bh6CyzLeKfYeICM0Fbr358SKwVP9rt9yNcc7UV6au2FPMyftiXg/exec';
+
+function getKeys() {
+    return API_KEYS;
 }
 
-export function saveKey(key) {
-    const keys = getKeys();
-    if (!keys.includes(key) && key.trim() !== "") {
-        keys.push(key.trim());
-        localStorage.setItem('geminiKeys', JSON.stringify(keys));
-    }
+function getWebAppUrl() {
+    return WEB_APP_URL;
 }
