@@ -14,6 +14,21 @@
     <div class="header-admin">
         <h1>⚙️ GESTOR DE CARTA V 13.0</h1>
         <div id="status-carga">Cargando datos...</div>
+        
+        <!-- Nuevo Panel de API Keys -->
+        <div class="api-keys-manager">
+            <label class="label-seccion" style="margin-bottom: 5px;">🔑 Claves API Gemini (Local)</label>
+            <div class="api-keys-inputs">
+                <input type="text" id="nuevaKey" placeholder="Pegar nueva API Key..." class="input-estandar">
+                <button class="btn-add-key" onclick="agregarKey()">Añadir</button>
+            </div>
+            <div class="api-keys-list">
+                <select id="selectKeys" class="select-keys" disabled>
+                    <option value="">No hay Keys configuradas</option>
+                </select>
+                <button class="btn-delete-key" onclick="eliminarKeySeleccionada()" title="Eliminar Key seleccionada">✕</button>
+            </div>
+        </div>
     </div>
     <div id="editor-dinamico"></div>
 </div>
