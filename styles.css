@@ -97,7 +97,6 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); overflow-y: auto; }
 .modal-content { background: white; width: 96%; max-width: 1000px; margin: 15px auto; border-radius: 15px; padding: 25px; box-sizing: border-box; }
 
-/* Nueva distribución a Pantalla Completa Dividida en Columnas */
 .modal-full-layout {
     width: 100% !important;
     max-width: 100vw !important;
@@ -110,7 +109,6 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     overflow: hidden;
 }
 
-/* Columna Izquierda */
 .modal-col-izquierda {
     flex: 0 0 75%;
     display: flex;
@@ -121,7 +119,6 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     border-right: 1px solid #eee;
 }
 
-/* Columna Derecha */
 .modal-col-derecha {
     flex: 1;
     display: flex;
@@ -138,17 +135,14 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .lang-tag { background: #34495e; color: white; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; width: 35px; text-align: center; flex-shrink: 0; }
 .input-estandar { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 5px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; }
 
-/* Optimización de los Espacios de nombres */
 .input-nombre-corto { padding: 8px 10px; font-size: 0.9rem; max-height: 38px; }
 .input-uvas { background: #fff9f4; border: 1px dashed var(--primario); margin-top: 4px; font-size: 0.8rem; padding: 6px 10px; }
 
-/* Contenedor optimizado y ultra-reducido para el precio lateral */
 .panel-control-precio { display: flex; gap: 12px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
 .input-precio-super-mini { flex: 0 0 90px !important; }
 .input-precio-mini { text-align: center; font-weight: bold; padding: 8px; }
 .input-imagen-flexible { flex: 1; }
 
-/* Distribución exacta de Alérgenos transformados en Botones */
 .alergenos-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); 
@@ -178,23 +172,12 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     gap: 4px;
 }
 
-.alergeno-btn:hover {
-    background: #fdfefe;
-    border-color: #bbb;
-}
+.alergeno-btn:hover { background: #fdfefe; border-color: #bbb; }
+.alergeno-btn.selected { background: var(--primario); color: white; border-color: var(--primario); box-shadow: 0 2px 5px rgba(230, 126, 34, 0.3); }
 
-.alergeno-btn.selected { 
-    background: var(--primario); 
-    color: white; 
-    border-color: var(--primario); 
-    box-shadow: 0 2px 5px rgba(230, 126, 34, 0.3);
-}
-
-/* Clases adicionales necesarias del Modal de traducciones */
 .btn-traductor-magico { width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 0; }
 .btn-traductor-magico:disabled { background: #bdc3c7; cursor: not-allowed; }
 
-/* Botón nuevo para generar inglés */
 .btn-traducir-en { 
     width: 100%; padding: 10px; background: #34495e; color: white; border: none; border-radius: 8px; 
     font-weight: bold; cursor: pointer; margin: 5px 0 2px; font-size: 0.9rem; transition: background 0.2s; 
@@ -202,173 +185,54 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .btn-traducir-en:hover { background: #2c3e50; }
 .btn-traducir-en:disabled { background: #bdc3c7; cursor: not-allowed; }
 
-/* Contenedor fluido sin límites de altura máxima ni scrolls intermedios forzados */
-.langs-fluid-container {
-    display: flex;
-    flex-direction: column;
-    padding: 5px 0;
-    background: transparent;
-}
+.langs-fluid-container { display: flex; flex-direction: column; padding: 5px 0; background: transparent; }
 
-/* Acciones Aceptar y Cancelar integradas en el panel derecho */
 .modal-acciones-footer { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 15px; }
 .btn-modal-aceptar { background: var(--verde); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; }
 .btn-modal-cancelar { background: #eee; color: var(--texto); padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; }
 
-
 /* --- ESTILOS: PANEL DE API KEYS --- */
-.api-keys-manager {
-    margin-top: 15px;
-    padding: 12px;
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    text-align: left;
-}
+.api-keys-manager { margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; text-align: left; }
+.api-keys-inputs { display: flex; gap: 8px; margin-bottom: 8px; }
+.api-keys-inputs .input-estandar { margin-bottom: 0; font-size: 0.85rem; padding: 8px; }
+.btn-add-key { background: var(--primario); color: white; border: none; border-radius: 6px; padding: 8px 15px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+.btn-add-key:hover { background: #d35400; }
+.api-keys-list { display: flex; gap: 8px; align-items: center; }
+.select-keys { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; background: white; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; color: var(--texto); cursor: pointer; }
+.select-keys:disabled { background: #f1f2f6; cursor: not-allowed; }
+.btn-delete-key { background: var(--rojo); color: white; border: none; border-radius: 6px; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.btn-delete-key:hover { background: #c0392b; }
 
-.api-keys-inputs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
+/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS --- */
+#modal-traduccion-en { justify-content: center; align-items: center; }
+.modal-box-en { width: 95vw; height: 85vh; max-width: none; max-height: none; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; padding: 40px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+.opciones-en-scroll { flex: 1; display: flex; flex-direction: column; gap: 25px; margin: 25px 0; min-height: 0; }
+.footer-box-en { margin-top: auto; padding-top: 20px; border-top: 1px solid #eee; }
+.opcion-en-btn { width: 100%; flex: 1; text-align: left; padding: 0 35px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 1.4rem; font-family: 'Montserrat', sans-serif; color: var(--texto); display: flex; flex-direction: column; justify-content: center; }
+.opcion-en-btn:hover { border-color: var(--primario); background: #fff9f4; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(230, 126, 34, 0.1); }
+.opcion-en-btn.selected { border-color: var(--primario); background: #fff4ec; font-weight: 600; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.2); transform: translateY(0); }
+.opcion-en-label { display: block; font-size: 0.85rem; color: var(--primario); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
 
-.api-keys-inputs .input-estandar {
-    margin-bottom: 0;
-    font-size: 0.85rem;
-    padding: 8px;
-}
+/* --- NUEVOS ESTILOS: SELECTOR DE CROQUETAS --- */
+.croquetas-grid { margin-top: 5px; }
+.croqueta-category { margin-bottom: 10px; }
+.croqueta-cat-title { font-size: 0.7rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+.croqueta-cat-title.carne { color: #c0392b; }
+.croqueta-cat-title.pescado { color: #2980b9; }
+.croqueta-cat-title.vegetariana { color: #27ae60; }
 
-.btn-add-key {
-    background: var(--primario);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 15px;
-    font-weight: bold;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.2s;
-}
+.croqueta-cat-btns { display: flex; flex-wrap: wrap; gap: 6px; }
 
-.btn-add-key:hover {
-    background: #d35400;
+.croqueta-btn { 
+    border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 0.75rem; 
+    text-align: center; cursor: pointer; background: #fff; font-weight: 600; color: var(--texto);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
+.croqueta-btn.carne { border-color: #e6b0aa; color: #c0392b; }
+.croqueta-btn.pescado { border-color: #a9cce3; color: #2980b9; }
+.croqueta-btn.vegetariana { border-color: #a9dfbf; color: #27ae60; }
 
-.api-keys-list {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.select-keys {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: white;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.8rem;
-    color: var(--texto);
-    cursor: pointer;
-}
-
-.select-keys:disabled {
-    background: #f1f2f6;
-    cursor: not-allowed;
-}
-
-.btn-delete-key {
-    background: var(--rojo);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    width: 35px;
-    height: 35px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.btn-delete-key:hover {
-    background: #c0392b;
-}
-
-/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS (Pantalla Completa y 3 Filas) --- */
-#modal-traduccion-en {
-    justify-content: center; 
-    align-items: center;     
-}
-
-.modal-box-en {
-    width: 95vw;            /* Ocupa de lado a lado casi completo */
-    height: 85vh;           /* Ocupa gran parte de la altura */
-    max-width: none;        
-    max-height: none;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;        
-    border-radius: 20px;    
-    padding: 40px;          
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-}
-
-.opciones-en-scroll {
-    flex: 1;
-    display: flex;
-    flex-direction: column; /* Distribución en 3 FILAS verticales */
-    gap: 25px;
-    margin: 25px 0;
-    min-height: 0;
-}
-
-.footer-box-en {
-    margin-top: auto;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-.opcion-en-btn {
-    width: 100%;
-    flex: 1;                /* Cada fila ocupa exactamente 1/3 del alto disponible */
-    text-align: left;
-    padding: 0 35px;        /* Padding lateral ancho para aprovechar el espacio */
-    background: #f8f9fa;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 1.4rem;      /* Texto muy claro y grande */
-    font-family: 'Montserrat', sans-serif;
-    color: var(--texto);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.opcion-en-btn:hover { 
-    border-color: var(--primario); 
-    background: #fff9f4; 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(230, 126, 34, 0.1);
-}
-
-.opcion-en-btn.selected { 
-    border-color: var(--primario); 
-    background: #fff4ec; 
-    font-weight: 600; 
-    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.2);
-    transform: translateY(0);
-}
-
-.opcion-en-label { 
-    display: block; 
-    font-size: 0.85rem; 
-    color: var(--primario); 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    margin-bottom: 8px; 
-    letter-spacing: 1px;
-}
+.croqueta-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.croqueta-btn.selected.carne { background: #c0392b; color: white; border-color: #c0392b; }
+.croqueta-btn.selected.pescado { background: #2980b9; color: white; border-color: #2980b9; }
+.croqueta-btn.selected.vegetariana { background: #27ae60; color: white; border-color: #27ae60; }
