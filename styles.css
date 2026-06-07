@@ -93,9 +93,45 @@ body {
 input:checked + .slider-switch { background-color: var(--verde); }
 input:checked + .slider-switch:before { transform: translateX(18px); }
 
-/* Modales */
+/* Modales e Interfaz de Pantalla Completa del Editor */
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); overflow-y: auto; }
+
+/* El modal ahora abarca todo el espacio real disponible */
 .modal-content { background: white; width: 96%; max-width: 1000px; margin: 15px auto; border-radius: 15px; padding: 25px; box-sizing: border-box; }
+
+/* Nueva distribución a Pantalla Completa Dividida en Columnas */
+.modal-full-layout {
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: flex;
+    gap: 25px;
+    padding: 20px !important;
+    overflow: hidden;
+}
+
+/* Columna Izquierda: Idiomas (Ocupa las 3/4 partes verticales de la pantalla) */
+.modal-col-izquierda {
+    flex: 0 0 75%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 15px;
+    border-right: 1px solid #eee;
+}
+
+/* Columna Derecha: Precio, Imagen, Alérgenos y Botones */
+.modal-col-derecha {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    justify-content: flex-start;
+}
 
 .input-group { margin-bottom: 15px; }
 .label-seccion { display: block; font-size: 0.75rem; font-weight: 700; color: var(--primario); text-transform: uppercase; margin-bottom: 8px; }
@@ -108,24 +144,27 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .input-nombre-corto { padding: 8px 10px; font-size: 0.9rem; max-height: 38px; }
 .input-uvas { background: #fff9f4; border: 1px dashed var(--primario); margin-top: 4px; font-size: 0.8rem; padding: 6px 10px; }
 
-/* Contenedor en línea optimizado para Precio e Imagen en lugar de filas completas gigantes */
-.meta-row-compacta { display: flex; gap: 20px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
-.input-precio-contenedor { flex: 0 0 140px; } /* Ancho fijo y controlado y pequeño para el precio */
-.input-imagen-contenedor { flex: 1; }
+/* Contenedor optimizado y ultra-reducido para el precio lateral */
+.panel-control-precio { display: flex; gap: 12px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
+.input-precio-super-mini { flex: 0 0 90px !important; } /* Botón/caja de precio reducida drásticamente */
+.input-precio-mini { text-align: center; font-weight: bold; padding: 8px; }
+.input-imagen-flexible { flex: 1; }
 
-/* Distribución exacta de Alérgenos transformados en Botones (4 o 5 por fila) */
+/* Distribución exacta de Alérgenos transformados en Botones */
 .alergenos-grid { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-    gap: 8px; 
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+    gap: 6px; 
     margin-top: 5px;
+    max-height: 45vh;
+    overflow-y: auto;
 }
 
 .alergeno-btn { 
     border: 1px solid #ddd; 
     border-radius: 8px; 
-    padding: 10px 5px; 
-    font-size: 0.72rem; 
+    padding: 8px 4px; 
+    font-size: 0.68rem; 
     text-align: center; 
     cursor: pointer; 
     background: #fff; 
@@ -152,4 +191,11 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 /* Clases adicionales necesarias del Modal de traducciones */
 .btn-traductor-magico { width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 0; }
 .btn-traductor-magico:disabled { background: #bdc3c7; cursor: not-allowed; }
-.langs-scroll-container { max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px; background: #fafafa; margin-top: 10px; }
+
+/* Scroll extendido de los 19 idiomas para aprovechar el alto vertical de 3/4 */
+.langs-scroll-container { max-height: calc(100vh - 310px); overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 8px; background: #fafafa; margin-top: 10px; }
+
+/* Acciones Aceptar y Cancelar integradas en el panel derecho */
+.modal-acciones-footer { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 15px; }
+.btn-modal-aceptar { background: var(--verde); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; }
+.btn-modal-cancelar { background: #eee; color: var(--texto); padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; }
