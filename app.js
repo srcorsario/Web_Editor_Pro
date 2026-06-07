@@ -6,23 +6,28 @@ let platoEditandoId = null;
 let esNuevoPlato = false; 
 let datosTempNuevo = null; 
 
-// --- LISTA MAESTRA DE ALÉRGENOS ---
+// --- LISTA MAESTRA DE ALÉRGENOS (ID CONCORDANTE CON EXCEL) ---
 const LISTA_ALERGENOS = [
-    { id: "gluten", nombre: "Gluten", icono: "🌾" },
-    { id: "crustaceos", nombre: "Crustáceos", icono: "🦀" },
-    { id: "huevos", nombre: "Huevos", icono: "🥚" },
-    { id: "pescado", nombre: "Pescado", icono: "🐟" },
-    { id: "cacahuetes", nombre: "Cacahuetes", icono: "🥜" },
-    { id: "soja", nombre: "Soja", icono: "🫘" },
-    { id: "lacteos", nombre: "Lácteos", icono: "🥛" },
-    { id: "frutos_cascara", nombre: "Frutos de Cáscara", icono: "🌰" },
-    { id: "apio", nombre: "Apio", icono: "🌱" },
-    { id: "mostaza", nombre: "Mostaza", icono: "🏺" },
-    { id: "sesamo", nombre: "Sésamo", icono: "🥯" },
-    { id: "sulfitos", nombre: "Sulfitos", icono: "🍷" },
-    { id: "altramuces", nombre: "Altramuces", icono: "🌼" },
-    { id: "moluscos", nombre: "Moluscos", icono: "🦑" }
+    { id: "GLUTEN", nombre: "Gluten", icono: "🌾" },
+    { id: "SESAMO", nombre: "Sésamo", icono: "🥯" },
+    { id: "CACAHUETE", nombre: "Cacahuete", icono: "🥜" },
+    { id: "SOJA", nombre: "Soja", icono: "🫘" },
+    { id: "FRUTOSCASCARA", nombre: "Frutos Cáscara", icono: "🌰" },
+    { id: "APIO", nombre: "Apio", icono: "🌱" },
+    { id: "HUEVO", nombre: "Huevo", icono: "🥚" },
+    { id: "PESCADO", nombre: "Pescado", icono: "🐟" },
+    { id: "MOSTAZA", nombre: "Mostaza", icono: "🏺" },
+    { id: "MOLUSCO", nombre: "Molusco", icono: "🦑" },
+    { id: "SULFITOS", nombre: "Sulfitos", icono: "🍷" },
+    { id: "LACTOSA", nombre: "Lactosa", icono: "🥛" },
+    { id: "ALTRAMUCES", nombre: "Altramuces", icono: "🌼" },
+    { id: "CRUSTACEO", nombre: "Crustáceo", icono: "🦀" },
+    { id: "VEGANO", nombre: "Vegano", icono: "🌱" },
+    { id: "VEGETARIANO", nombre: "Vegetariano", icono: "🥗" }
 ];
+
+// Variable global interna para controlar el estado de selección en la interfaz de botones
+let alergenosSeleccionadosTemporales = [];
 
 // --- SEGURIDAD: Esperar a que las variables globales de languages.js estén listas ---
 async function esperarDependencias() {
@@ -42,21 +47,51 @@ function superLimpiar(texto) {
     return texto.trim().replace(/^"|"$/g, '');
 }
 
-// --- INICIALIZADOR DEL GRID DE ALÉRGENOS EN EL DOM ---
+// --- INICIALIZADOR DEL GRID DE ALÉRGENOS EN EL DOM (FORMATO BOTONERA COMPACTA) ---
 function inicializarGridAlergenos() {
+    const grid = document.getElementById('alergenos-grid');
+    if (!grid) return;
+    
+    // Forzamos distribución horizontal responsiva calculada para 4 o 5 elementos por fila
+    grid.style.cssText = "display: grid; grid-template-columns: repeat(auto-fill, minmax(18%, 1fr)); gap: 8px; width: 100%; margin-top: 10px;";
+    renderizarBotoneraAlergenos();
+}
+
+// Dibujado dinámico del estado visual de los botones de alérgenos
+function renderizarBotoneraAlergenos() {
     const grid = document.getElementById('alergenos-grid');
     if (!grid) return;
     
     grid.innerHTML = "";
     LISTA_ALERGENOS.forEach(al => {
-        const item = document.createElement('label');
-        item.style.cssText = "display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; font-size: 0.85rem; font-weight: 600;";
-        item.innerHTML = `
-            <input type="checkbox" id="chk-alergeno-${al.id}" value="${al.id}" style="cursor:pointer;">
-            <span>${al.icono} ${al.nombre}</span>
+        const estaActivo = alergenosSeleccionadosTemporales.includes(al.id);
+        const boton = document.createElement('button');
+        boton.type = "button";
+        
+        // Estilos dinámicos dependiendo de si está seleccionado o no
+        boton.style.cssText = `
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 5px; padding: 10px 5px; border-radius: 8px; border: 1px solid ${estaActivo ? 'var(--verde)' : '#ddd'};
+            background: ${estaActivo ? '#e8f8f0' : '#f8f9fa'}; color: ${estaActivo ? '#27ae60' : 'var(--texto)'};
+            cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 700;
+            transition: all 0.2s ease; box-shadow: ${estaActivo ? '0 2px 4px rgba(39,174,96,0.2)' : 'none'};
         `;
-        grid.appendChild(item);
+        
+        boton.innerHTML = `<span style="font-size: 1.2rem;">${al.icono}</span><span>${al.nombre}</span>`;
+        boton.onclick = () => toggleSeleccionAlergeno(al.id);
+        grid.appendChild(boton);
     });
+}
+
+// Alternar la selección del alérgeno al hacer click en el botón
+function toggleSeleccionAlergeno(id) {
+    const index = alergenosSeleccionadosTemporales.indexOf(id);
+    if (index === -1) {
+        alergenosSeleccionadosTemporales.push(id);
+    } else {
+        alergenosSeleccionadosTemporales.splice(index, 1);
+    }
+    renderizarBotoneraAlergenos();
 }
 
 // --- MOTOR DE RENDERIZADO DINÁMICO ---
@@ -65,33 +100,26 @@ function renderizar() {
     const contenedor = document.getElementById('editor-dinamico');
     if (!contenedor) return;
 
-    // Limpiamos el contenedor antes de renderizar la lista real
     contenedor.innerHTML = "";
 
-    // Recorremos la estructura maestra declarada en languages.js
     ESTRUCTURA.forEach(cat => {
-        // Buscamos si hay platos cargados que correspondan al rango de IDs de esta categoría
         let platosDeCategoria = [];
         
         if (cat.sub && cat.sub.length > 0) {
-            // Caso para categorías con subsecciones específicas (como los Vinos o Arroces)
             cat.sub.forEach(subcat => {
                 const maxId = subcat.max || (subcat.id + 99);
                 const filtrados = datosLocales.filter(p => p.id >= subcat.id && p.id <= maxId);
                 platosDeCategoria = platosDeCategoria.concat(filtrados);
             });
         } else {
-            // Caso para categorías directas usando su ID base y un rango estándar (como Postres o Cervezas)
             const maxId = cat.id + (cat.rango || 999);
             platosDeCategoria = datosLocales.filter(p => p.id >= cat.id && p.id <= maxId);
         }
 
-        // Si la categoría tiene platos asociados, dibujamos su tarjeta contenedora
         if (platosDeCategoria.length > 0) {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'categoria-tarjeta';
 
-            // Cabecera de la categoría utilizando el nombre mapeado
             let HTMLTarjeta = `
                 <div class="categoria-titulo">
                     ${cat.name.toUpperCase()} (${platosDeCategoria.length})
@@ -99,11 +127,8 @@ function renderizar() {
                 <div class="categoria-cuerpo">
             `;
 
-            // Construcción de la fila/item para cada plato individual de la lista
             platosDeCategoria.forEach((plato, index) => {
                 const checkedAttr = plato.activa ? 'checked' : '';
-                
-                // Deshabilitar flechas si están en los extremos de su propia categoría
                 const esPrimero = (index === 0);
                 const esUltimo = (index === platosDeCategoria.length - 1);
 
@@ -129,13 +154,12 @@ function renderizar() {
                 `;
             });
 
-            HTMLTarjeta += `</div>`; // Cierre de categoria-cuerpo
+            HTMLTarjeta += `</div>`; 
             tarjeta.innerHTML = HTMLTarjeta;
             contenedor.appendChild(tarjeta);
         }
     });
 
-    // Si tras procesar todo no encontramos elementos que encajen en ESTRUCTURA
     if (contenedor.innerHTML === "") {
         contenedor.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--texto);">No se encontraron elementos que coincidan con los rangos numéricos de las categorías configuradas.</p>`;
     }
@@ -147,8 +171,6 @@ function moverPlato(id, direccion) {
     if (indexActual === -1) return;
 
     const platoActual = datosLocales[indexActual];
-
-    // Encontrar la categoría actual para mover el plato sólo dentro de sus límites correspondientes
     let categoriaActual = null;
     let maxIdCat = 0;
     let minIdCat = 0;
@@ -170,7 +192,6 @@ function moverPlato(id, direccion) {
             }
         }
         if (categoriaActual) {
-            // Mapeamos los límites reales basados en el algoritmo de renderizado
             if (cat.sub && cat.sub.length > 0) {
                 minIdCat = cat.sub[0].id;
                 maxIdCat = cat.sub[cat.sub.length - 1].max || (cat.sub[cat.sub.length - 1].id + 99);
@@ -182,22 +203,17 @@ function moverPlato(id, direccion) {
         }
     }
 
-    // Filtrar todos los platos pertenecientes a esa categoría que existen en el array global
     const platosFiltrados = datosLocales.filter(p => p.id >= minIdCat && p.id <= maxIdCat);
     const subIndexActual = platosFiltrados.findIndex(p => p.id === id);
 
     if (direccion === 'arriba' && subIndexActual > 0) {
         const platoAnterior = platosFiltrados[subIndexActual - 1];
         const indexAnteriorEnGlobal = datosLocales.findIndex(p => p.id === platoAnterior.id);
-        
-        // Intercambio de posiciones en el array maestro
         datosLocales[indexActual] = platoAnterior;
         datosLocales[indexAnteriorEnGlobal] = platoActual;
     } else if (direccion === 'abajo' && subIndexActual < platosFiltrados.length - 1) {
         const platoSiguiente = platosFiltrados[subIndexActual + 1];
         const indexSiguienteEnGlobal = datosLocales.findIndex(p => p.id === platoSiguiente.id);
-        
-        // Intercambio de posiciones en el array maestro
         datosLocales[indexActual] = platoSiguiente;
         datosLocales[indexAnteriorEnGlobal] = platoActual;
     }
@@ -205,27 +221,18 @@ function moverPlato(id, direccion) {
     renderizar();
 }
 
-// --- VALIDACIÓN DE PRECIO EN TIEMPO REAL (SOLO NÚMEROS Y 2 DECIMALES) ---
+// --- VALIDACIÓN DE PRECIO EN TIEMPO REAL ---
 function validarPrecio(input) {
     let valor = input.value;
-    
-    // Reemplaza comas por puntos para homogeneizar la entrada de decimales
     valor = valor.replace(/,/g, '.');
-    
-    // Elimina cualquier caracter que no sea un dígito o un punto decimal
     valor = valor.replace(/[^0-9.]/g, '');
-    
-    // Si hay más de un punto decimal, deja únicamente el primero
     const partes = valor.split('.');
     if (partes.length > 2) {
         valor = partes[0] + '.' + partes.slice(1).join('');
     }
-    
-    // Restringe a un máximo de 2 dígitos decimales
     if (partes[1] && partes[1].length > 2) {
         valor = partes[0] + '.' + partes[1].substring(0, 2);
     }
-    
     input.value = valor;
 }
 
@@ -237,7 +244,6 @@ function generarMenuAgrupado() {
 
     listaAgrupadaContenedor.innerHTML = "";
     
-    // Rellena de forma dinámica el modal de asignación rápida para cuando se quiera añadir un nuevo plato
     ESTRUCTURA.forEach(cat => {
         const btnCat = document.createElement('button');
         btnCat.style.cssText = "width:100%; text-align:left; padding:12px; margin-bottom:6px; border:1px solid #ddd; background:#fff; border-radius:8px; font-weight:600; cursor:pointer;";
@@ -288,7 +294,7 @@ async function llamarApiTraductor(texto, targetLang) {
 // --- LÓGICA DE CARGA PRINCIPAL DEL SPREADSHEET ---
 async function cargar() {
     await esperarDependencias(); 
-    inicializarGridAlergenos(); // Crear el grid visual en el modal apenas inicie la app
+    inicializarGridAlergenos(); 
     UI_INTERNA.log("⏳ Cargando datos desde Google Sheets...");
     try {
         const resp = await fetch(CSV_URL + '&t=' + Date.now());
@@ -360,43 +366,34 @@ function abrirEditor(id) {
     document.getElementById('edit-precio').value = plato.precio || "0.00";
     document.getElementById('edit-imagen').value = plato.imagen || "";
 
-    // Importación dinámica de los campos de idiomas adicionales
     const keysLang = Object.keys(IDIOMAS_CONFIG);
     keysLang.forEach(lang => {
         const langLower = lang.toLowerCase();
-        
-        // Asignar nombres principales de idiomas
         const inputNombre = document.getElementById(`edit-${langLower}`);
         if (inputNombre) {
             inputNombre.value = plato[langLower] || "";
         }
-        
-        // Asignar nombres secundarios de detalles/uvas
         const inputUvas = document.getElementById(`edit-${langLower}-uvas`);
         if (inputUvas) {
             inputUvas.value = plato[`${langLower}-uvas`] || plato[`uvas-${langLower}`] || "";
         }
     });
 
-    // --- LEER Y MOSTRAR LOS ALÉRGENOS GUARDADOS ---
-    // Desmarcar todos primero
-    LISTA_ALERGENOS.forEach(al => {
-        const chk = document.getElementById(`chk-alergeno-${al.id}`);
-        if (chk) chk.checked = false;
-    });
-
-    // Marcar los correspondientes si el plato los posee en su string (separados por coma u otro carácter)
+    // --- CARGAR ALÉRGENOS EN LA INTERFAZ DE BOTONES ---
+    alergenosSeleccionadosTemporales = [];
     if (plato.alergenos) {
-        const AlergenosPlato = plato.alergenos.toLowerCase().split(/[\s,;|]+/); // Tolera espacios, comas o puntos y coma
+        // Separa el texto plano por comas, espacios o barras y lo pasa a mayúsculas para emparejar
+        const fragmentos = plato.alergenos.toUpperCase().split(/[\s,;|]+/);
         LISTA_ALERGENOS.forEach(al => {
-            const chk = document.getElementById(`chk-alergeno-${al.id}`);
-            if (chk && AlergenosPlato.includes(al.id.toLowerCase())) {
-                chk.checked = true;
+            if (fragmentos.includes(al.id)) {
+                alergenosSeleccionadosTemporales.push(al.id);
             }
         });
     }
 
-    // Abre el modal manipulando el estilo directo de tus CSS
+    // Dibujar los botones con sus respectivos colores asignados
+    renderizarBotoneraAlergenos();
+
     document.getElementById('modal-editor').style.display = "block";
 }
 
@@ -426,41 +423,32 @@ function aplicarCambiosPlato() {
         plato.precio = pVal ? parseFloat(pVal).toFixed(2) : "0.00";
         plato.imagen = document.getElementById('edit-imagen').value;
 
-        // Guardar dinámicamente todos los idiomas procesados en el modal
         const keysLang = Object.keys(IDIOMAS_CONFIG);
         keysLang.forEach(lang => {
             const langLower = lang.toLowerCase();
-            
             const inputNombre = document.getElementById(`edit-${langLower}`);
             if (inputNombre) {
                 plato[langLower] = inputNombre.value;
             }
-            
             const inputUvas = document.getElementById(`edit-${langLower}-uvas`);
             if (inputUvas) {
                 plato[`${langLower}-uvas`] = inputUvas.value;
             }
         });
 
-        // --- RECOPILAR Y GUARDAR LOS ALÉRGENOS SELECCIONADOS ---
-        let alergenosSeleccionados = [];
-        LISTA_ALERGENOS.forEach(al => {
-            const chk = document.getElementById(`chk-alergeno-${al.id}`);
-            if (chk && chk.checked) {
-                alergenosSeleccionados.push(al.id);
-            }
-        });
-        // Lo unimos con comas para que mantenga el formato plano compatible con tu CSV
-        plato.alergenos = alergenosSeleccionados.join(', ');
+        // --- SALVAR ALÉRGENOS DESDE LA INTERFAZ DE BOTONES HACIA LA HOJA LOCAL ---
+        // Se unen mediante comas respetando el formato plano original en Mayúsculas exigido por tu Script
+        plato.alergenos = alergenosSeleccionadosTemporales.join(', ');
     }
     cerrarModal('modal-editor'); 
     renderizar(); 
 } 
+
 function enviarAlExcel() { alert("Simulación: Datos sincronizados de vuelta a Google Sheets."); } 
 function prepararNuevoPlato(catId) { cerrarModal('modal-selector'); alert(`Listo para añadir en categoría base: ${catId}`); } 
 function comprobarRequisitosTraduccion() {}
 
-// --- ASIGNACIONES GLOBALES (Para interactuar desde el HTML) ---
+// --- ASIGNACIONES GLOBALES ---
 window.ejecutarTraduccionAutomatica = ejecutarTraduccionAutomatica;
 window.abrirEditor = abrirEditor;
 window.aplicarCambiosPlato = aplicarCambiosPlato;
