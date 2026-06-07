@@ -65,13 +65,20 @@ function renderizar() {
             `;
 
             // Construcción de la fila/item para cada plato individual de la lista
-            platosDeCategoria.forEach(plato => {
-                const indicadorActivo = plato.activa ? '🟢' : '🔴';
+            platosDeCategoria.forEach((plato, index) => {
+                const checkedAttr = plato.activa ? 'checked' : '';
                 
+                // Deshabilitar flechas si están en los extremos de su propia categoría
+                const esPrimero = (index === 0);
+                const esUltimo = (index === platosDeCategoria.length - 1);
+
                 HTMLTarjeta += `
                     <div class="plato-item">
-                        <div style="font-size: 1.1rem; cursor: pointer;" onclick="window.toggleActivo(${plato.id})">
-                            ${indicadorActivo}
+                        <div>
+                            <label class="switch-container">
+                                <input type="checkbox" ${checkedAttr} onchange="window.toggleActivo(${plato.id})">
+                                <span class="slider-switch"></span>
+                            </label>
                         </div>
                         <div class="plato-info">
                             <span class="plato-nombre">${plato.es || 'Sin Nombre'}</span>
@@ -79,6 +86,8 @@ function renderizar() {
                         </div>
                         <div class="plato-meta-footer">
                             <span style="font-weight: bold; color: var(--primario);">${parseFloat(plato.precio).toFixed(2)} €</span>
+                            <button class="btn-nav" ${esPrimero ? 'disabled' : ''} onclick="window.moverPlato(${plato.id}, 'arriba')">⬆️</button>
+                            <button class="btn-nav" ${esUltimo ? 'disabled' : ''} onclick="window.moverPlato(${plato.id}, 'abajo')">⬇️</button>
                             <button class="btn-config" onclick="window.abrirEditor(${plato.id})">⚙️</button>
                         </div>
                     </div>
@@ -95,6 +104,94 @@ function renderizar() {
     if (contenedor.innerHTML === "") {
         contenedor.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--texto);">No se encontraron elementos que coincidan con los rangos numéricos de las categorías configuradas.</p>`;
     }
+}
+
+// --- MOTOR DE REORDENAMIENTO DE PLATOS (FLECHAS) ---
+function moverPlato(id, direccion) {
+    const indexActual = datosLocales.findIndex(p => p.id === id);
+    if (indexActual === -1) return;
+
+    const platoActual = datosLocales[indexActual];
+
+    // Encontrar la categoría actual para mover el plato sólo dentro de sus límites correspondientes
+    let categoriaActual = null;
+    let maxIdCat = 0;
+    let minIdCat = 0;
+
+    for (const cat of ESTRUCTURA) {
+        if (cat.sub && cat.sub.length > 0) {
+            for (const subcat of cat.sub) {
+                const maxId = subcat.max || (subcat.id + 99);
+                if (platoActual.id >= subcat.id && platoActual.id <= maxId) {
+                    categoriaActual = cat;
+                    break;
+                }
+            }
+        } else {
+            const maxId = cat.id + (cat.rango || 999);
+            if (platoActual.id >= cat.id && platoActual.id <= maxId) {
+                categoriaActual = cat;
+                break;
+            }
+        }
+        if (categoriaActual) {
+            // Mapeamos los límites reales basados en el algoritmo de renderizado
+            if (cat.sub && cat.sub.length > 0) {
+                minIdCat = cat.sub[0].id;
+                maxIdCat = cat.sub[cat.sub.length - 1].max || (cat.sub[cat.sub.length - 1].id + 99);
+            } else {
+                minIdCat = cat.id;
+                maxIdCat = cat.id + (cat.rango || 999);
+            }
+            break;
+        }
+    }
+
+    // Filtrar todos los platos pertenecientes a esa categoría que existen en el array global
+    const platosFiltrados = datosLocales.filter(p => p.id >= minIdCat && p.id <= maxIdCat);
+    const subIndexActual = platosFiltrados.findIndex(p => p.id === id);
+
+    if (direccion === 'arriba' && subIndexActual > 0) {
+        const platoAnterior = platosFiltrados[subIndexActual - 1];
+        const indexAnteriorEnGlobal = datosLocales.findIndex(p => p.id === platoAnterior.id);
+        
+        // Intercambio de posiciones en el array maestro
+        datosLocales[indexActual] = platoAnterior;
+        datosLocales[indexAnteriorEnGlobal] = platoActual;
+    } else if (direccion === 'abajo' && subIndexActual < platosFiltrados.length - 1) {
+        const platoSiguiente = platosFiltrados[subIndexActual + 1];
+        const indexSiguienteEnGlobal = datosLocales.findIndex(p => p.id === platoSiguiente.id);
+        
+        // Intercambio de posiciones en el array maestro
+        datosLocales[indexActual] = platoSiguiente;
+        datosLocales[indexSiguienteEnGlobal] = platoActual;
+    }
+
+    renderizar();
+}
+
+// --- VALIDACIÓN DE PRECIO EN TIEMPO REAL (SOLO NÚMEROS Y 2 DECIMALES) ---
+function validarPrecio(input) {
+    let valor = input.value;
+    
+    // Reemplaza comas por puntos para homogeneizar la entrada de decimales
+    valor = valor.replace(/,/g, '.');
+    
+    // Elimina cualquier caracter que no sea un dígito o un punto decimal
+    valor = valor.replace(/[^0-9.]/g, '');
+    
+    // Si hay más de un punto decimal, deja únicamente el primero
+    const partes = valor.split('.');
+    if (partes.length > 2) {
+        valor = partes[0] + '.' + partes.slice(1).join('');
+    }
+    
+    // Restringe a un máximo de 2 dígitos decimales
+    if (partes[1] && partes[1].length > 2) {
+        valor = partes[0] + '.' + partes[1].substring(0, 2);
+    }
+    
+    input.value = valor;
 }
 
 // --- MOTOR DE GENERACIÓN DE MENÚS AGRUPADOS ---
@@ -249,9 +346,18 @@ function toggleActivo(id) {
 }
 
 // --- FUNCIONES MOCK DE ACCIONES ADICIONALES ---
-function aplicarCambiosPlato() { cerrarModal('modal-editor'); renderizar(); } 
+function aplicarCambiosPlato() { 
+    const plato = datosLocales.find(p => p.id === platoEditandoId);
+    if (plato) {
+        plato.es = document.getElementById('edit-es').value;
+        let pVal = document.getElementById('edit-precio').value;
+        plato.precio = pVal ? parseFloat(pVal).toFixed(2) : "0.00";
+        plato.imagen = document.getElementById('edit-imagen').value;
+    }
+    cerrarModal('modal-editor'); 
+    renderizar(); 
+} 
 function enviarAlExcel() { alert("Simulación: Datos sincronizados de vuelta a Google Sheets."); } 
-function moverPlato() {} 
 function prepararNuevoPlato(catId) { cerrarModal('modal-selector'); alert(`Listo para añadir en categoría base: ${catId}`); } 
 function comprobarRequisitosTraduccion() {}
 
@@ -266,6 +372,7 @@ window.moverPlato = moverPlato;
 window.prepararNuevoPlato = prepararNuevoPlato;
 window.toggleActivo = toggleActivo;
 window.comprobarRequisitosTraduccion = comprobarRequisitosTraduccion;
+window.validarPrecio = validarPrecio;
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', cargar);
