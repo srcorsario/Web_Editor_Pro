@@ -22,50 +22,53 @@
 <button class="btn-guardar-main" onclick="enviarAlExcel()">💾 GUARDAR Y REORDENAR EXCEL</button>
 
 <div id="modal-editor" class="modal">
-    <div class="modal-content">
-        <h2 id="modal-titulo" style="margin-top:0; color:var(--primario); border-bottom: 2px solid #eee; padding-bottom: 10px;">Editar Elemento</h2>
-        
-        <div class="input-group">
-            <label id="label-uvas" class="label-seccion">Nombres y Detalles del Plato</label>
-            <div class="input-row-lang row-es-control">
-                <div class="lang-tag tag-es-main">ES</div>
-                <div style="flex:1">
-                    <input id="edit-es" class="input-estandar input-nombre-corto" placeholder="Nombre en Español" oninput="comprobarRequisitosTraduccion()">
-                    <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Uvas / Detalles (Opcional)">
+    <div class="modal-content modal-full-layout">
+        <div class="modal-col-izquierda">
+            <h2 id="modal-titulo" style="margin-top:0; color:var(--primario); border-bottom: 2px solid #eee; padding-bottom: 10px;">Editar Elemento</h2>
+            <div class="input-group">
+                <label id="label-uvas" class="label-seccion">Nombres y Detalles del Plato</label>
+                <div class="input-row-lang row-es-control">
+                    <div class="lang-tag tag-es-main">ES</div>
+                    <div style="flex:1">
+                        <input id="edit-es" class="input-estandar input-nombre-corto" placeholder="Nombre en Español" oninput="comprobarRequisitosTraduccion()">
+                        <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Uvas / Detalles (Opcional)">
+                    </div>
+                </div>
+                <div class="input-row-lang row-en-control">
+                    <div class="lang-tag tag-en-main">EN</div>
+                    <div style="flex:1">
+                        <input id="edit-en" class="input-estandar input-nombre-corto" placeholder="Name in English" oninput="comprobarRequisitosTraduccion()">
+                        <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
+                    </div>
+                </div>
+                <button id="btn-autotraducir" class="btn-traductor-magico" disabled onclick="ejecutarTraduccionAutomatica()">
+                    ✨ Traducir los otros 19 idiomas (Requiere ES y EN)
+                </button>
+                <div id="contenedor-resto-idiomas" class="langs-scroll-container"></div>
+            </div>
+        </div>
+
+        <div class="modal-col-derecha">
+            <div class="panel-control-precio">
+                <div class="input-group input-precio-super-mini">
+                    <label class="label-seccion">Precio (€)</label>
+                    <input type="text" id="edit-precio" class="input-estandar input-precio-mini" placeholder="0.00" oninput="validarFormatoPrecio(this)">
+                </div>
+                <div class="input-group input-imagen-flexible">
+                    <label class="label-seccion">Imagen</label>
+                    <input type="text" id="edit-imagen" class="input-estandar" placeholder="plato01.webp">
                 </div>
             </div>
-            <div class="input-row-lang row-en-control">
-                <div class="lang-tag tag-en-main">EN</div>
-                <div style="flex:1">
-                    <input id="edit-en" class="input-estandar input-nombre-corto" placeholder="Name in English" oninput="comprobarRequisitosTraduccion()">
-                    <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
-                </div>
+            
+            <div class="input-group">
+                <label class="label-seccion">Alérgenos y Dietas</label>
+                <div id="alergenos-grid" class="alergenos-grid"></div>
             </div>
-            <button id="btn-autotraducir" class="btn-traductor-magico" disabled onclick="ejecutarTraduccionAutomatica()">
-                ✨ Traducir los otros 19 idiomas (Requiere ES y EN)
-            </button>
-            <div id="contenedor-resto-idiomas" class="langs-scroll-container"></div>
-        </div>
-        
-        <div class="meta-row-compacta">
-            <div class="input-group input-precio-contenedor">
-                <label class="label-seccion">Precio (€)</label>
-                <input type="text" id="edit-precio" class="input-estandar" placeholder="0.00" oninput="validarFormatoPrecio(this)">
+            
+            <div class="modal-acciones-footer">
+                <button onclick="aplicarCambiosPlato()" class="btn-modal-aceptar">ACEPTAR</button>
+                <button onclick="cerrarModal('modal-editor')" class="btn-modal-cancelar">CANCELAR</button>
             </div>
-            <div class="input-group input-imagen-contenedor">
-                <label class="label-seccion">Imagen</label>
-                <input type="text" id="edit-imagen" class="input-estandar" placeholder="plato01.webp">
-            </div>
-        </div>
-        
-        <div class="input-group">
-            <label class="label-seccion">Alérgenos y Dietas</label>
-            <div id="alergenos-grid" class="alergenos-grid"></div>
-        </div>
-        
-        <div style="margin-top: 30px; display: flex; gap: 10px;">
-            <button onclick="aplicarCambiosPlato()" style="flex:2; background:var(--verde); color:white; padding:18px; border:none; border-radius:12px; font-weight:700; cursor:pointer;">ACEPTAR</button>
-            <button onclick="cerrarModal('modal-editor')" style="flex:1; background:#eee; padding:18px; border:none; border-radius:12px; font-weight:600; cursor:pointer;">CANCELAR</button>
         </div>
     </div>
 </div>
@@ -101,7 +104,7 @@
         // Volver a dividir para validar longitudes de enteros y decimales por separado
         const fragmentos = valor.split('.');
         let enteros = fragmentos[0];
-        let decimales = fragmentes[1];
+        let decimales = fragmentos[1];
         
         // Limitar parte entera a 3 dígitos máximo
         if (enteros.length > 3) {
@@ -113,8 +116,12 @@
             decimales = decimales.substring(0, 2);
         }
         
-        // Recomponer valor final estructurado
+        // Control de seguridad adicional: no permitir más de 5 dígitos totales entre enteros y decimales
         if (decimales !== undefined) {
+            if ((enteros.length + decimales.length) > 5) {
+                // Si excede los 5 dígitos en combinación conjunta se recorta del decimal sobrante
+                decimales = decimales.substring(0, 5 - enteros.length);
+            }
             input.value = enteros + '.' + decimales;
         } else {
             input.value = enteros;
