@@ -15,7 +15,8 @@ const ALERGENOS_LISTA = [
     "🌿 VEGANO", "🥗 VEGETARIANO"
 ];
 
-const IDIOMAS_ORDEN = ['es', 'en', 'de', 'fr', 'it', 'ru', 'nl', 'pl', 'sv', 'no', 'da', 'fi', 'pt', 'ro', 'hu', 'cs', 'el', 'tr', 'ar', 'zh', 'ja'];
+// MODIFICADO: Añadidos los 4 nuevos idiomas al array de orden
+const IDIOMAS_ORDEN = ['es', 'en', 'de', 'fr', 'it', 'ru', 'nl', 'pl', 'sv', 'no', 'da', 'fi', 'pt', 'ro', 'hu', 'cs', 'el', 'tr', 'ar', 'zh', 'ja', 'ca', 'eu', 'gl', 'va'];
 
 // Configuración de Sabores de Croquetas
 const CROQUETAS_CONFIG = {
@@ -119,6 +120,11 @@ async function cargar() {
                 item['ar'] = superLimpiar(c[24]);
                 item['zh'] = superLimpiar(c[25]);
                 item['ja'] = superLimpiar(c[26]);
+                // NUEVO: Carga de los 4 idiomas adicionales
+                item['ca'] = superLimpiar(c[27]);
+                item['eu'] = superLimpiar(c[28]);
+                item['gl'] = superLimpiar(c[29]);
+                item['va'] = superLimpiar(c[30]);
                 
                 datosLocales.push(item);
             }
@@ -126,7 +132,8 @@ async function cargar() {
         
         const statusCarga = document.getElementById('status-carga');
         if (statusCarga) {
-            statusCarga.innerText = "✅ Datos Sincronizados (21 Idiomas)";
+            // MODIFICADO: Dinámico en vez de harcodear el número
+            statusCarga.innerText = `✅ Datos Sincronizados (${IDIOMAS_ORDEN.length} Idiomas)`;
             statusCarga.className = "status-ok";
         }
         renderizar();
@@ -237,19 +244,16 @@ function abrirEditor(id, esNuevo = false) {
     const actuales = (p.alergenos || "").split(',').map(s => s.trim().toUpperCase());
     let alergenosHtml = "";
     if (esVino) {
-        // Comprobamos si existe SULFITOS con o sin emoji para mantener compatibilidad
         const sel = actuales.includes("🧪 SULFITOS") || actuales.includes("SULFITOS") ? 'selected' : '';
         alergenosHtml = `<div class="alergeno-btn ${sel}" onclick="this.classList.toggle('selected')">🧪 SULFITOS</div>`;
     } else {
         alergenosHtml = ALERGENOS_LISTA.map(a => {
-            // Comprobamos coincidencia ignorando el emoji previo por si acaso
             const sel = actuales.some(act => act.includes(a.split(" ").pop())) ? 'selected' : '';
             return `<div class="alergeno-btn ${sel}" onclick="this.classList.toggle('selected')">${a}</div>`;
         }).join('');
     }
     document.getElementById('alergenos-grid').innerHTML = alergenosHtml;
     
-    // --- LÓGICA DE CROQUETAS ---
     let croquetasHtml = "";
     if (esCroqueta) {
         croquetasHtml += `<div class="input-group"><label class="label-seccion">Sabores de Croquetas</label><div class="croquetas-grid">`;
@@ -537,7 +541,8 @@ async function ejecutarTraduccionAutomatica() {
                     if (traducciones[l]) {
                         const desglosado = desglosarNombre(traducciones[l]);
                         const finalName = esVino ? formatWineName(desglosado.nombre) : desglosado.nombre;
-                        document.getElementById(`edit-${l}`).value = finalName;
+                        const inputField = document.getElementById(`edit-${l}`);
+                        if (inputField) inputField.value = finalName;
                         
                         const inputUva = document.getElementById(`edit-${l}-uvas`);
                         if (inputUva && inputUva.style.display !== "none") {
@@ -682,7 +687,12 @@ async function enviarAlExcel() {
         nombre_tr: p['tr'] || "",
         nombre_ar: p['ar'] || "",
         nombre_zh: p['zh'] || "",
-        nombre_ja: p['ja'] || ""
+        nombre_ja: p['ja'] || "",
+        // NUEVO: Envío de los 4 idiomas adicionales al Excel
+        nombre_ca: p['ca'] || "",
+        nombre_eu: p['eu'] || "",
+        nombre_gl: p['gl'] || "",
+        nombre_va: p['va'] || ""
     }));
     
     try {
