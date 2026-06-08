@@ -120,7 +120,6 @@ async function cargar() {
                 item['ar'] = superLimpiar(c[24]);
                 item['zh'] = superLimpiar(c[25]);
                 item['ja'] = superLimpiar(c[26]);
-                // NUEVO: Carga de los 4 idiomas adicionales
                 item['ca'] = superLimpiar(c[27]);
                 item['eu'] = superLimpiar(c[28]);
                 item['gl'] = superLimpiar(c[29]);
@@ -132,7 +131,6 @@ async function cargar() {
         
         const statusCarga = document.getElementById('status-carga');
         if (statusCarga) {
-            // MODIFICADO: Dinámico en vez de harcodear el número
             statusCarga.innerText = `✅ Datos Sincronizados (${IDIOMAS_ORDEN.length} Idiomas)`;
             statusCarga.className = "status-ok";
         }
@@ -591,7 +589,12 @@ function aplicarCambiosPlato() {
     if(isNaN(p.precio)) p.precio = "0.00";
     
     p.imagen = superLimpiar(document.getElementById('edit-imagen').value);
-    p.alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => el.innerText.trim()).join(', ');
+    // MODIFICADO: Limpiar emojis de los alérgenos antes de guardar para evitar errores en la hoja de cálculo
+    p.alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => {
+        let rawText = el.innerText.trim();
+        let spaceIdx = rawText.indexOf(' ');
+        return spaceIdx !== -1 ? rawText.substring(spaceIdx + 1).trim() : rawText;
+    }).join(', ');
     
     cerrarModal('modal-editor');
     renderizar();
@@ -688,7 +691,6 @@ async function enviarAlExcel() {
         nombre_ar: p['ar'] || "",
         nombre_zh: p['zh'] || "",
         nombre_ja: p['ja'] || "",
-        // NUEVO: Envío de los 4 idiomas adicionales al Excel
         nombre_ca: p['ca'] || "",
         nombre_eu: p['eu'] || "",
         nombre_gl: p['gl'] || "",
