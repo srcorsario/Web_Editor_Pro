@@ -1,7 +1,8 @@
 // --- state.js ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyDQEGNn8pLpVu-7n4bh6CyzLeKfYeICM0Fbr358SKwVP9rt9yNcc7UV6au2FPMyftiXg/exec';
+// MODIFICADO: Nueva URL del Web App Script
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4kd15keNe7KaX5vGNeUQEPX1MRoWMMe8OUlgkLFUYjI16oWoIsHhl-RVm6sdDnmxjNg/exec';
 
-// Sistema dinámico de API Keys en LocalStorage (Traído del repositorio Idiomas)
+// Sistema dinámico de API Keys en LocalStorage
 function getKeys() {
     const keys = localStorage.getItem('geminiKeys');
     return keys ? JSON.parse(keys) : [];
