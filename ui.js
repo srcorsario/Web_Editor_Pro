@@ -172,29 +172,38 @@ export const UI = {
         }
     },
 
-    // MODIFICADO: Seguridad máxima aplicada. Solo sincroniza ID y Traducciones para no sobreescribir nada más.
+    // MODIFICADO: Mapeo completo para no borrar columnas no visibles en la tabla (Precio, Estado, Carpeta, Imagen, Alergenos)
     sincronizarConGoogleSheets: async () => {
         if (stateContainer.headers.length === 0 || stateContainer.csvData.length === 0) {
             return UI.log("[Error] No hay datos en memoria para sincronizar. Carga un archivo primero.");
         }
 
-        UI.log("[Sincro] Compilando matriz de traducciones (Ignorando columnas de sistema para evitar sobrescritura)...");
+        UI.log("[Sincro] Compilando matriz completa (Preservando columnas de sistema: Precio, Estado, Carpeta...)...");
         
+        // NUEVO: Helper para leer el valor de forma segura de la matriz cruda respetando las cabeceras
+        const getColValue = (rowArray, headerName) => {
+            const idx = stateContainer.headers.findIndex(h => h.trim().toUpperCase() === headerName.toUpperCase());
+            return idx !== -1 ? (rowArray[idx] || "") : "";
+        };
+
         const payload = stateContainer.csvData.map(row => {
-            let obj = {};
-            stateContainer.headers.forEach((h, i) => {
-                let key = h.trim().toUpperCase();
-                let val = row[i] || "";
-                
-                // SEGURIDAD MÁXIMA: Solo sincronizamos el ID y las traducciones. 
-                // Ignoramos Precio, Estado, Carpeta, Imagen y Alergenos para NO sobreescribir la hoja original.
-                if (key === 'ID') {
-                    obj.id = parseInt(val);
-                } else if (key.startsWith('NOMBRE_')) {
-                    let langKey = key.replace('NOMBRE_', '').toLowerCase();
-                    obj[`nombre_${langKey}`] = val;
+            let obj = {
+                id: parseInt(getColValue(row, 'ID')),
+                precio: getColValue(row, 'Precio') || "0.00",
+                estado: getColValue(row, 'Estado') || "no",
+                carpeta: getColValue(row, 'Carpeta') || "",
+                imagen: getColValue(row, 'Imagen') || "",
+                alergenos: getColValue(row, 'Alergenos') || ""
+            };
+
+            // Reconstruir dinámicamente todas las columnas de idioma (Nombre_XX)
+            stateContainer.headers.forEach(h => {
+                if (h.trim().toUpperCase().startsWith("NOMBRE_")) {
+                    let langKey = h.trim().toUpperCase().replace("NOMBRE_", "").toLowerCase();
+                    obj[`nombre_${langKey}`] = getColValue(row, h.trim());
                 }
             });
+
             return obj;
         }).filter(x => !isNaN(x.id) && x.id > 0); // Filtra filas sin ID válido
 
@@ -202,7 +211,7 @@ export const UI = {
             return UI.log("[Error] La compilación no generó filas válidas. Verifica que la columna 'ID' exista y sea correcta.");
         }
 
-        UI.log(`[Sincro] Enviando ${payload.length} traducciones procesadas de forma segura al servidor...`);
+        UI.log(`[Sincro] Enviando ${payload.length} filas completas (Traducciones + Datos de sistema) al servidor...`);
         
         try {
             const urlDestino = getWebAppUrl();
@@ -212,7 +221,7 @@ export const UI = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload) 
             });
-            UI.log("✅ [Sincro] ¡Éxito! Solo se han actualizado las traducciones en la hoja web original.");
+            UI.log("✅ [Sincro] ¡Éxito! Datos y traducciones sincronizados sin pérdidas.");
         } catch (e) { 
             UI.log("❌ [Sincro] Error de red al intentar impactar los datos en Google Sheets: " + e.message); 
         }
