@@ -172,13 +172,13 @@ export const UI = {
         }
     },
 
-    // NUEVO: Función robusta para transformar la matriz del CSV al JSON que entiende el backend y enviarla
+    // MODIFICADO: Seguridad máxima aplicada. Solo sincroniza ID y Traducciones para no sobreescribir nada más.
     sincronizarConGoogleSheets: async () => {
         if (stateContainer.headers.length === 0 || stateContainer.csvData.length === 0) {
             return UI.log("[Error] No hay datos en memoria para sincronizar. Carga un archivo primero.");
         }
 
-        UI.log("[Sincro] Compilando matriz de datos hacia la estructura nativa de Google Sheets...");
+        UI.log("[Sincro] Compilando matriz de traducciones (Ignorando columnas de sistema para evitar sobrescritura)...");
         
         const payload = stateContainer.csvData.map(row => {
             let obj = {};
@@ -186,25 +186,23 @@ export const UI = {
                 let key = h.trim().toUpperCase();
                 let val = row[i] || "";
                 
-                if (key === 'ID') obj.id = parseInt(val);
-                else if (key === 'PRECIO') obj.precio = val;
-                else if (key === 'ESTADO') obj.estado = val;
-                else if (key === 'CATEGORIA') obj.carpeta = val;
-                else if (key === 'IMAGEN') obj.imagen = val;
-                else if (key === 'ALERGENOS') obj.alergenos = val;
-                else if (key.startsWith('NOMBRE_')) {
+                // SEGURIDAD MÁXIMA: Solo sincronizamos el ID y las traducciones. 
+                // Ignoramos Precio, Estado, Carpeta, Imagen y Alergenos para NO sobreescribir la hoja original.
+                if (key === 'ID') {
+                    obj.id = parseInt(val);
+                } else if (key.startsWith('NOMBRE_')) {
                     let langKey = key.replace('NOMBRE_', '').toLowerCase();
                     obj[`nombre_${langKey}`] = val;
                 }
             });
             return obj;
-        }).filter(x => !isNaN(x.id) && x.id > 0); // Filtra filas sin ID válido para no corromper la hoja
+        }).filter(x => !isNaN(x.id) && x.id > 0); // Filtra filas sin ID válido
 
         if (payload.length === 0) {
             return UI.log("[Error] La compilación no generó filas válidas. Verifica que la columna 'ID' exista y sea correcta.");
         }
 
-        UI.log(`[Sincro] Enviando ${payload.length} filas procesadas al servidor de Google Apps Script...`);
+        UI.log(`[Sincro] Enviando ${payload.length} traducciones procesadas de forma segura al servidor...`);
         
         try {
             const urlDestino = getWebAppUrl();
@@ -214,7 +212,7 @@ export const UI = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload) 
             });
-            UI.log("✅ [Sincro] ¡Éxito! Datos sincronizados con la hoja web original de forma segura.");
+            UI.log("✅ [Sincro] ¡Éxito! Solo se han actualizado las traducciones en la hoja web original.");
         } catch (e) { 
             UI.log("❌ [Sincro] Error de red al intentar impactar los datos en Google Sheets: " + e.message); 
         }
@@ -234,7 +232,6 @@ export const UI = {
             };
         }
 
-        // NUEVO: Enlace del botón de sincronización
         const btnSyncSheets = document.getElementById('btnSyncSheets');
         if (btnSyncSheets) {
             btnSyncSheets.onclick = () => {
