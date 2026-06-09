@@ -3,8 +3,6 @@
 let currentKeyIndex = 0;
 let procesoDetenido = false;
 let procesoPausado = false;
-
-// NUEVO: Variable de estado centralizada para el idioma activo en la tabla
 let activeLang = 'EN';
 
 const stateContainer = {
@@ -54,7 +52,6 @@ export const UI = {
         }).join('');
     },
 
-    // MODIFICADO: Cambio de radio buttons a botones interactivos y corrección del bug de cambio de idioma
     renderRadiosIdiomas: () => {
         const container = document.getElementById('radiosIdiomas');
         if (!container) return;
@@ -70,12 +67,10 @@ export const UI = {
         html += '</div>';
         container.innerHTML = html;
 
-        // NUEVO: Añadir listeners a los botones de idioma de forma nativa
         container.querySelectorAll('.lang-btn').forEach(btn => {
             btn.onclick = () => {
                 activeLang = btn.dataset.lang;
                 
-                // Actualizar clases visuales de los botones
                 container.querySelectorAll('.lang-btn').forEach(b => {
                     b.classList.remove('bg-amber-600', 'text-white', 'shadow-md');
                     b.classList.add('bg-slate-700', 'text-slate-300');
@@ -83,13 +78,11 @@ export const UI = {
                 btn.classList.remove('bg-slate-700', 'text-slate-300');
                 btn.classList.add('bg-amber-600', 'text-white', 'shadow-md');
                 
-                // Refrescar la tabla con el nuevo idioma
                 UI.renderTable();
             };
         });
     },
 
-    // MODIFICADO: Usa la variable global activeLang en lugar de buscar un radiobutton
     renderTable: () => {
         const tableHeadRow = document.getElementById('tableHeadRow');
         const tablaBody = document.getElementById('tablaBody');
@@ -179,6 +172,54 @@ export const UI = {
         }
     },
 
+    // NUEVO: Función robusta para transformar la matriz del CSV al JSON que entiende el backend y enviarla
+    sincronizarConGoogleSheets: async () => {
+        if (stateContainer.headers.length === 0 || stateContainer.csvData.length === 0) {
+            return UI.log("[Error] No hay datos en memoria para sincronizar. Carga un archivo primero.");
+        }
+
+        UI.log("[Sincro] Compilando matriz de datos hacia la estructura nativa de Google Sheets...");
+        
+        const payload = stateContainer.csvData.map(row => {
+            let obj = {};
+            stateContainer.headers.forEach((h, i) => {
+                let key = h.trim().toUpperCase();
+                let val = row[i] || "";
+                
+                if (key === 'ID') obj.id = parseInt(val);
+                else if (key === 'PRECIO') obj.precio = val;
+                else if (key === 'ESTADO') obj.estado = val;
+                else if (key === 'CATEGORIA') obj.carpeta = val;
+                else if (key === 'IMAGEN') obj.imagen = val;
+                else if (key === 'ALERGENOS') obj.alergenos = val;
+                else if (key.startsWith('NOMBRE_')) {
+                    let langKey = key.replace('NOMBRE_', '').toLowerCase();
+                    obj[`nombre_${langKey}`] = val;
+                }
+            });
+            return obj;
+        }).filter(x => !isNaN(x.id) && x.id > 0); // Filtra filas sin ID válido para no corromper la hoja
+
+        if (payload.length === 0) {
+            return UI.log("[Error] La compilación no generó filas válidas. Verifica que la columna 'ID' exista y sea correcta.");
+        }
+
+        UI.log(`[Sincro] Enviando ${payload.length} filas procesadas al servidor de Google Apps Script...`);
+        
+        try {
+            const urlDestino = getWebAppUrl();
+            await fetch(urlDestino, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload) 
+            });
+            UI.log("✅ [Sincro] ¡Éxito! Datos sincronizados con la hoja web original de forma segura.");
+        } catch (e) { 
+            UI.log("❌ [Sincro] Error de red al intentar impactar los datos en Google Sheets: " + e.message); 
+        }
+    },
+
     inicializarAjustesExpertos: () => {
         UI.log("[Expertos] Vinculando componentes interactivos del panel avanzado de control...");
 
@@ -190,6 +231,14 @@ export const UI = {
                 } else {
                     UI.log("[Error] El estado del sistema no contiene estructuras válidas de datos para proceder.");
                 }
+            };
+        }
+
+        // NUEVO: Enlace del botón de sincronización
+        const btnSyncSheets = document.getElementById('btnSyncSheets');
+        if (btnSyncSheets) {
+            btnSyncSheets.onclick = () => {
+                UI.sincronizarConGoogleSheets();
             };
         }
 
@@ -445,7 +494,6 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.renderRadiosIdiomas();
     UI.inicializarAjustesExpertos();
 
-    // NUEVO: Mostrar la versión de la aplicación en pantalla leyendo el atributo data-version del script
     const mainScript = document.getElementById('main-script');
     if (mainScript && mainScript.dataset.version) {
         const versionEl = document.getElementById('app-version');
