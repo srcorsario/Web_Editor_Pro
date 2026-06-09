@@ -4,6 +4,9 @@ let currentKeyIndex = 0;
 let procesoDetenido = false;
 let procesoPausado = false;
 
+// NUEVO: Variable de estado centralizada para el idioma activo en la tabla
+let activeLang = 'EN';
+
 const stateContainer = {
     headers: [],
     csvData: []
@@ -51,25 +54,42 @@ export const UI = {
         }).join('');
     },
 
+    // MODIFICADO: Cambio de radio buttons a botones interactivos y corrección del bug de cambio de idioma
     renderRadiosIdiomas: () => {
         const container = document.getElementById('radiosIdiomas');
         if (!container) return;
 
         const idiomas = window.IDIOMAS_CONFIG || {};
-        let html = '';
+        let html = '<div class="flex flex-wrap gap-1.5">';
 
         for (const [code, name] of Object.entries(idiomas)) {
             if (code === 'ES') continue; 
-            const checked = code === 'EN' ? 'checked' : '';
-            html += `<label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer hover:text-white mb-1">
-                <input type="radio" name="langView" value="${code}" ${checked} onchange="UI.renderTable()" class="accent-amber-500">
-                <span>${name}</span>
-            </label>`;
+            const isActive = code === activeLang ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600';
+            html += `<button class="lang-btn text-xs py-1.5 px-2.5 rounded font-semibold transition-all ${isActive}" data-lang="${code}">${name}</button>`;
         }
+        html += '</div>';
         container.innerHTML = html;
+
+        // NUEVO: Añadir listeners a los botones de idioma de forma nativa
+        container.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.onclick = () => {
+                activeLang = btn.dataset.lang;
+                
+                // Actualizar clases visuales de los botones
+                container.querySelectorAll('.lang-btn').forEach(b => {
+                    b.classList.remove('bg-amber-600', 'text-white', 'shadow-md');
+                    b.classList.add('bg-slate-700', 'text-slate-300');
+                });
+                btn.classList.remove('bg-slate-700', 'text-slate-300');
+                btn.classList.add('bg-amber-600', 'text-white', 'shadow-md');
+                
+                // Refrescar la tabla con el nuevo idioma
+                UI.renderTable();
+            };
+        });
     },
 
-    // MODIFICADO: Tamaño de columnas estricto y reparto equitativo para idiomas
+    // MODIFICADO: Usa la variable global activeLang en lugar de buscar un radiobutton
     renderTable: () => {
         const tableHeadRow = document.getElementById('tableHeadRow');
         const tablaBody = document.getElementById('tablaBody');
@@ -81,8 +101,7 @@ export const UI = {
             return;
         }
 
-        const selectedRadio = document.querySelector('input[name="langView"]:checked');
-        const selectedLang = selectedRadio ? selectedRadio.value : 'EN';
+        const selectedLang = activeLang;
         const idiomas = window.IDIOMAS_CONFIG || {};
 
         const idIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === 'ID');
@@ -96,7 +115,6 @@ export const UI = {
 
         const langName = idiomas[selectedLang] || selectedLang;
 
-        // Cabecera con anchos fijos: Fila 60px, ID 70px, resto 50% y 50% (descontiendo los 130px totales fijos)
         tableHeadRow.innerHTML = `<tr>
             <th style="width: 60px;">Fila</th>
             <th style="width: 70px;">ID</th>
@@ -426,6 +444,13 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.actualizarListaKeys();
     UI.renderRadiosIdiomas();
     UI.inicializarAjustesExpertos();
+
+    // NUEVO: Mostrar la versión de la aplicación en pantalla leyendo el atributo data-version del script
+    const mainScript = document.getElementById('main-script');
+    if (mainScript && mainScript.dataset.version) {
+        const versionEl = document.getElementById('app-version');
+        if (versionEl) versionEl.innerText = `v${mainScript.dataset.version}`;
+    }
 
     const addKeyBtn = document.getElementById('addKeyBtn');
     if (addKeyBtn) {
