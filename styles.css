@@ -30,6 +30,75 @@ body {
 .status-ok { background: #d4edda; color: #155724; }
 .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
+/* NUEVO: ESTILOS PARA LAS PESTAÑAS */
+.tabs-container {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: #7f8c8d;
+    margin-right: 5px;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: white;
+    color: var(--primario);
+    border-bottom: 2px solid white;
+    margin-bottom: -2px;
+}
+
+.tab-content {
+    display: none; /* Por defecto oculto, el JS lo controla */
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* NUEVO: SCOPE DEL TEMA OSCURO PARA EL PANEL PRO */
+.pro-panel {
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 20px;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid #334155;
+    border-top: none;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.pro-panel .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; }
+.pro-panel input, .pro-panel textarea, .pro-panel select { background-color: #334155; border: 1px solid #475569; color: white; border-radius: 4px; padding: 6px 12px; }
+.pro-panel input:focus { outline: 2px solid #3b82f6; }
+.pro-panel .btn { padding: 5px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+.pro-panel .btn-primary { background-color: #2563eb; color: white; }
+.pro-panel .btn-primary:hover { background-color: #1d4ed8; }
+.pro-panel .btn-success { background-color: #16a34a; color: white; }
+.pro-panel .btn-success:hover { background-color: #15803d; }
+.pro-panel .btn-danger { background-color: #dc2626; color: white; }
+.pro-panel .btn-danger:hover { background-color: #b91c1c; }
+.pro-panel .btn-secondary { background-color: #475569; color: white; }
+.pro-panel .btn-secondary:hover { background-color: #334155; }
+
+#consola { background-color: #020617; font-family: monospace; font-size: 13px; color: #38bdf8; overflow-y: auto; padding: 10px; border-radius: 6px; border: 1px solid #1e293b; flex: 1; }
+
+.pro-panel table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+.pro-panel th, .pro-panel td { padding: 10px; border: 1px solid #334155; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pro-panel th { background-color: #1e293b; color: #94a3b8; font-weight: 600; }
+.pro-panel tr:nth-child(even) { background-color: #1e293b; }
+.pro-panel tr:hover { background-color: #334155; }
+
 .categoria-tarjeta { 
     background: white; border-radius: 12px; margin-bottom: 20px; 
     overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
