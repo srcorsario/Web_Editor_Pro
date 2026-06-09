@@ -1,11 +1,17 @@
 // ui.js (Web_Editor_Pro)
-// MODIFICADO: Importación estricta del lector de estado local para nutrir el componente UI portado
-import { getKeys } from './state.js';
+// MODIFICADO: Importación estricta de funciones de estado para permitir la gestión completa desde la UI
+import { getKeys, saveKey, deleteKey } from './state.js';
 
 // NUEVO: Variables de control de estado encapsuladas para el proceso de traducción por lotes portadas del repositorio secundario
 let currentKeyIndex = 0;
 let procesoDetenido = false;
 let procesoPausado = false;
+
+// NUEVO: Estado global centralizado para el flujo de datos del traductor y ajustes avanzados
+const stateContainer = {
+    headers: [],
+    csvData: []
+};
 
 export const UI = {
     log: (mensaje) => {
@@ -55,15 +61,79 @@ export const UI = {
         }).join('');
     },
 
-    // NUEVO: Inicializador defensivo del entorno "Ajustes solo para expertos" para el intercambio de archivos locales (PC)
-    inicializarAjustesExpertos: (stateContainer) => {
+    // NUEVO: Método de renderizado de tabla para visualizar los datos importados en pantalla
+    renderTable: () => {
+        const tableHeadRow = document.getElementById('tableHeadRow');
+        const tablaBody = document.getElementById('tablaBody');
+        if (!tableHeadRow || !tablaBody) return;
+
+        if (stateContainer.headers.length === 0) {
+            tablaBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-500 italic">Ningún archivo cargado en el sistema. Selecciona un origen arriba.</td></tr>';
+            return;
+        }
+
+        tableHeadRow.innerHTML = '<tr>' + stateContainer.headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+        
+        // Obtener rango si existe
+        const rangoInicioEl = document.getElementById('rangoInicio');
+        const rangoFinEl = document.getElementById('rangoFin');
+        const inicio = rangoInicioEl ? Math.max(0, parseInt(rangoInicioEl.value) - 2) : 0;
+        const fin = rangoFinEl ? Math.min(stateContainer.csvData.length, parseInt(rangoFinEl.value) - 1) : stateContainer.csvData.length;
+
+        const datosFiltrados = stateContainer.csvData.slice(inicio, fin);
+        
+        tablaBody.innerHTML = datosFiltrados.map(row => {
+            return '<tr>' + row.map(cell => `<td>${cell || ''}</td>`).join('') + '</tr>';
+        }).join('');
+    },
+
+    // NUEVO: Lógica de importación directa desde Google Sheets usando la URL proporcionada
+    cargarGoogleSheets: async () => {
+        const urlInput = document.getElementById('sheetsUrl');
+        const url = urlInput ? urlInput.value.trim() : '';
+        if (!url) return UI.log("[Error] Introduce una URL válida de Google Sheets.");
+        
+        UI.log("[Info] Descargando CSV desde Google Sheets...");
+        try {
+            const resp = await fetch(url + '&t=' + Date.now());
+            if (!resp.ok) throw new Error("Error HTTP " + resp.status);
+            const text = await resp.text();
+            
+            if (window.Papa) {
+                window.Papa.parse(text, {
+                    skipEmptyLines: true,
+                    complete: (resultado) => {
+                        if (resultado.data && resultado.data.length > 0) {
+                            stateContainer.headers = resultado.data[0];
+                            stateContainer.csvData = resultado.data.slice(1);
+                            UI.log(`[OK] CSV de Google Sheets cargado. Filas: ${stateContainer.csvData.length}, Columnas: ${stateContainer.headers.length}`);
+                            UI.renderTable();
+                        }
+                    }
+                });
+            } else {
+                const lineas = text.split(/\r?\n/).filter(line => line.trim() !== "");
+                if (lineas.length > 0) {
+                    stateContainer.headers = lineas[0].split(",").map(h => h.replace(/^"|"$/g, '').trim());
+                    stateContainer.csvData = lineas.slice(1).map(f => f.split(",").map(v => v.replace(/^"|"$/g, '').trim()));
+                    UI.log(`[OK] CSV cargado (Fallback). Filas: ${stateContainer.csvData.length}`);
+                    UI.renderTable();
+                }
+            }
+        } catch (e) {
+            UI.log("[Error] Fallo al descargar o procesar el CSV: " + e.message);
+        }
+    },
+
+    // MODIFICADO: Eliminado el parámetro stateContainer para usar el estado global centralizado del módulo
+    inicializarAjustesExpertos: () => {
         UI.log("[Expertos] Vinculando componentes interactivos del panel avanzado de control...");
 
         // Registro seguro de eventos de exportación CSV local hacia la PC
         const btnExportar = document.getElementById('btnExportarCsvExpertos') || document.getElementById('saveCsvBtn');
         if (btnExportar) {
             btnExportar.onclick = () => {
-                if (stateContainer && stateContainer.headers && stateContainer.csvData) {
+                if (stateContainer.headers && stateContainer.csvData) {
                     UI.exportarCSV(stateContainer.headers, stateContainer.csvData);
                 } else {
                     UI.log("[Error] El estado del sistema no contiene estructuras válidas de datos para proceder.");
@@ -76,7 +146,7 @@ export const UI = {
         if (inputImportar) {
             inputImportar.onchange = (e) => {
                 const file = e.target.files[0];
-                if (file && stateContainer) {
+                if (file) {
                     UI.importarCSV(file, (headers, data) => {
                         stateContainer.headers = headers;
                         stateContainer.csvData = data;
@@ -89,13 +159,19 @@ export const UI = {
             };
         }
 
+        // NUEVO: Registro seguro del botón de carga de Google Sheets para volcar datos desde la web
+        const loadSheetsBtn = document.getElementById('loadSheetsBtn');
+        if (loadSheetsBtn) {
+            loadSheetsBtn.onclick = () => {
+                UI.cargarGoogleSheets();
+            };
+        }
+
         // Registro seguro de botones de ciclo de vida del motor de automatización asíncrona por lotes
         const btnIniciar = document.getElementById('btnIniciarTraduccionLotes') || document.getElementById('btnIniciar');
         if (btnIniciar) {
             btnIniciar.onclick = () => {
-                if (stateContainer) {
-                    UI.iniciarTraduccionPorLotes(stateContainer);
-                }
+                UI.iniciarTraduccionPorLotes(stateContainer);
             };
         }
 
@@ -174,7 +250,7 @@ export const UI = {
     },
 
     // NUEVO: Motor asíncrono optimizado de traducción masiva por lotes paralelos con rotación inteligente de cuotas
-    iniciarTraduccionPorLotes: async (stateContainer) => {
+    iniciarTraduccionPorLotes: async (stateContainerParam) => {
         procesoDetenido = false;
         procesoPausado = false;
         
@@ -183,7 +259,10 @@ export const UI = {
             return UI.log("[Error] Operación abortada: Introduzca al menos una API Key válida en el almacenamiento local.");
         }
 
-        if (!stateContainer || !stateContainer.headers || !stateContainer.csvData) {
+        // MODIFICADO: Uso del estado global inyectado por parámetro (compatibilidad hacia atrás) o el del módulo
+        const activeStateContainer = stateContainerParam || stateContainer;
+
+        if (!activeStateContainer || !activeStateContainer.headers || !activeStateContainer.csvData) {
             return UI.log("[Error] La estructura de datos o cabeceras del estado se encuentra corrupta o vacía.");
         }
 
@@ -191,13 +270,13 @@ export const UI = {
         const selectorInicio = document.getElementById('rangoInicio');
         const selectorFin = document.getElementById('rangoFin');
         const rangoInicio = selectorInicio ? (parseInt(selectorInicio.value) - 2 || 0) : 0;
-        const rangoFin = selectorFin ? (parseInt(selectorFin.value) - 1 || stateContainer.csvData.length) : stateContainer.csvData.length;
+        const rangoFin = selectorFin ? (parseInt(selectorFin.value) - 1 || activeStateContainer.csvData.length) : activeStateContainer.csvData.length;
 
         const ENDPOINT_GATEWAY = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
         
         // Mapeo adaptativo automático de columnas lingüísticas regionales basadas en nomenclatura Nombre_
-        const columnasIdiomasDestino = stateContainer.headers.map((h, i) => (h.startsWith("Nombre_") && h !== "Nombre_ES") ? i : -1).filter(i => i !== -1);
-        const indiceCastellanoBase = stateContainer.headers.indexOf('Nombre_ES');
+        const columnasIdiomasDestino = activeStateContainer.headers.map((h, i) => (h.startsWith("Nombre_") && h !== "Nombre_ES") ? i : -1).filter(i => i !== -1);
+        const indiceCastellanoBase = activeStateContainer.headers.indexOf('Nombre_ES');
 
         if (indiceCastellanoBase === -1) {
             return UI.log("[Error] Estructura incompatible: Falta la columna pivote requerida 'Nombre_ES'.");
@@ -205,12 +284,12 @@ export const UI = {
 
         let totalPeticionesExitosas = 0;
         const matrizFilasPendientes = [];
-        const techoLimiteEvaluacion = Math.min(rangoFin, stateContainer.csvData.length);
+        const techoLimiteEvaluacion = Math.min(rangoFin, activeStateContainer.csvData.length);
 
         // Escaneo quirúrgico automatizado para buscar e indexar traducciones huérfanas/vacías
         for (let i = Math.max(0, rangoInicio); i < techoLimiteEvaluacion; i++) {
-            const cadenaCastellano = stateContainer.csvData[i][indiceCastellanoBase] || "Sin nombre";
-            const indicesColumnasVacias = columnasIdiomasDestino.filter(idx => !stateContainer.csvData[i][idx] || stateContainer.csvData[i][idx].trim() === "");
+            const cadenaCastellano = activeStateContainer.csvData[i][indiceCastellanoBase] || "Sin nombre";
+            const indicesColumnasVacias = columnasIdiomasDestino.filter(idx => !activeStateContainer.csvData[i][idx] || activeStateContainer.csvData[i][idx].trim() === "");
             
             if (indicesColumnasVacias.length > 0) {
                 matrizFilasPendientes.push({
@@ -218,7 +297,7 @@ export const UI = {
                     numeroFilaHumana: i + 2,
                     textoES: cadenaCastellano,
                     indicesColumnasFaltantes: indicesColumnasVacias,
-                    codigosIdiomas: indicesColumnasVacias.map(idx => stateContainer.headers[idx].replace("Nombre_", ""))
+                    codigosIdiomas: indicesColumnasVacias.map(idx => activeStateContainer.headers[idx].replace("Nombre_", ""))
                 });
             }
         }
@@ -282,10 +361,10 @@ export const UI = {
                                 const objetivoFilaMemoria = loteActual.find(p => p.numeroFilaHumana === parseInt(filaLote.id_fila));
                                 if (objetivoFilaMemoria && filaLote.traducciones) {
                                     objetivoFilaMemoria.indicesColumnasFaltantes.forEach(idxCol => {
-                                        const codigoIdiomaISO = stateContainer.headers[idxCol].replace("Nombre_", "");
+                                        const codigoIdiomaISO = activeStateContainer.headers[idxCol].replace("Nombre_", "");
                                         if (filaLote.traducciones[codigoIdiomaISO]) {
                                             // Inyección atómica directa en la estructura bidimensional del estado mutado
-                                            stateContainer.csvData[objetivoFilaMemoria.indiceMatriz][idxCol] = filaLote.traducciones[codigoIdiomaISO].replace(/[\(\)""'']/g, '');
+                                            activeStateContainer.csvData[objetivoFilaMemoria.indiceMatriz][idxCol] = filaLote.traducciones[codigoIdiomaISO].replace(/[\(\)""'']/g, '');
                                         }
                                     });
                                 }
@@ -323,3 +402,36 @@ export const UI = {
         }
     }
 };
+
+// NUEVO: Inicialización centralizada y segura al cargar el DOM para habilitar los ajustes avanzados y botones
+document.addEventListener('DOMContentLoaded', () => {
+    UI.actualizarListaKeys();
+    UI.inicializarAjustesExpertos();
+
+    const addKeyBtn = document.getElementById('addKeyBtn');
+    if (addKeyBtn) {
+        addKeyBtn.onclick = () => {
+            const input = document.getElementById('nuevaKey');
+            if (input && input.value.trim()) {
+                saveKey(input.value.trim());
+                input.value = "";
+                UI.actualizarListaKeys();
+                UI.log("[OK] Nueva API Key agregada al sistema.");
+            }
+        };
+    }
+
+    const btnEliminarKeySeleccionada = document.getElementById('btnEliminarKeySeleccionada');
+    if (btnEliminarKeySeleccionada) {
+        btnEliminarKeySeleccionada.onclick = () => {
+            const selectEl = document.getElementById('selectKeys');
+            if (selectEl && selectEl.value) {
+                deleteKey(selectEl.value);
+                UI.actualizarListaKeys();
+                UI.log("[OK] API Key eliminada del almacenamiento local.");
+            } else {
+                UI.log("[Aviso] No hay ninguna Key seleccionada para eliminar.");
+            }
+        };
+    }
+});
