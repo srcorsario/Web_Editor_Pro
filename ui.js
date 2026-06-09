@@ -1,5 +1,5 @@
 // ui.js (Web_Editor_Pro)
-import { getKeys, saveKey, deleteKey } from './state.js';
+// MODIFICADO: Se ha eliminado la importación de state.js para evitar conflictos de módulo. Se usan las variables globales inyectadas por los scripts en index.html.
 
 let currentKeyIndex = 0;
 let procesoDetenido = false;
