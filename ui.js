@@ -51,17 +51,15 @@ export const UI = {
         }).join('');
     },
 
-    // NUEVO: Renderizado dinámico de los radio buttons de idiomas basado en la configuración global
     renderRadiosIdiomas: () => {
         const container = document.getElementById('radiosIdiomas');
         if (!container) return;
 
-        // Accedemos a la variable global inyectada por languages.js
         const idiomas = window.IDIOMAS_CONFIG || {};
         let html = '';
 
         for (const [code, name] of Object.entries(idiomas)) {
-            if (code === 'ES') continue; // Saltamos castellano porque es la columna base fija
+            if (code === 'ES') continue; 
             const checked = code === 'EN' ? 'checked' : '';
             html += `<label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer hover:text-white mb-1">
                 <input type="radio" name="langView" value="${code}" ${checked} onchange="UI.renderTable()" class="accent-amber-500">
@@ -71,7 +69,7 @@ export const UI = {
         container.innerHTML = html;
     },
 
-    // MODIFICADO: Tabla simplificada. Solo Fila, ID, Castellano y el idioma seleccionado
+    // MODIFICADO: Tamaño de columnas estricto y reparto equitativo para idiomas
     renderTable: () => {
         const tableHeadRow = document.getElementById('tableHeadRow');
         const tablaBody = document.getElementById('tablaBody');
@@ -87,7 +85,6 @@ export const UI = {
         const selectedLang = selectedRadio ? selectedRadio.value : 'EN';
         const idiomas = window.IDIOMAS_CONFIG || {};
 
-        // Búsqueda de índices (insensible a mayúsculas/minúsculas para mayor robustez)
         const idIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === 'ID');
         const esIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === 'NOMBRE_ES');
         const langIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === `NOMBRE_${selectedLang}`);
@@ -99,32 +96,30 @@ export const UI = {
 
         const langName = idiomas[selectedLang] || selectedLang;
 
-        // Cabecera
+        // Cabecera con anchos fijos: Fila 60px, ID 70px, resto 50% y 50% (descontiendo los 130px totales fijos)
         tableHeadRow.innerHTML = `<tr>
-            <th>Fila</th>
-            <th>ID</th>
-            <th>Castellano (ES)</th>
-            <th>${langName} (${selectedLang})</th>
+            <th style="width: 60px;">Fila</th>
+            <th style="width: 70px;">ID</th>
+            <th style="width: calc(50% - 65px);">Castellano (ES)</th>
+            <th style="width: calc(50% - 65px);">${langName} (${selectedLang})</th>
         </tr>`;
 
-        // Rango
         const rangoInicioEl = document.getElementById('rangoInicio');
         const rangoFinEl = document.getElementById('rangoFin');
         const inicio = rangoInicioEl ? Math.max(0, parseInt(rangoInicioEl.value) - 2) : 0;
         const fin = rangoFinEl ? Math.min(stateContainer.csvData.length, parseInt(rangoFinEl.value) - 1) : stateContainer.csvData.length;
         const datosFiltrados = stateContainer.csvData.slice(inicio, fin);
 
-        // Cuerpo
         tablaBody.innerHTML = datosFiltrados.map((row, index) => {
-            const rowNum = inicio + index + 2; // +2 porque el índice es 0-based y la fila 1 es cabecera
+            const rowNum = inicio + index + 2; 
             const idVal = row[idIdx] || '';
             const esVal = row[esIdx] || '';
             const langVal = langIdx !== -1 ? (row[langIdx] || '') : 'N/A';
             return `<tr>
-                <td>${rowNum}</td>
-                <td>${idVal}</td>
-                <td>${esVal}</td>
-                <td>${langVal}</td>
+                <td style="width: 60px; text-align: center;">${rowNum}</td>
+                <td style="width: 70px; text-align: center;">${idVal}</td>
+                <td style="width: calc(50% - 65px);">${esVal}</td>
+                <td style="width: calc(50% - 65px);">${langVal}</td>
             </tr>`;
         }).join('');
     },
@@ -429,7 +424,7 @@ export const UI = {
 
 document.addEventListener('DOMContentLoaded', () => {
     UI.actualizarListaKeys();
-    UI.renderRadiosIdiomas(); // NUEVO: Inicializar radios
+    UI.renderRadiosIdiomas();
     UI.inicializarAjustesExpertos();
 
     const addKeyBtn = document.getElementById('addKeyBtn');
