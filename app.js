@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '1.0.23';
+window.APP_VERSIONS.app = '1.0.24';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
@@ -312,7 +312,7 @@ function actualizarNombreCroquetas() {
         return;
     }
 
-    const soloVegetarianas = selecionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
+    const soloVegetarianas = seleccionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
     const cantidad = (soloVegetarianas || esCroquetaVeg) ? 6 : 2;
 
     const textoCroquetas = seleccionadas.map(s => `${cantidad} ${s}`).join(' - ');
@@ -784,3 +784,17 @@ function eliminarKeySeleccionada() {
 // Inicialización automática al cargar la página
 cargar();
 actualizarListaKeys();
+
+// NUEVO: Restringir input de precio a estrictamente 2 decimales
+const editPrecioInput = document.getElementById('edit-precio');
+if (editPrecioInput) {
+    editPrecioInput.addEventListener('input', function() {
+        if (this.value.includes('.')) {
+            let parts = this.value.split('.');
+            if (parts[1] && parts[1].length > 2) {
+                parts[1] = parts[1].substring(0, 2);
+                this.value = parts.join('.');
+            }
+        }
+    });
+}
