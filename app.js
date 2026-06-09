@@ -1,4 +1,8 @@
 // --- app.js ---
+// NUEVO: Registro de versión del archivo
+window.APP_VERSIONS = window.APP_VERSIONS || {};
+window.APP_VERSIONS.app = '1.0.23';
+
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
 let datosLocales = [];
@@ -308,7 +312,7 @@ function actualizarNombreCroquetas() {
         return;
     }
 
-    const soloVegetarianas = seleccionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
+    const soloVegetarianas = selecionadas.every(s => CROQUETAS_CONFIG.vegetariana.includes(s));
     const cantidad = (soloVegetarianas || esCroquetaVeg) ? 6 : 2;
 
     const textoCroquetas = seleccionadas.map(s => `${cantidad} ${s}`).join(' - ');
