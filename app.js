@@ -62,7 +62,7 @@ function extraerJSON(texto) {
             if (braceCount === 0) startIndex = i;
             braceCount++;
         } else if (limpio[i] === '}') {
-            braceCount--;
+            box_count = braceCount--;
             if (braceCount === 0 && startIndex !== -1) {
                 const jsonString = limpio.substring(startIndex, i + 1);
                 try {
@@ -79,6 +79,10 @@ function extraerJSON(texto) {
 
 async function cargar() {
     try {
+        if (typeof UI !== 'undefined' && typeof UI.log === 'function') {
+            UI.log('[Editor] Conectando con Google Sheets remoto...');
+        }
+        
         const resp = await fetch(CSV_URL + '&t=' + Date.now());
         const text = await resp.text();
         const filas = text.split(/\r?\n/).filter(f => f.trim() !== "");
@@ -347,7 +351,7 @@ async function generarTraduccionEN() {
     const textoCompletoEs = (nombreEs + (uvasEs ? ' // ' + uvasEs : '')).replace(/"/g, "'");
 
     const URL_MODELO = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
-    const instruccion = `Actúa como un traductor profesional de menús de restaurantes. Te paso un elemento en español: "${textoCompletoEs}".
+    const instruccion = `Actúa como un translator profesional de menús de restaurantes. Te paso un elemento en español: "${textoCompletoEs}".
     ${esVino ? 'Es un vino. El separador "//" distingue el nombre del vino de la variedad de uva o detalles. Debes traducir ambas partes y mantener el separador "//" en el resultado. El nombre del vino debe ir en MAYÚSCULAS, pero el contenido entre paréntesis (como la D.O.) debe mantener su formato original (ej: EL COTO (D.O. Rioja)).' : ''}
     Necesito que me des EXACTAMENTE 3 opciones de traducción al inglés con diferentes enfoques para un menú:
     1. Traducción directa/literal.
@@ -661,6 +665,10 @@ async function enviarAlExcel() {
     btn.innerText = "⏳ SUBIENDO Y ORDENANDO COLUMNAS..."; 
     btn.disabled = true;
     
+    if (typeof UI !== 'undefined' && typeof UI.log === 'function') {
+        UI.log('[Editor] Compilando matriz y enviando cambios distribuidos a Google Sheets...');
+    }
+    
     datosLocales.sort((a, b) => a.id - b.id);
     
     const payload = datosLocales.map(p => ({
@@ -724,6 +732,12 @@ function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
 
 // --- SISTEMA DE GESTIÓN DE API KEYS EN LOCAL ---
 function actualizarListaKeys() {
+    // ENLACE AL MODULO SUPERIOR: Si ui.js tiene implementado el renderizado avanzado y enmascarado, delegamos en él
+    if (typeof UI !== 'undefined' && typeof UI.actualizarListaKeys === 'function') {
+        UI.actualizarListaKeys();
+        return;
+    }
+
     const select = document.getElementById('selectKeys');
     const keys = getKeys();
     
@@ -745,6 +759,10 @@ function agregarKey() {
     if (input.value.trim()) {
         saveKey(input.value.trim());
         input.value = "";
+        
+        if (typeof UI !== 'undefined' && typeof UI.log === 'function') {
+            UI.log('[Editor] Nueva API Key agregada con éxito.');
+        }
         actualizarListaKeys();
     }
 }
@@ -753,6 +771,10 @@ function eliminarKeySeleccionada() {
     const select = document.getElementById('selectKeys');
     if (select.value) {
         deleteKey(select.value);
+        
+        if (typeof UI !== 'undefined' && typeof UI.log === 'function') {
+            UI.log('[Editor] API Key removida del almacenamiento local.');
+        }
         actualizarListaKeys();
     } else {
         alert("No hay ninguna Key seleccionada para eliminar.");
