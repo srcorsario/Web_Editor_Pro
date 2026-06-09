@@ -1,4 +1,7 @@
 // ui.js (Web_Editor_Pro)
+// NUEVO: Registro de versión del archivo
+window.APP_VERSIONS = window.APP_VERSIONS || {};
+window.APP_VERSIONS.ui = '1.0.2';
 
 let currentKeyIndex = 0;
 let procesoDetenido = false;
@@ -172,7 +175,6 @@ export const UI = {
         }
     },
 
-    // MODIFICADO: Ampliadas las palabras clave de búsqueda para 'Activa'
     sincronizarConGoogleSheets: async () => {
         if (stateContainer.headers.length === 0 || stateContainer.csvData.length === 0) {
             return UI.log("[Error] No hay datos en memoria para sincronizar. Carga un archivo primero.");
@@ -190,7 +192,6 @@ export const UI = {
 
         const idxId = findIdx(['ID']);
         const idxPrecio = findIdx(['PRECIO', 'PRICE']);
-        // MODIFICADO: Incluidas variantes femenino/plural/inglés para que encuentre "Activa"
         const idxEstado = findIdx(['ESTADO', 'ACTIVO', 'ACTIVA', 'ACTIV', 'ACTIVE']);
         const idxCarpeta = findIdx(['CARPETA', 'FOLDER', 'CATEGORIA']);
         const idxImagen = findIdx(['IMAGEN', 'FOTO', 'ARCHIVO_FOTO', 'IMG']);
@@ -212,7 +213,6 @@ export const UI = {
                 alergenos: idxAlergenos !== -1 ? (row[idxAlergenos] || "") : ""
             };
 
-            // Reconstruir dinámicamente todas las columnas de idioma (Nombre_XX)
             stateContainer.headers.forEach((h, i) => {
                 if (h.trim().toUpperCase().startsWith("NOMBRE_")) {
                     let langKey = h.trim().toUpperCase().replace("NOMBRE_", "").toLowerCase();
@@ -221,7 +221,7 @@ export const UI = {
             });
 
             return obj;
-        }).filter(x => !isNaN(x.id) && x.id > 0); // Filtra filas sin ID válido
+        }).filter(x => !isNaN(x.id) && x.id > 0);
 
         if (payload.length === 0) {
             return UI.log("[Error] La compilación no generó filas válidas. Verifica que la columna 'ID' exista y sea correcta.");
@@ -516,10 +516,12 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.renderRadiosIdiomas();
     UI.inicializarAjustesExpertos();
 
-    const mainScript = document.getElementById('main-script');
-    if (mainScript && mainScript.dataset.version) {
-        const versionEl = document.getElementById('app-version');
-        if (versionEl) versionEl.innerText = `v${mainScript.dataset.version}`;
+    // NUEVO: Recopilar versiones de todos los scripts y mostrarlas en la cabecera
+    window.APP_VERSIONS.css = '1.0.0';
+    const versionEl = document.getElementById('app-version');
+    if (versionEl) {
+        const v = window.APP_VERSIONS;
+        versionEl.innerText = `Core:${v.app || '?'} | UI:${v.ui || '?'} | Lang:${v.lang || '?'} | State:${v.state || '?'} | CSS:${v.css || '?'}`;
     }
 
     const addKeyBtn = document.getElementById('addKeyBtn');
