@@ -56,7 +56,10 @@
                             <button id="addKeyBtn" class="btn btn-primary text-xs py-1 px-2">Añadir</button>
                         </div>
                         <div class="flex gap-1.5 items-center">
-                            <div id="contenedorSelectKeys" class="flex-1"></div>
+                            <!-- NUEVO: Contenedor rellenado dinámicamente por ui.js con el select necesario -->
+                            <div id="contenedorSelectKeys" class="flex-1">
+                                <select id="selectKeys" class="select-keys w-full text-xs py-1 px-2"></select>
+                            </div>
                             <button id="btnEliminarKeySeleccionada" class="btn btn-danger text-xs py-1 px-2.5 font-bold" title="Eliminar key">✕</button>
                         </div>
                     </div>
@@ -67,7 +70,8 @@
                             <input type="file" id="archivoLocal" accept=".csv" class="text-xs flex-1 bg-slate-800 text-slate-300 p-0.5">
                         </div>
                         <div class="flex gap-1.5">
-                            <input type="text" id="sheetsUrl" placeholder="Pega aquí la URL CSV de tu Google Sheets..." class="flex-1 text-xs text-slate-200 py-1 px-2">
+                            <!-- MODIFICADO: Añadido el valor por defecto con la URL del CSV de Google Sheets conocido para la importación -->
+                            <input type="text" id="sheetsUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv" placeholder="Pega aquí la URL CSV de tu Google Sheets..." class="flex-1 text-xs text-slate-200 py-1 px-2">
                             <button id="loadSheetsBtn" class="btn btn-secondary text-xs py-1 px-2 whitespace-nowrap">Cargar web</button>
                         </div>
                     </div>
@@ -156,5 +160,7 @@
     </div>
 
     <script id="main-script" data-version="1.0.15" type="module" src="./app.js"></script>
+    <!-- NUEVO: Carga del módulo de la interfaz avanzada y traductor por lotes para que los ajustes expertos funcionen -->
+    <script type="module" src="./ui.js"></script>
 </body>
 </html>
