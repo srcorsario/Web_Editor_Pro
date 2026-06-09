@@ -172,7 +172,7 @@ export const UI = {
         }
     },
 
-    // MODIFICADO: Mapeo dinámico inteligente basado en palabras clave para evitar sobrescrituras con blanco
+    // MODIFICADO: Ampliadas las palabras clave de búsqueda para 'Activa'
     sincronizarConGoogleSheets: async () => {
         if (stateContainer.headers.length === 0 || stateContainer.csvData.length === 0) {
             return UI.log("[Error] No hay datos en memoria para sincronizar. Carga un archivo primero.");
@@ -180,7 +180,6 @@ export const UI = {
 
         UI.log("[Sincro] Analizando cabeceras reales de la hoja para mapeo seguro...");
         
-        // Buscador flexible: encuentra el índice buscando múltiples variantes en mayúsculas
         const findIdx = (keywords) => {
             for (const kw of keywords) {
                 const idx = stateContainer.headers.findIndex(h => h.toUpperCase().includes(kw));
@@ -191,7 +190,8 @@ export const UI = {
 
         const idxId = findIdx(['ID']);
         const idxPrecio = findIdx(['PRECIO', 'PRICE']);
-        const idxEstado = findIdx(['ESTADO', 'ACTIVO']);
+        // MODIFICADO: Incluidas variantes femenino/plural/inglés para que encuentre "Activa"
+        const idxEstado = findIdx(['ESTADO', 'ACTIVO', 'ACTIVA', 'ACTIV', 'ACTIVE']);
         const idxCarpeta = findIdx(['CARPETA', 'FOLDER', 'CATEGORIA']);
         const idxImagen = findIdx(['IMAGEN', 'FOTO', 'ARCHIVO_FOTO', 'IMG']);
         const idxAlergenos = findIdx(['ALERG']);
@@ -200,7 +200,7 @@ export const UI = {
             return UI.log("[Error Crítico] No se encuentra la columna 'ID'. Sincronización cancelada por seguridad.");
         }
 
-        UI.log(`[Sincro] Mapeo detectado -> ID:${idxId} | Precio:${idxPrecio} | Estado:${idxEstado} | Carpeta:${idxCarpeta} | Imagen:${idxImagen} | Alergenos:${idxAlergenos}`);
+        UI.log(`[Sincro] Mapeo detectado -> ID:${idxId} | Precio:${idxPrecio} | Estado/Activa:${idxEstado} | Carpeta:${idxCarpeta} | Imagen:${idxImagen} | Alergenos:${idxAlergenos}`);
 
         const payload = stateContainer.csvData.map(row => {
             let obj = {
