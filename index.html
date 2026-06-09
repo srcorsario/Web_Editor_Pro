@@ -2,159 +2,159 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ADMIN CARTA V 13.0 - WINE SYNC</title>
-    <link rel="icon" type="image/png" href="setting.png">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traductor de Menús Ultra-Eficiente por Lotes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; }
+        input, textarea, select { background-color: #334155; border: 1px solid #475569; color: white; border-radius: 4px; padding: 6px 12px; }
+        input:focus { outline: 2px solid #3b82f6; }
+        .btn { padding: 5px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn-primary { background-color: #2563eb; color: white; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-success { background-color: #16a34a; color: white; }
+        .btn-success:hover { background-color: #15803d; }
+        .btn-danger { background-color: #dc2626; color: white; }
+        .btn-danger:hover { background-color: #b91c1c; }
+        .btn-secondary { background-color: #475569; color: white; }
+        .btn-secondary:hover { background-color: #334155; }
+        /* Consola de comandos con scroll interno rígido */
+        #consola { background-color: #020617; font-family: monospace; font-size: 13px; color: #38bdf8; overflow-y: auto; padding: 10px; border-radius: 6px; border: 1px solid #1e293b; flex-1; }
+        /* Tabla de contenidos */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        th, td { padding: 10px; border: 1px solid #334155; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        th { background-color: #1e293b; color: #94a3b8; font-weight: 600; }
+        tr:nth-child(even) { background-color: #1e293b; }
+        tr:hover { background-color: #334155; }
+    </style>
 </head>
-<body>
+<body class="p-4">
 
-<div class="container">
-    <div class="header-admin">
-        <h1>⚙️ GESTOR DE CARTA V 13.0</h1>
-        <div id="status-carga">Cargando datos...</div>
+    <div class="w-full px-2 space-y-4">
         
-        <!-- Panel de API Keys -->
-        <div class="api-keys-manager">
-            <label class="label-seccion" style="margin-bottom: 5px;">🔑 Claves API Gemini (Local)</label>
-            <div class="api-keys-inputs">
-                <input type="text" id="nuevaKey" placeholder="Pegar nueva API Key..." class="input-estandar">
-                <button class="btn-add-key" onclick="agregarKey()">Añadir</button>
-            </div>
-            <div class="api-keys-list">
-                <select id="selectKeys" class="select-keys" disabled>
-                    <option value="">No hay Keys configuradas</option>
-                </select>
-                <button class="btn-delete-key" onclick="eliminarKeySeleccionada()" title="Eliminar Key seleccionada">✕</button>
-            </div>
-        </div>
-    </div>
-    <div id="editor-dinamico"></div>
-</div>
-
-<button class="btn-add-float" onclick="abrirSelector()">+</button>
-<button class="btn-guardar-main" onclick="enviarAlExcel()">💾 GUARDAR Y REORDENAR EXCEL</button>
-
-<div id="modal-editor" class="modal">
-    <div class="modal-content modal-full-layout">
-        <div class="modal-col-izquierda">
-            <h2 id="modal-titulo" style="margin-top:0; color:var(--primario); border-bottom: 2px solid #eee; padding-bottom: 10px;">Editar Elemento</h2>
-            <div class="input-group">
-                <label id="label-uvas" class="label-seccion">Nombres y Detalles del Plato</label>
-                <div class="input-row-lang row-es-control">
-                    <div class="lang-tag tag-es-main">ES</div>
-                    <div style="flex:1">
-                        <input id="edit-es" class="input-estandar input-nombre-corto" placeholder="Nombre en Español" oninput="comprobarRequisitosTraduccion()">
-                        <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Uvas / Detalles (Opcional)">
-                    </div>
-                </div>
-                <div class="input-row-lang row-en-control">
-                    <div class="lang-tag tag-en-main">EN</div>
-                    <div style="flex:1">
-                        <input id="edit-en" class="input-estandar input-nombre-corto" placeholder="Name in English" oninput="comprobarRequisitosTraduccion()">
-                        <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Grapes / Details (Optional)">
-                    </div>
-                </div>
-                <button id="btn-generar-en" class="btn-traducir-en" onclick="generarTraduccionEN()">🇬🇧 Generar Inglés desde Español</button>
-                <button id="btn-autotraducir" class="btn-traductor-magico" disabled onclick="ejecutarTraduccionAutomatica()">
-                    ✨ Traducir los otros 23 idiomas (Requiere ES y EN) <!-- MODIFICADO: De 19 a 23 -->
-                </button>
-                <div id="contenedor-resto-idiomas" class="langs-scroll-container"></div>
-            </div>
-        </div>
-
-        <div class="modal-col-derecha">
-            <div class="panel-control-precio">
-                <div class="input-group input-precio-super-mini">
-                    <label class="label-seccion">Precio (€)</label>
-                    <input type="text" id="edit-precio" class="input-estandar input-precio-mini" placeholder="0.00" oninput="validarFormatoPrecio(this)">
-                </div>
-                <div class="input-group input-imagen-flexible">
-                    <label class="label-seccion">Imagen</label>
-                    <input type="text" id="edit-imagen" class="input-estandar" placeholder="plato01.webp">
-                </div>
-            </div>
-            
-            <div class="input-group">
-                <label class="label-seccion">Alérgenos y Dietas</label>
-                <div id="alergenos-grid" class="alergenos-grid"></div>
-            </div>
-            
-            <!-- NUEVO: Contenedor para selector de Croquetas -->
-            <div id="contenedor-croquetas"></div>
-            
-            <div class="modal-acciones-footer">
-                <button onclick="aplicarCambiosPlato()" class="btn-modal-aceptar">ACEPTAR</button>
-                <button onclick="cerrarModal('modal-editor')" class="btn-modal-cancelar">CANCELAR</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para elegir la traducción al Inglés -->
-<div id="modal-traduccion-en" class="modal">
-    <div class="modal-content modal-box-en">
-        <h3 style="text-align:center; color:var(--primario); margin-top:0;">Generar Traducción al Inglés</h3>
-        <p style="font-size: 0.85rem; text-align:center; color:#7f8c8d;">Selecciona una versión o edítala a tu gusto</p>
-        
-        <div id="opciones-en-container" class="opciones-en-scroll"></div>
-        
-        <div class="footer-box-en">
+        <header class="flex justify-between items-center border-b border-slate-700 pb-2">
             <div>
-                <label class="label-seccion">Editar selección:</label>
-                <textarea id="editar-opcion-en" class="input-estandar" rows="3" placeholder="Selecciona una opción arriba o escribe la tuya..."></textarea>
+                <h1 class="text-2xl font-bold tracking-tight">AI Menu Translator Engine</h1>
+                <p class="text-slate-400 text-xs mt-0.5">Traductor profesional de cartas y bases de datos gastronómicas</p>
             </div>
+            <div class="text-right text-xs text-slate-400">
+                Panel de Control de Integridad Estricta
+            </div>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-4">
             
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="confirmarTraduccionEN()" class="btn-modal-aceptar" style="flex:1;">CONFIRMAR</button>
-                <button onclick="cerrarModalTraduccionEN()" class="btn-modal-cancelar" style="flex:1;">CANCELAR</button>
+            <div class="card md:w-3/10 flex-none flex flex-col justify-between h-[310px]" style="width: 30%; min-width: 340px;">
+                <div class="space-y-1.5">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">1. Panel de Control & Orígenes</h3>
+                    
+                    <div class="space-y-1 bg-slate-900/50 p-1.5 rounded border border-slate-800">
+                        <div class="flex gap-1.5">
+                            <input type="text" id="nuevaKey" placeholder="Nueva Gemini Key..." class="flex-1 text-xs py-1 px-2">
+                            <button id="addKeyBtn" class="btn btn-primary text-xs py-1 px-2">Añadir</button>
+                        </div>
+                        <div class="flex gap-1.5 items-center">
+                            <div id="contenedorSelectKeys" class="flex-1"></div>
+                            <button id="btnEliminarKeySeleccionada" class="btn btn-danger text-xs py-1 px-2.5 font-bold" title="Eliminar key">✕</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-1 text-sm">
+                        <div class="flex gap-2 items-center">
+                            <label class="text-xs text-slate-300 whitespace-nowrap">CSV Local:</label>
+                            <input type="file" id="archivoLocal" accept=".csv" class="text-xs flex-1 bg-slate-800 text-slate-300 p-0.5">
+                        </div>
+                        <div class="flex gap-1.5">
+                            <input type="text" id="sheetsUrl" placeholder="Pega aquí la URL CSV de tu Google Sheets..." class="flex-1 text-xs text-slate-200 py-1 px-2">
+                            <button id="loadSheetsBtn" class="btn btn-secondary text-xs py-1 px-2 whitespace-nowrap">Cargar web</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-700/60 pt-1.5 space-y-1.5">
+                    <div class="flex items-center justify-between text-xs text-slate-300">
+                        <span class="font-medium">Rango de Filas:</span>
+                        <div class="flex items-center gap-2">
+                            <label class="text-slate-400">Desde: <input type="number" id="rangoInicio" value="7" min="2" class="w-12 text-center text-xs py-0.5 px-1 ml-1 bg-slate-900"></label>
+                            <label class="text-slate-400">Hasta: <input type="number" id="rangoFin" value="18" min="2" class="w-12 text-center text-xs py-0.5 px-1 ml-1 bg-slate-900"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-1.5 text-xs">
+                        <button id="btnIniciar" class="btn btn-success font-bold py-1 px-1 text-[11px] tracking-tight uppercase">Iniciar Traducción</button>
+                        <button id="btnPausa" class="btn btn-secondary font-bold py-1 px-1 uppercase">Pausar</button>
+                        <button id="btnCancelar" class="btn btn-danger font-bold py-1 px-1 uppercase">Cancelar</button>
+                        <button id="saveCsvBtn" class="btn btn-primary font-bold py-1 px-1 text-[11px] whitespace-nowrap uppercase">Descargar CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card md:w-1/5 flex-none flex flex-col h-[310px]" style="width: 20%; min-w-[200px]">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Idioma Vista</h3>
+                <div id="radiosIdiomas" class="w-full overflow-y-auto pr-1 flex-1"></div>
+            </div>
+
+            <div class="card flex-1 md:w-1/2 c-consola flex flex-col h-[310px]" style="width: 50%;">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">3. Monitor de Sistema</h3>
+                <div id="consola"></div>
+            </div>
+
+        </div>
+
+        <div class="card border-dashed border-amber-500/40 bg-slate-900/40">
+            <h3 class="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                🛠️ 4. Ajustes solo para Expertos (Control Local & Lotes Alternativos)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3 bg-slate-950/40 p-3 rounded border border-slate-800">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wide border-b border-slate-800 pb-1">Persistencia Directa en PC</p>
+                    <div class="flex flex-col sm:flex-row gap-3 items-center">
+                        <button id="btnExportarCsvExpertos" class="btn btn-primary text-xs py-2 px-4 font-bold uppercase tracking-wide w-full sm:w-auto bg-amber-600 hover:bg-amber-700 border border-amber-500">
+                            Guardar Hoja CSV al PC
+                        </button>
+                        <div class="flex flex-col w-full flex-1">
+                            <label class="text-[11px] text-slate-400 mb-1">Importar CSV desde Ordenador:</label>
+                            <input type="file" id="btnImportarCsvExpertos" accept=".csv" class="text-xs bg-slate-800 text-slate-200 cursor-pointer p-1 rounded border border-slate-700">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-slate-950/40 p-3 rounded border border-slate-800">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wide border-b border-slate-800 pb-1">Motor de Traducción Masiva Avanzada</p>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <button id="btnIniciarTraduccionLotes" class="btn btn-success text-xs py-2 px-3 font-bold uppercase tracking-wide flex-1 min-w-[140px]">
+                            Traducir Faltantes
+                        </button>
+                        <button id="btnPausarTraduccionLotes" class="btn btn-secondary text-xs py-2 px-3 font-bold uppercase tracking-wide">
+                            Pausar
+                        </button>
+                        <button id="btnCancelarTraduccionLotes" class="btn btn-danger text-xs py-2 px-3 font-bold uppercase tracking-wide">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="card overflow-x-auto">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Previsualización de Datos en Memoria</h3>
+            <div class="max-h-[580px] overflow-y-auto">
+                <table class="w-full">
+                    <thead id="tableHeadRow" class="sticky top-0 z-10">
+                        </thead>
+                    <tbody id="tablaBody" class="text-sm text-slate-300">
+                        <tr>
+                            <td colspan="4" class="text-center py-8 text-slate-500 italic">Ningún archivo cargado en el sistema. Selecciona un origen arriba.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
-</div>
 
-<div id="modal-selector" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-        <h3 style="text-align:center; color:var(--primario);">AÑADIR NUEVO A...</h3>
-        <div id="lista-agrupada" style="max-height: 65vh; overflow-y: auto;"></div>
-        <button onclick="cerrarModal('modal-selector')" style="width:100%; margin-top:15px; padding:15px; border:none; background:#eee; border-radius:10px; font-weight:bold;">CERRAR</button>
-    </div>
-</div>
-
-<script src="languages.js"></script>
-<script src="state.js"></script>
-<script src="ui.js"></script>
-<script src="app.js"></script>
-
-<script>
-    function validarFormatoPrecio(input) {
-        let valor = input.value.replace(',', '.');
-        valor = valor.replace(/[^0-9.]/g, '');
-        const partes = valor.split('.');
-        if (partes.length > 2) {
-            valor = partes[0] + '.' + partes.slice(1).join('');
-        }
-        const fragmentos = valor.split('.');
-        let enteros = fragmentos[0];
-        let decimales = fragmentos[1];
-        if (enteros.length > 3) {
-            enteros = enteros.substring(0, 3);
-        }
-        if (decimales !== undefined && decimales.length > 2) {
-            decimales = decimales.substring(0, 2);
-        }
-        if (decimales !== undefined) {
-            if ((enteros.length + decimales.length) > 5) {
-                decimales = decimales.substring(0, 5 - enteros.length);
-            }
-            input.value = enteros + '.' + decimales;
-        } else {
-            input.value = enteros;
-        }
-    }
-    window.validarPrecio = validarFormatoPrecio;
-</script>
-
+    <script id="main-script" data-version="1.0.15" type="module" src="./app.js"></script>
 </body>
 </html>
