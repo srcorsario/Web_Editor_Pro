@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Editor Pro</title>
+    <!-- NUEVO: Favicon restaurado apuntando a setting.png -->
+    <link rel="icon" href="setting.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
@@ -14,7 +16,8 @@
     <div class="container">
         <!-- HEADER Y KEYS COMPARTIDAS -->
         <div class="header-admin">
-            <h1>Web Editor Pro <span id="app-version" style="font-size: 0.7rem; color: #7f8c8d; font-weight: 400; margin-left: 10px; vertical-align: middle;"></span></h1>
+            <!-- MODIFICADO: Contenedor de versiones dinámico -->
+            <h1>Web Editor Pro <span id="app-version" style="font-size: 0.65rem; color: #95a5a6; font-weight: 400; margin-left: 10px; vertical-align: middle; display: inline-block;"></span></h1>
             <div id="status-carga" class="status-ok">⏳ Conectando...</div>
             
             <div class="api-keys-manager">
@@ -80,7 +83,6 @@
                             <button id="saveCsvBtn" class="btn btn-primary font-bold py-1 px-1 text-[11px] whitespace-nowrap uppercase">Descargar CSV</button>
                         </div>
                         
-                        <!-- NUEVO: Botón para sincronizar traducciones masivas a la hoja original -->
                         <button id="btnSyncSheets" class="btn btn-success font-bold py-2 px-1 text-[11px] tracking-tight uppercase w-full col-span-2 mt-1 border border-emerald-400" style="grid-column: span 2;">
                             ☁️ Sincronizar con Google Sheet
                         </button>
@@ -203,8 +205,8 @@
     <!-- SCRIPTS -->
     <script src="languages.js"></script>
     <script src="state.js"></script>
-    <script id="main-script" data-version="1.0.22" src="./app.js"></script>
-    <script type="module" src="./ui.js"></script>
+    <script src="app.js"></script>
+    <script type="module" src="ui.js"></script>
 
     <script>
         // Lógica nativa de Pestañas (Tabs)
