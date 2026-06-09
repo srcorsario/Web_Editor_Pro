@@ -1,3 +1,7 @@
+// NUEVO: Registro de versión del archivo
+window.APP_VERSIONS = window.APP_VERSIONS || {};
+window.APP_VERSIONS.lang = '1.0.0';
+
 // MODIFICADO: Cambiado de const a var para garantizar que se adjunte al objeto global window y sea accesible desde ui.js (módulo ES6)
 var IDIOMAS_CONFIG = {
     ES: "🇪🇸 Español", EN: "🇬🇧 English", DE: "🇩🇪 Deutsch", FR: "🇫🇷 Français", IT: "🇮🇹 Italiano",
@@ -7,7 +11,6 @@ var IDIOMAS_CONFIG = {
     CA: "català", EU: "Euskara", GL: "Galego", VA: "Valencià"
 };
 
-// Traducciones maestras de las colecciones de Categorías
 var categoriesList = [ 
     { id: '12', ES: 'Sugerencias', EN: 'Suggestions', DE: 'Vorschläge', FR: 'Suggestions', IT: 'Suggerimenti', RU: 'Предложения', NL: 'Suggesties', PL: 'Sugestie', SV: 'Förslag', NO: 'Forslag', DA: 'Forslag', FI: 'Suositukset', PT: 'Sugstões', RO: 'Sugestii', HU: 'Ajánlatok', CS: 'Doporučení', EL: 'Προτάσεις', TR: 'Öneriler', AR: 'اقتراحات', ZH: '推荐', JA: 'おすすめ', CA: 'Suggeriments', EU: 'Iradokizunak', GL: 'Suxestións', VA: 'Suggeriments' }, 
     { id: '1', ES: 'Entrantes', EN: 'Starters', DE: 'Vorspeisen', FR: 'Entrées', IT: 'Antipasti', RU: 'Закуски', NL: 'Voorgerechten', PL: 'Przystawki', SV: 'Förrätter', NO: 'Forretter', DA: 'Forretter', FI: 'Alkuruoat', PT: 'Entradas', RO: 'Gustări', HU: 'Előételek', CS: 'Předkrmy', EL: 'Ορεκτικά', TR: 'Başlangıçlar', AR: 'مقبلات', ZH: '前菜', JA: '前菜', CA: 'Entrants', EU: 'Hasierakoak', GL: 'Entrantes', VA: 'Entrants' }, 
