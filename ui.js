@@ -1,5 +1,4 @@
 // ui.js (Web_Editor_Pro)
-// MODIFICADO: Se ha eliminado la importación de state.js para evitar conflictos de módulo. Se usan las variables globales inyectadas por los scripts en index.html.
 
 let currentKeyIndex = 0;
 let procesoDetenido = false;
@@ -52,27 +51,81 @@ export const UI = {
         }).join('');
     },
 
+    // NUEVO: Renderizado dinámico de los radio buttons de idiomas basado en la configuración global
+    renderRadiosIdiomas: () => {
+        const container = document.getElementById('radiosIdiomas');
+        if (!container) return;
+
+        // Accedemos a la variable global inyectada por languages.js
+        const idiomas = window.IDIOMAS_CONFIG || {};
+        let html = '';
+
+        for (const [code, name] of Object.entries(idiomas)) {
+            if (code === 'ES') continue; // Saltamos castellano porque es la columna base fija
+            const checked = code === 'EN' ? 'checked' : '';
+            html += `<label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer hover:text-white mb-1">
+                <input type="radio" name="langView" value="${code}" ${checked} onchange="UI.renderTable()" class="accent-amber-500">
+                <span>${name}</span>
+            </label>`;
+        }
+        container.innerHTML = html;
+    },
+
+    // MODIFICADO: Tabla simplificada. Solo Fila, ID, Castellano y el idioma seleccionado
     renderTable: () => {
         const tableHeadRow = document.getElementById('tableHeadRow');
         const tablaBody = document.getElementById('tablaBody');
         if (!tableHeadRow || !tablaBody) return;
 
         if (stateContainer.headers.length === 0) {
+            tableHeadRow.innerHTML = '';
             tablaBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-500 italic">Ningún archivo cargado en el sistema. Selecciona un origen arriba.</td></tr>';
             return;
         }
 
-        tableHeadRow.innerHTML = '<tr>' + stateContainer.headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-        
+        const selectedRadio = document.querySelector('input[name="langView"]:checked');
+        const selectedLang = selectedRadio ? selectedRadio.value : 'EN';
+        const idiomas = window.IDIOMAS_CONFIG || {};
+
+        // Búsqueda de índices (insensible a mayúsculas/minúsculas para mayor robustez)
+        const idIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === 'ID');
+        const esIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === 'NOMBRE_ES');
+        const langIdx = stateContainer.headers.findIndex(h => h.toUpperCase() === `NOMBRE_${selectedLang}`);
+
+        if (idIdx === -1 || esIdx === -1) {
+            tablaBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-500 italic">Estructura de CSV no reconocida (Faltan columnas ID o Nombre_ES).</td></tr>';
+            return;
+        }
+
+        const langName = idiomas[selectedLang] || selectedLang;
+
+        // Cabecera
+        tableHeadRow.innerHTML = `<tr>
+            <th>Fila</th>
+            <th>ID</th>
+            <th>Castellano (ES)</th>
+            <th>${langName} (${selectedLang})</th>
+        </tr>`;
+
+        // Rango
         const rangoInicioEl = document.getElementById('rangoInicio');
         const rangoFinEl = document.getElementById('rangoFin');
         const inicio = rangoInicioEl ? Math.max(0, parseInt(rangoInicioEl.value) - 2) : 0;
         const fin = rangoFinEl ? Math.min(stateContainer.csvData.length, parseInt(rangoFinEl.value) - 1) : stateContainer.csvData.length;
-
         const datosFiltrados = stateContainer.csvData.slice(inicio, fin);
-        
-        tablaBody.innerHTML = datosFiltrados.map(row => {
-            return '<tr>' + row.map(cell => `<td>${cell || ''}</td>`).join('') + '</tr>';
+
+        // Cuerpo
+        tablaBody.innerHTML = datosFiltrados.map((row, index) => {
+            const rowNum = inicio + index + 2; // +2 porque el índice es 0-based y la fila 1 es cabecera
+            const idVal = row[idIdx] || '';
+            const esVal = row[esIdx] || '';
+            const langVal = langIdx !== -1 ? (row[langIdx] || '') : 'N/A';
+            return `<tr>
+                <td>${rowNum}</td>
+                <td>${idVal}</td>
+                <td>${esVal}</td>
+                <td>${langVal}</td>
+            </tr>`;
         }).join('');
     },
 
@@ -116,7 +169,7 @@ export const UI = {
     inicializarAjustesExpertos: () => {
         UI.log("[Expertos] Vinculando componentes interactivos del panel avanzado de control...");
 
-        const btnExportar = document.getElementById('btnExportarCsvExpertos') || document.getElementById('saveCsvBtn');
+        const btnExportar = document.getElementById('saveCsvBtn');
         if (btnExportar) {
             btnExportar.onclick = () => {
                 if (stateContainer.headers && stateContainer.csvData) {
@@ -127,7 +180,7 @@ export const UI = {
             };
         }
 
-        const inputImportar = document.getElementById('btnImportarCsvExpertos') || document.getElementById('archivoLocal');
+        const inputImportar = document.getElementById('archivoLocal');
         if (inputImportar) {
             inputImportar.onchange = (e) => {
                 const file = e.target.files[0];
@@ -151,14 +204,14 @@ export const UI = {
             };
         }
 
-        const btnIniciar = document.getElementById('btnIniciarTraduccionLotes') || document.getElementById('btnIniciar');
+        const btnIniciar = document.getElementById('btnIniciar');
         if (btnIniciar) {
             btnIniciar.onclick = () => {
                 UI.iniciarTraduccionPorLotes(stateContainer);
             };
         }
 
-        const btnPausa = document.getElementById('btnPausarTraduccionLotes') || document.getElementById('btnPausa');
+        const btnPausa = document.getElementById('btnPausa');
         if (btnPausa) {
             btnPausa.onclick = () => {
                 procesoPausado = !procesoPausado;
@@ -167,7 +220,7 @@ export const UI = {
             };
         }
 
-        const btnCancelar = document.getElementById('btnCancelarTraduccionLotes') || document.getElementById('btnCancelar');
+        const btnCancelar = document.getElementById('btnCancelar');
         if (btnCancelar) {
             btnCancelar.onclick = () => {
                 procesoDetenido = true;
@@ -250,8 +303,8 @@ export const UI = {
 
         const ENDPOINT_GATEWAY = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
         
-        const columnasIdiomasDestino = activeStateContainer.headers.map((h, i) => (h.startsWith("Nombre_") && h !== "Nombre_ES") ? i : -1).filter(i => i !== -1);
-        const indiceCastellanoBase = activeStateContainer.headers.indexOf('Nombre_ES');
+        const columnasIdiomasDestino = activeStateContainer.headers.map((h, i) => (h.toUpperCase().startsWith("NOMBRE_") && h.toUpperCase() !== "NOMBRE_ES") ? i : -1).filter(i => i !== -1);
+        const indiceCastellanoBase = activeStateContainer.headers.findIndex(h => h.toUpperCase() === 'NOMBRE_ES');
 
         if (indiceCastellanoBase === -1) {
             return UI.log("[Error] Estructura incompatible: Falta la columna pivote requerida 'Nombre_ES'.");
@@ -271,7 +324,7 @@ export const UI = {
                     numeroFilaHumana: i + 2,
                     textoES: cadenaCastellano,
                     indicesColumnasFaltantes: indicesColumnasVacias,
-                    codigosIdiomas: indicesColumnasVacias.map(idx => activeStateContainer.headers[idx].replace("Nombre_", ""))
+                    codigosIdiomas: indicesColumnasVacias.map(idx => activeStateContainer.headers[idx].replace("Nombre_", "").replace("nombre_", ""))
                 });
             }
         }
@@ -334,7 +387,7 @@ export const UI = {
                                 const objetivoFilaMemoria = loteActual.find(p => p.numeroFilaHumana === parseInt(filaLote.id_fila));
                                 if (objetivoFilaMemoria && filaLote.traducciones) {
                                     objetivoFilaMemoria.indicesColumnasFaltantes.forEach(idxCol => {
-                                        const codigoIdiomaISO = activeStateContainer.headers[idxCol].replace("Nombre_", "");
+                                        const codigoIdiomaISO = activeStateContainer.headers[idxCol].replace("Nombre_", "").replace("nombre_", "");
                                         if (filaLote.traducciones[codigoIdiomaISO]) {
                                             activeStateContainer.csvData[objetivoFilaMemoria.indiceMatriz][idxCol] = filaLote.traducciones[codigoIdiomaISO].replace(/[\(\)""'']/g, '');
                                         }
@@ -376,6 +429,7 @@ export const UI = {
 
 document.addEventListener('DOMContentLoaded', () => {
     UI.actualizarListaKeys();
+    UI.renderRadiosIdiomas(); // NUEVO: Inicializar radios
     UI.inicializarAjustesExpertos();
 
     const addKeyBtn = document.getElementById('addKeyBtn');
