@@ -1,13 +1,10 @@
 // ui.js (Web_Editor_Pro)
-// MODIFICADO: Importación estricta de funciones de estado para permitir la gestión completa desde la UI
 import { getKeys, saveKey, deleteKey } from './state.js';
 
-// NUEVO: Variables de control de estado encapsuladas para el proceso de traducción por lotes portadas del repositorio secundario
 let currentKeyIndex = 0;
 let procesoDetenido = false;
 let procesoPausado = false;
 
-// NUEVO: Estado global centralizado para el flujo de datos del traductor y ajustes avanzados
 const stateContainer = {
     headers: [],
     csvData: []
@@ -15,16 +12,13 @@ const stateContainer = {
 
 export const UI = {
     log: (mensaje) => {
-        console.log(`[Editor] ${mensaje}`);
-        // Si tienes una consola en el editor, puedes apuntar aquí
+        console.log(`[Editor Pro] ${mensaje}`);
         
-        // NUEVO: Integración defensiva para volcar logs visuales al contenedor de estado nativo del editor si se encuentra presente
         const statusCarga = document.getElementById('status-carga');
         if (statusCarga) {
             statusCarga.innerText = mensaje;
         }
 
-        // NUEVO: Trazabilidad extendida. Soporte defensivo para volcar logs en tiempo real al Monitor del Sistema si existe en el DOM
         const consolaVisual = document.getElementById('consola');
         if (consolaVisual) {
             const div = document.createElement('div');
@@ -40,9 +34,7 @@ export const UI = {
         btn.innerText = isLoading ? text : "Guardar";
     },
     
-    // NUEVO: Patrón de renderizado optimizado y enmascaramiento seguro de API Keys portado del repositorio secundario
     actualizarListaKeys: (selectorElemento = '.select-keys') => {
-        // Manejo defensivo del DOM: búsqueda adaptativa por clase o identificador alternativo
         const selectEl = document.querySelector(selectorElemento) || document.getElementById('selectKeys');
         if (!selectEl) return;
         
@@ -55,13 +47,11 @@ export const UI = {
 
         selectEl.disabled = false;
         selectEl.innerHTML = keys.map((k, i) => {
-            // Enmascaramiento seguro para evitar la exposición visual de tokens completos
             const resumida = k.length > 10 ? `${k.substring(0, 6)}...${k.substring(k.length - 4)}` : k;
             return `<option value="${k}">Key ${i + 1}: ${resumida}</option>`;
         }).join('');
     },
 
-    // NUEVO: Método de renderizado de tabla para visualizar los datos importados en pantalla
     renderTable: () => {
         const tableHeadRow = document.getElementById('tableHeadRow');
         const tablaBody = document.getElementById('tablaBody');
@@ -74,7 +64,6 @@ export const UI = {
 
         tableHeadRow.innerHTML = '<tr>' + stateContainer.headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
         
-        // Obtener rango si existe
         const rangoInicioEl = document.getElementById('rangoInicio');
         const rangoFinEl = document.getElementById('rangoFin');
         const inicio = rangoInicioEl ? Math.max(0, parseInt(rangoInicioEl.value) - 2) : 0;
@@ -87,7 +76,6 @@ export const UI = {
         }).join('');
     },
 
-    // NUEVO: Lógica de importación directa desde Google Sheets usando la URL proporcionada
     cargarGoogleSheets: async () => {
         const urlInput = document.getElementById('sheetsUrl');
         const url = urlInput ? urlInput.value.trim() : '';
@@ -125,11 +113,9 @@ export const UI = {
         }
     },
 
-    // MODIFICADO: Eliminado el parámetro stateContainer para usar el estado global centralizado del módulo
     inicializarAjustesExpertos: () => {
         UI.log("[Expertos] Vinculando componentes interactivos del panel avanzado de control...");
 
-        // Registro seguro de eventos de exportación CSV local hacia la PC
         const btnExportar = document.getElementById('btnExportarCsvExpertos') || document.getElementById('saveCsvBtn');
         if (btnExportar) {
             btnExportar.onclick = () => {
@@ -141,7 +127,6 @@ export const UI = {
             };
         }
 
-        // Registro seguro de eventos de importación CSV local desde la PC
         const inputImportar = document.getElementById('btnImportarCsvExpertos') || document.getElementById('archivoLocal');
         if (inputImportar) {
             inputImportar.onchange = (e) => {
@@ -159,7 +144,6 @@ export const UI = {
             };
         }
 
-        // NUEVO: Registro seguro del botón de carga de Google Sheets para volcar datos desde la web
         const loadSheetsBtn = document.getElementById('loadSheetsBtn');
         if (loadSheetsBtn) {
             loadSheetsBtn.onclick = () => {
@@ -167,7 +151,6 @@ export const UI = {
             };
         }
 
-        // Registro seguro de botones de ciclo de vida del motor de automatización asíncrona por lotes
         const btnIniciar = document.getElementById('btnIniciarTraduccionLotes') || document.getElementById('btnIniciar');
         if (btnIniciar) {
             btnIniciar.onclick = () => {
@@ -193,14 +176,12 @@ export const UI = {
         }
     },
 
-    // NUEVO: Compilador de archivos planos CSV estructurado con fallback autónomo para salvaguardar la compatibilidad
     exportarCSV: (headers, csvData) => {
         try {
             let resultadoTexto = "";
             if (window.Papa) {
                 resultadoTexto = window.Papa.unparse([headers, ...csvData]);
             } else {
-                // Algoritmo recursivo de escape nativo ante ausencia accidental de librerías externas
                 resultadoTexto = [headers, ...csvData].map(row => 
                     row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
                 ).join("\n");
@@ -216,7 +197,6 @@ export const UI = {
         }
     },
 
-    // NUEVO: Lector asíncrono y sanitizador de flujo de entrada de texto estructurado Local
     importarCSV: (file, callback) => {
         const lector = new FileReader();
         lector.onload = (e) => {
@@ -234,7 +214,6 @@ export const UI = {
                         }
                     });
                 } else {
-                    // Fallback nativo de segmentación lineal para aislamiento procedimental autosuficiente
                     const lineas = contenidoCrudo.split(/\r?\n/).filter(line => line.trim() !== "");
                     if (lineas.length > 0) {
                         const headers = lineas[0].split(",").map(h => h.replace(/^"|"$/g, '').trim());
@@ -249,7 +228,6 @@ export const UI = {
         lector.readAsText(file);
     },
 
-    // NUEVO: Motor asíncrono optimizado de traducción masiva por lotes paralelos con rotación inteligente de cuotas
     iniciarTraduccionPorLotes: async (stateContainerParam) => {
         procesoDetenido = false;
         procesoPausado = false;
@@ -259,14 +237,12 @@ export const UI = {
             return UI.log("[Error] Operación abortada: Introduzca al menos una API Key válida en el almacenamiento local.");
         }
 
-        // MODIFICADO: Uso del estado global inyectado por parámetro (compatibilidad hacia atrás) o el del módulo
         const activeStateContainer = stateContainerParam || stateContainer;
 
         if (!activeStateContainer || !activeStateContainer.headers || !activeStateContainer.csvData) {
             return UI.log("[Error] La estructura de datos o cabeceras del estado se encuentra corrupta o vacía.");
         }
 
-        // Extracción defensiva del rango de segmentación numérica directamente desde el DOM si existen los nodos
         const selectorInicio = document.getElementById('rangoInicio');
         const selectorFin = document.getElementById('rangoFin');
         const rangoInicio = selectorInicio ? (parseInt(selectorInicio.value) - 2 || 0) : 0;
@@ -274,7 +250,6 @@ export const UI = {
 
         const ENDPOINT_GATEWAY = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent";
         
-        // Mapeo adaptativo automático de columnas lingüísticas regionales basadas en nomenclatura Nombre_
         const columnasIdiomasDestino = activeStateContainer.headers.map((h, i) => (h.startsWith("Nombre_") && h !== "Nombre_ES") ? i : -1).filter(i => i !== -1);
         const indiceCastellanoBase = activeStateContainer.headers.indexOf('Nombre_ES');
 
@@ -286,7 +261,6 @@ export const UI = {
         const matrizFilasPendientes = [];
         const techoLimiteEvaluacion = Math.min(rangoFin, activeStateContainer.csvData.length);
 
-        // Escaneo quirúrgico automatizado para buscar e indexar traducciones huérfanas/vacías
         for (let i = Math.max(0, rangoInicio); i < techoLimiteEvaluacion; i++) {
             const cadenaCastellano = activeStateContainer.csvData[i][indiceCastellanoBase] || "Sin nombre";
             const indicesColumnasVacias = columnasIdiomasDestino.filter(idx => !activeStateContainer.csvData[i][idx] || activeStateContainer.csvData[i][idx].trim() === "");
@@ -343,7 +317,6 @@ export const UI = {
 
                     const respuestaJsonData = await callResponse.json();
                     
-                    // Manejo dinámico inteligente de desbordamiento de cuota de API (Rate Limiting HTTP 429)
                     if (respuestaJsonData.error?.code === 429) {
                         currentKeyIndex = (currentKeyIndex + 1) % listaClavesAPI.length;
                         UI.log(`[Aviso de Red] Límite superado. Rotando balanceo defensivo hacia la Key Índice: ${currentKeyIndex + 1}...`);
@@ -363,7 +336,6 @@ export const UI = {
                                     objetivoFilaMemoria.indicesColumnasFaltantes.forEach(idxCol => {
                                         const codigoIdiomaISO = activeStateContainer.headers[idxCol].replace("Nombre_", "");
                                         if (filaLote.traducciones[codigoIdiomaISO]) {
-                                            // Inyección atómica directa en la estructura bidimensional del estado mutado
                                             activeStateContainer.csvData[objetivoFilaMemoria.indiceMatriz][idxCol] = filaLote.traducciones[codigoIdiomaISO].replace(/[\(\)""'']/g, '');
                                         }
                                     });
@@ -385,7 +357,6 @@ export const UI = {
                     }
                 }
             }
-            // Retardo prudencial de mitigación anti-bloqueo antes de liberar el siguiente hilo del lote
             await new Promise(resolve => setTimeout(resolve, 2500)); 
             if (typeof UI.renderTable === 'function') {
                 UI.renderTable();
@@ -403,7 +374,6 @@ export const UI = {
     }
 };
 
-// NUEVO: Inicialización centralizada y segura al cargar el DOM para habilitar los ajustes avanzados y botones
 document.addEventListener('DOMContentLoaded', () => {
     UI.actualizarListaKeys();
     UI.inicializarAjustesExpertos();
