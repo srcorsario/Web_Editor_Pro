@@ -1,4 +1,8 @@
 // --- state.js ---
+// NUEVO: Registro de versión del archivo
+window.APP_VERSIONS = window.APP_VERSIONS || {};
+window.APP_VERSIONS.state = '1.0.0';
+
 // MODIFICADO: Nueva URL del Web App Script
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4kd15keNe7KaX5vGNeUQEPX1MRoWMMe8OUlgkLFUYjI16oWoIsHhl-RVm6sdDnmxjNg/exec';
 
