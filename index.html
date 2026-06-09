@@ -68,8 +68,9 @@
                         <div class="flex items-center justify-between text-xs">
                             <span class="font-medium">Rango de Filas:</span>
                             <div class="flex items-center gap-2">
-                                <label class="text-slate-400">Desde: <input type="number" id="rangoInicio" value="7" min="2" class="w-12 text-center text-xs py-0.5 px-1 ml-1"></label>
-                                <label class="text-slate-400">Hasta: <input type="number" id="rangoFin" value="18" min="2" class="w-12 text-center text-xs py-0.5 px-1 ml-1"></label>
+                                <label class="text-slate-400">Desde: <input type="number" id="rangoInicio" value="2" min="2" class="w-12 text-center text-xs py-0.5 px-1 ml-1"></label>
+                                <!-- MODIFICADO: Valor por defecto cambiado a 9999 para mostrar todo y habilitar el scroll natural -->
+                                <label class="text-slate-400">Hasta: <input type="number" id="rangoFin" value="9999" min="2" class="w-12 text-center text-xs py-0.5 px-1 ml-1"></label>
                             </div>
                         </div>
                         
@@ -82,7 +83,6 @@
                     </div>
                 </div>
 
-                <!-- NUEVO: Menú de selección de idioma restaurado -->
                 <div class="card md:w-1/5 flex-none flex flex-col h-[310px]" style="width: 20%; min-width: 200px">
                     <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">2. Idioma Vista</h3>
                     <div id="radiosIdiomas" class="w-full overflow-y-auto pr-1 flex-1"></div>
@@ -94,8 +94,6 @@
                 </div>
 
             </div>
-
-            <!-- SECCIÓN 3 EXPERTOS ELIMINADA -->
 
             <div class="card overflow-x-auto">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Previsualización de Datos en Memoria</h3>
@@ -201,7 +199,7 @@
     <!-- SCRIPTS -->
     <script src="languages.js"></script>
     <script src="state.js"></script>
-    <script id="main-script" data-version="1.0.19" src="./app.js"></script>
+    <script id="main-script" data-version="1.0.20" src="./app.js"></script>
     <script type="module" src="./ui.js"></script>
 
     <script>
