@@ -166,12 +166,14 @@
                 </div>
                 
                 <div class="input-group">
-                    <button id="btn-generar-en" class="btn-traducir-en">🇬🇧 Generar opciones en Inglés con IA</button>
+                    <!-- MODIFICADO: Restaurado atributo onclick faltante -->
+                    <button id="btn-generar-en" class="btn-traducir-en" onclick="generarTraduccionEN()">🇬🇧 Generar opciones en Inglés con IA</button>
                     <input id="edit-en" class="input-estandar" placeholder="Nombre en Inglés">
                     <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Detalles / Uvas (Inglés)" style="display: none;">
                 </div>
 
-                <button id="btn-autotraducir" class="btn-traductor-magico" disabled>✨ Auto-Traducir resto de idiomas con Gemini</button>
+                <!-- MODIFICADO: Restaurado atributo onclick faltante -->
+                <button id="btn-autotraducir" class="btn-traductor-magico" onclick="ejecutarTraduccionAutomatica()" disabled>✨ Auto-Traducir resto de idiomas con Gemini</button>
 
                 <div class="input-group">
                     <label class="label-seccion">Resto de Idiomas</label>
@@ -226,10 +228,9 @@
     </div>
 
     <!-- SCRIPTS -->
-    <!-- MODIFICADO: Carga explícita de dependencias globales antes que app.js para evitar errores de variables indefinidas -->
     <script src="languages.js"></script>
     <script src="state.js"></script>
-    <script id="main-script" data-version="1.0.17" src="./app.js"></script>
+    <script id="main-script" data-version="1.0.18" src="./app.js"></script>
     <script type="module" src="./ui.js"></script>
 
     <script>
