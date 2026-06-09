@@ -14,7 +14,6 @@
     <div class="container">
         <!-- HEADER Y KEYS COMPARTIDAS -->
         <div class="header-admin">
-            <!-- MODIFICADO: Añadido span para mostrar la versión visualmente -->
             <h1>Web Editor Pro <span id="app-version" style="font-size: 0.7rem; color: #7f8c8d; font-weight: 400; margin-left: 10px; vertical-align: middle;"></span></h1>
             <div id="status-carga" class="status-ok">⏳ Conectando...</div>
             
@@ -68,7 +67,6 @@
                     <div class="border-t pt-1.5 space-y-1.5 mt-2">
                         <div class="flex items-center justify-between text-xs">
                             <span class="font-medium">Rango de Filas:</span>
-                            <!-- MODIFICADO: Aumentado el ancho de los inputs de rango (w-20 en lugar de w-12) para que quepan los numeros -->
                             <div class="flex items-center gap-2">
                                 <label class="text-slate-400">Desde: <input type="number" id="rangoInicio" value="2" min="2" class="w-20 text-center text-xs py-0.5 px-1 ml-1"></label>
                                 <label class="text-slate-400">Hasta: <input type="number" id="rangoFin" value="9999" min="2" class="w-20 text-center text-xs py-0.5 px-1 ml-1"></label>
@@ -81,12 +79,16 @@
                             <button id="btnCancelar" class="btn btn-danger font-bold py-1 px-1 uppercase">Cancelar</button>
                             <button id="saveCsvBtn" class="btn btn-primary font-bold py-1 px-1 text-[11px] whitespace-nowrap uppercase">Descargar CSV</button>
                         </div>
+                        
+                        <!-- NUEVO: Botón para sincronizar traducciones masivas a la hoja original -->
+                        <button id="btnSyncSheets" class="btn btn-success font-bold py-2 px-1 text-[11px] tracking-tight uppercase w-full col-span-2 mt-1 border border-emerald-400" style="grid-column: span 2;">
+                            ☁️ Sincronizar con Google Sheet
+                        </button>
                     </div>
                 </div>
 
                 <div class="card md:w-1/5 flex-none flex flex-col h-[310px]" style="width: 20%; min-width: 200px">
                     <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">2. Idioma Vista</h3>
-                    <!-- MODIFICADO: Contenedor adaptado para grid de botones -->
                     <div id="radiosIdiomas" class="w-full overflow-y-auto pr-1 flex-1"></div>
                 </div>
 
@@ -201,8 +203,7 @@
     <!-- SCRIPTS -->
     <script src="languages.js"></script>
     <script src="state.js"></script>
-    <!-- MODIFICADO: Version incrementada -->
-    <script id="main-script" data-version="1.0.21" src="./app.js"></script>
+    <script id="main-script" data-version="1.0.22" src="./app.js"></script>
     <script type="module" src="./ui.js"></script>
 
     <script>
