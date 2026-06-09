@@ -34,8 +34,8 @@
 
         <!-- SISTEMA DE PESTAÑAS -->
         <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('editor')">📋 Editor de Menú</button>
-            <button class="tab-btn" onclick="switchTab('pro')">🛠️ Traductor Pro & Ajustes Avanzados</button>
+            <button class="tab-btn active" onclick="switchTab('editor', this)">📋 Editor de Menú</button>
+            <button class="tab-btn" onclick="switchTab('pro', this)">🛠️ Traductor Pro & Ajustes</button>
         </div>
 
         <!-- PESTAÑA 1: EDITOR DE MENÚ PRINCIPAL -->
@@ -226,26 +226,29 @@
     </div>
 
     <!-- SCRIPTS -->
-    <script id="main-script" data-version="1.0.16" src="./app.js"></script>
+    <!-- MODIFICADO: Carga explícita de dependencias globales antes que app.js para evitar errores de variables indefinidas -->
+    <script src="languages.js"></script>
+    <script src="state.js"></script>
+    <script id="main-script" data-version="1.0.17" src="./app.js"></script>
     <script type="module" src="./ui.js"></script>
 
     <script>
         // Lógica nativa de Pestañas (Tabs)
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            });
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('tab-' + tabId).style.display = 'block';
-            
-            event.currentTarget.classList.add('active');
+            btnElement.classList.add('active');
 
             if (tabId === 'editor') {
-                document.getElementById('tab-pro').style.display = 'none';
                 document.querySelector('.btn-add-float').style.display = 'block';
                 document.querySelector('.btn-guardar-main').style.display = 'block';
             } else {
-                document.getElementById('tab-editor').style.display = 'none';
                 document.querySelector('.btn-add-float').style.display = 'none';
                 document.querySelector('.btn-guardar-main').style.display = 'none';
             }
