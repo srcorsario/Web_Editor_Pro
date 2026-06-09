@@ -172,35 +172,51 @@ export const UI = {
         }
     },
 
-    // MODIFICADO: Mapeo completo para no borrar columnas no visibles en la tabla (Precio, Estado, Carpeta, Imagen, Alergenos)
+    // MODIFICADO: Mapeo dinámico inteligente basado en palabras clave para evitar sobrescrituras con blanco
     sincronizarConGoogleSheets: async () => {
         if (stateContainer.headers.length === 0 || stateContainer.csvData.length === 0) {
             return UI.log("[Error] No hay datos en memoria para sincronizar. Carga un archivo primero.");
         }
 
-        UI.log("[Sincro] Compilando matriz completa (Preservando columnas de sistema: Precio, Estado, Carpeta...)...");
+        UI.log("[Sincro] Analizando cabeceras reales de la hoja para mapeo seguro...");
         
-        // NUEVO: Helper para leer el valor de forma segura de la matriz cruda respetando las cabeceras
-        const getColValue = (rowArray, headerName) => {
-            const idx = stateContainer.headers.findIndex(h => h.trim().toUpperCase() === headerName.toUpperCase());
-            return idx !== -1 ? (rowArray[idx] || "") : "";
+        // Buscador flexible: encuentra el índice buscando múltiples variantes en mayúsculas
+        const findIdx = (keywords) => {
+            for (const kw of keywords) {
+                const idx = stateContainer.headers.findIndex(h => h.toUpperCase().includes(kw));
+                if (idx !== -1) return idx;
+            }
+            return -1;
         };
+
+        const idxId = findIdx(['ID']);
+        const idxPrecio = findIdx(['PRECIO', 'PRICE']);
+        const idxEstado = findIdx(['ESTADO', 'ACTIVO']);
+        const idxCarpeta = findIdx(['CARPETA', 'FOLDER', 'CATEGORIA']);
+        const idxImagen = findIdx(['IMAGEN', 'FOTO', 'ARCHIVO_FOTO', 'IMG']);
+        const idxAlergenos = findIdx(['ALERG']);
+
+        if (idxId === -1) {
+            return UI.log("[Error Crítico] No se encuentra la columna 'ID'. Sincronización cancelada por seguridad.");
+        }
+
+        UI.log(`[Sincro] Mapeo detectado -> ID:${idxId} | Precio:${idxPrecio} | Estado:${idxEstado} | Carpeta:${idxCarpeta} | Imagen:${idxImagen} | Alergenos:${idxAlergenos}`);
 
         const payload = stateContainer.csvData.map(row => {
             let obj = {
-                id: parseInt(getColValue(row, 'ID')),
-                precio: getColValue(row, 'Precio') || "0.00",
-                estado: getColValue(row, 'Estado') || "no",
-                carpeta: getColValue(row, 'Carpeta') || "",
-                imagen: getColValue(row, 'Imagen') || "",
-                alergenos: getColValue(row, 'Alergenos') || ""
+                id: parseInt(row[idxId]),
+                precio: idxPrecio !== -1 ? (row[idxPrecio] || "0.00") : "0.00",
+                estado: idxEstado !== -1 ? (row[idxEstado] || "no") : "no",
+                carpeta: idxCarpeta !== -1 ? (row[idxCarpeta] || "") : "",
+                imagen: idxImagen !== -1 ? (row[idxImagen] || "") : "",
+                alergenos: idxAlergenos !== -1 ? (row[idxAlergenos] || "") : ""
             };
 
             // Reconstruir dinámicamente todas las columnas de idioma (Nombre_XX)
-            stateContainer.headers.forEach(h => {
+            stateContainer.headers.forEach((h, i) => {
                 if (h.trim().toUpperCase().startsWith("NOMBRE_")) {
                     let langKey = h.trim().toUpperCase().replace("NOMBRE_", "").toLowerCase();
-                    obj[`nombre_${langKey}`] = getColValue(row, h.trim());
+                    obj[`nombre_${langKey}`] = row[i] || "";
                 }
             });
 
@@ -211,7 +227,7 @@ export const UI = {
             return UI.log("[Error] La compilación no generó filas válidas. Verifica que la columna 'ID' exista y sea correcta.");
         }
 
-        UI.log(`[Sincro] Enviando ${payload.length} filas completas (Traducciones + Datos de sistema) al servidor...`);
+        UI.log(`[Sincro] Enviando ${payload.length} filas completas y preservando datos originales al servidor...`);
         
         try {
             const urlDestino = getWebAppUrl();
@@ -221,7 +237,7 @@ export const UI = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload) 
             });
-            UI.log("✅ [Sincro] ¡Éxito! Datos y traducciones sincronizados sin pérdidas.");
+            UI.log("✅ [Sincro] ¡Éxito! Sincronización completada sin pérdidas de datos.");
         } catch (e) { 
             UI.log("❌ [Sincro] Error de red al intentar impactar los datos en Google Sheets: " + e.message); 
         }
