@@ -1,4 +1,4 @@
-/* Web Editor Pro - Styles CSS - Version 1.0.0 */
+/* Web Editor Pro - Styles CSS - Version 1.0.1 */
 :root { 
     --primario: #e67e22; 
     --fondo: #f4f7f6; 
@@ -99,6 +99,112 @@ body {
 .pro-panel th { background-color: #1e293b; color: #94a3b8; font-weight: 600; }
 .pro-panel tr:nth-child(even) { background-color: #1e293b; }
 .pro-panel tr:hover { background-color: #334155; }
+
+/* NUEVO: ESTILOS PARA LA PESTAÑA DE SUGERENCIAS (Estilo Carta Real Roland Garros) */
+.sugerencias-panel {
+    background: white;
+    padding: 40px 50px;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid #ddd;
+    border-top: none;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.sugerencias-header {
+    text-align: center;
+    border-bottom: 2px solid var(--texto);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.sugerencias-header h2 {
+    margin: 0;
+    color: var(--texto);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 1.5rem;
+}
+
+.sugerencias-subtitle {
+    color: #7f8c8d;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.sugerencias-seccion {
+    margin-bottom: 30px;
+}
+
+.sugerencias-seccion-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primario);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.sugerencias-plato {
+    display: flex;
+    align-items: baseline; /* Alinea la base del texto perfectamente */
+    margin-bottom: 12px;
+}
+
+.sugerencias-plato-nombres {
+    flex: 0 0 auto;
+    max-width: 75%;
+}
+
+.sugerencias-nombre-es {
+    font-weight: 600;
+    color: var(--texto);
+    font-size: 0.95rem;
+}
+
+.sugerencias-nombre-en {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* MODIFICADO: Línea de puntos estilo menú de restaurante */
+.sugerencias-puntos {
+    flex: 1;
+    border-bottom: 1px dotted #aaa;
+    margin: 0 8px;
+    position: relative;
+    top: -4px; /* Ajuste fino para alinear con la base del nombre */
+}
+
+.sugerencias-precio {
+    flex: 0 0 auto;
+    font-weight: 700;
+    color: var(--texto);
+    font-size: 1rem;
+}
+
+/* MODIFICADO: Separador visual elegante entre entrantes y principales */
+.sugerencias-separador {
+    height: 20px;
+    margin: 30px 0;
+    border-bottom: 1px solid var(--primario);
+}
+
+/* NUEVO: Footer legal de alérgenos simulando la carta */
+.sugerencias-footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-align: center;
+    line-height: 1.6;
+}
 
 .categoria-tarjeta { 
     background: white; border-radius: 12px; margin-bottom: 20px; 
@@ -443,5 +549,10 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     .btn-guardar-main {
         width: 95%;
         padding: 14px;
+    }
+
+    /* --- Pestaña Sugerencias (MÓVIL) --- */
+    .sugerencias-panel {
+        padding: 20px;
     }
 }
