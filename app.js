@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '1.0.25';
+window.APP_VERSIONS.app = '1.0.26';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
@@ -188,32 +188,40 @@ function renderizar() {
     document.getElementById('editor-dinamico').innerHTML = h;
 }
 
-// NUEVO: Función para renderizar la pestaña de Sugerencias del Día (Estilo carta real)
+// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Estilo carta real y filtro 12000-12999)
 function renderizarSugerencias() {
     const contenedor = document.getElementById('sugerencias-contenido');
     if (!contenedor) return;
 
-    const platosActivos = datosLocales.filter(p => p.activa);
+    // MODIFICADO: Filtrar exclusivamente IDs activos entre 12000 y 12999
+    const platosActivos = datosLocales.filter(p => p.activa && p.id >= 12000 && p.id <= 12999);
     
     let entrantes = [];
     let principales = [];
-    let otros = [];
+    let postres = [];
 
     platosActivos.forEach(p => {
         const id = p.id;
-        // Clasificación según los rangos de ID establecidos en ESTRUCTURA
-        if ((id >= 1000 && id < 3000) || (id >= 12000 && id < 13000)) {
+        // Clasificación basada en el rango 12000 definido en ESTRUCTURA
+        if ((id >= 12100 && id <= 12399)) { // Croquetas y Entrantes
             entrantes.push(p);
-        } else if (id >= 3000 && id < 7000) {
+        } else if (id >= 12400 && id <= 12899) { // Pasta, Arroz, Pescado, Carne
             principales.push(p);
-        } else if (id >= 8000) {
-            otros.push(p);
+        } else if (id >= 12900 && id <= 12999) { // Postres
+            postres.push(p);
         } else {
-            otros.push(p);
+            entrantes.push(p);
         }
     });
 
-    let html = '';
+    // NUEVO: Estructura de plantilla tipo carta real Roland Garros
+    let html = `
+        <div class="sugerencias-logo">LOGO</div>
+        <div class="sugerencias-header">
+            <h2>SUGERENCIAS DEL CHEF</h2>
+            <h3>CHEF'S SUGGESTIONS</h3>
+        </div>
+    `;
 
     // Sección Entrantes y Sugerencias
     if (entrantes.length > 0) {
@@ -254,11 +262,11 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
-    // Sección Otros (Postres, Bebidas, etc.)
-    if (otros.length > 0) {
+    // Sección Postres
+    if (postres.length > 0) {
         html += `<div class="sugerencias-seccion">
-            <div class="sugerencias-seccion-titulo">Otros / Others</div>`;
-        otros.forEach(p => {
+            <div class="sugerencias-seccion-titulo">Postres / Desserts</div>`;
+        postres.forEach(p => {
             const nombreEs = desglosarNombre(p.es).nombre;
             const nombreEn = desglosarNombre(p.en).nombre;
             html += `<div class="sugerencias-plato">
@@ -273,14 +281,33 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
-    // Aviso de alérgenos en el pie de página, replicando la carta real
+    // NUEVO: Footer legal de alérgenos y QR simulando la carta
     html += `<div class="sugerencias-footer">
-        ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
-        If you have any food allergies, please inform our staff.
+        <div class="sugerencias-aviso">
+            ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
+            If you have any food allergies, please inform our staff.
+        </div>
+        <div class="sugerencias-qr">
+            <div class="sugerencias-qr-placeholder"></div>
+        </div>
     </div>`;
 
     if (platosActivos.length === 0) {
-        html = '<p style="text-align: center; color: #7f8c8d; font-style: italic;">No hay platos activos en la web para mostrar.</p>';
+        html = `<div class="sugerencias-logo">LOGO</div>
+                <div class="sugerencias-header">
+                    <h2>SUGERENCIAS DEL CHEF</h2>
+                    <h3>CHEF'S SUGGESTIONS</h3>
+                </div>
+                <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px;">No hay sugerencias activas en la web para mostrar (IDs 12000-12999).</p>
+                <div class="sugerencias-footer">
+                    <div class="sugerencias-aviso">
+                        ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
+                        If you have any food allergies, please inform our staff.
+                    </div>
+                    <div class="sugerencias-qr">
+                        <div class="sugerencias-qr-placeholder"></div>
+                    </div>
+                </div>`;
     }
 
     contenedor.innerHTML = html;
