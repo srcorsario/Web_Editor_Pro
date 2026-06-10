@@ -1,4 +1,4 @@
-/* Web Editor Pro - Styles CSS - Version 1.0.3 */
+/* Web Editor Pro - Styles CSS - Version 1.0.5 */
 :root { 
     --primario: #e67e22; 
     --fondo: #f4f7f6; 
@@ -115,36 +115,13 @@ body {
     overflow: hidden;
 }
 
-/* NUEVO: Fondo de la carta semitransparente */
-.sugerencias-bg-img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.15;
-    z-index: 0;
-}
-
-/* NUEVO: Capa de contenido para asegurar legibilidad */
-.sugerencias-content-layer {
-    position: relative;
-    z-index: 1;
-}
-
-/* NUEVO: Logo circular superior derecho extraído de la imagen mediante CSS */
+/* NUEVO: Imagen del logo real posicionada arriba a la derecha */
 .sugerencias-logo-img {
     position: absolute;
-    top: 30px;
-    right: 40px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: top right; /* Aproximación para encastrar el logo de la foto */
-    border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    top: 25px;
+    right: 35px;
+    width: 90px;
+    height: auto;
     z-index: 2;
 }
 
@@ -233,7 +210,7 @@ body {
     border-bottom: 1px solid var(--primario);
 }
 
-/* NUEVO: Footer legal de alérgenos y QR simulando la carta */
+/* NUEVO: Footer legal de alérgenos y QR real */
 .sugerencias-footer {
     display: flex;
     justify-content: space-between;
@@ -252,23 +229,20 @@ body {
 }
 
 .sugerencias-qr {
-    width: 90px;
-    height: 90px;
+    width: 100px;
+    height: 100px;
     background: white;
-    border: 1px solid #ddd;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    overflow: hidden;
 }
 
-/* NUEVO: Imagen del QR extraída de la esquina inferior derecha de la foto */
+/* NUEVO: Imagen del QR real */
 .sugerencias-qr-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: bottom right; /* Aproximación para encastrar el QR de la foto */
+    object-fit: contain;
 }
 
 .categoria-tarjeta { 
@@ -493,15 +467,15 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 
     /* --- Listado Principal (MÓVIL OPTIMIZADO) --- */
     .btn-config {
-        display: none !important; /* Ocultar rueda de ajustes en móvil */
+        display: none !important;
     }
 
     .plato-orden-btns {
-        display: none !important; /* Ocultar flechas en móvil */
+        display: none !important;
     }
 
     .plato-info > div:last-child {
-        display: none !important; /* Ocultar la línea que contiene el nombre de imagen/categoría en móvil */
+        display: none !important;
     }
 
     .plato-item {
@@ -621,12 +595,14 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
         padding: 20px;
     }
     
+    /* NUEVO: Ajuste del logo en móvil */
     .sugerencias-logo-img {
         position: relative;
         top: auto;
         right: auto;
         margin: 0 auto 20px;
         display: block;
+        width: 70px;
     }
     
     .sugerencias-footer {
