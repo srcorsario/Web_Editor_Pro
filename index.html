@@ -39,6 +39,8 @@
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('editor', this)">📋 Editor de Menú</button>
             <button class="tab-btn" onclick="switchTab('pro', this)">🛠️ Traductor Pro & Ajustes</button>
+            <!-- NUEVO: Pestaña de Sugerencias -->
+            <button class="tab-btn" onclick="switchTab('sugerencias', this)">📝 Sugerencias del Día</button>
         </div>
 
         <!-- PESTAÑA 1: EDITOR DE MENÚ PRINCIPAL -->
@@ -116,6 +118,16 @@
             </div>
 
         </div>
+
+        <!-- NUEVO: PESTAÑA 3: SUGERENCIAS DEL DÍA -->
+        <div id="tab-sugerencias" class="tab-content sugerencias-panel" style="display: none;">
+            <div class="sugerencias-header">
+                <h2>Sugerencias del Día</h2>
+                <p class="sugerencias-subtitle">Platos activos en la web (Español / English)</p>
+            </div>
+            <div id="sugerencias-contenido" class="sugerencias-body"></div>
+        </div>
+
     </div>
 
     <!-- BOTONES FLOTANTES EDITOR -->
@@ -227,6 +239,11 @@
             } else {
                 document.querySelector('.btn-add-float').style.display = 'none';
                 document.querySelector('.btn-guardar-main').style.display = 'none';
+            }
+
+            // NUEVO: Renderizar sugerencias al cambiar a la pestaña
+            if (tabId === 'sugerencias' && typeof renderizarSugerencias === 'function') {
+                renderizarSugerencias();
             }
         }
     </script>
