@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '1.0.27';
+window.APP_VERSIONS.app = '1.0.29';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
@@ -188,12 +188,11 @@ function renderizar() {
     document.getElementById('editor-dinamico').innerHTML = h;
 }
 
-// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Estilo carta real, filtro y corrección de vinos)
+// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Logo y QR reales integrados)
 function renderizarSugerencias() {
     const contenedor = document.getElementById('sugerencias-contenido');
     if (!contenedor) return;
 
-    // MODIFICADO: Filtrar exclusivamente IDs activos entre 12000 y 12999
     const platosActivos = datosLocales.filter(p => p.activa && p.id >= 12000 && p.id <= 12999);
     
     let entrantes = [];
@@ -205,35 +204,31 @@ function renderizarSugerencias() {
         const id = p.id;
         const nombreEs = desglosarNombre(p.es).nombre.toLowerCase();
         
-        // MODIFICADO: Los vinos recomendados van a su propia sección, no a postres
         if (nombreEs.includes('vino')) {
             vinos.push(p);
-        } else if ((id >= 12100 && id <= 12399)) { // Croquetas y Entrantes
+        } else if ((id >= 12100 && id <= 12399)) {
             entrantes.push(p);
-        } else if (id >= 12400 && id <= 12899) { // Pasta, Arroz, Pescado, Carne
+        } else if (id >= 12400 && id <= 12899) {
             principales.push(p);
-        } else if (id >= 12900 && id <= 12999) { // Postres
+        } else if (id >= 12900 && id <= 12999) {
             postres.push(p);
         } else {
             entrantes.push(p);
         }
     });
 
-    // NUEVO: Imagen de la carta proporcionada para fondo, logo y QR
-    const IMG_URL = 'https://z-cdn-media.chatglm.cn/files/86a86cae-b7e4-428b-92d5-555c19925653.jpg?auth_key=1881111788-d5409efdf712444680dbec6fb01f270b-0-c06ac64055f16052948be47903912b69';
+    // NUEVO: URLs de imágenes reales (Logo y QR)
+    const LOGO_URL = 'https://z-cdn-media.chatglm.cn/files/fc4b4919-b148-470d-97a2-c740c58d1178.png?auth_key=1881113734-9f1ef8e42c5a4eae8f4f0f9055730ecf-0-f7b585f0f08f5f78de683fb163bec75d';
+    const QR_URL = 'https://z-cdn-media.chatglm.cn/files/b78052a5-e557-40d5-b6d7-b178fdcb24f0.png?auth_key=1881113482-d01441d334c1427982bb0a78a45f46bd-0-60430b647cd3b43f34b5ec212f6640b1';
 
-    // NUEVO: Estructura de plantilla tipo carta real Roland Garros con imágenes
     let html = `
-        <img src="${IMG_URL}" class="sugerencias-bg-img">
-        <div class="sugerencias-content-layer">
-            <img src="${IMG_URL}" class="sugerencias-logo-img">
-            <div class="sugerencias-header">
-                <h2>SUGERENCIAS DEL CHEF</h2>
-                <h3>CHEF'S SUGGESTIONS</h3>
-            </div>
+        <img src="${LOGO_URL}" class="sugerencias-logo-img" alt="Roland Garros Restaurant">
+        <div class="sugerencias-header">
+            <h2>SUGERENCIAS DEL CHEF</h2>
+            <h3>CHEF'S SUGGESTIONS</h3>
+        </div>
     `;
 
-    // Sección Entrantes y Sugerencias
     if (entrantes.length > 0) {
         html += `<div class="sugerencias-seccion">
             <div class="sugerencias-seccion-titulo">Entrantes & Sugerencias / Starters & Suggestions</div>`;
@@ -253,7 +248,6 @@ function renderizarSugerencias() {
         html += `<div class="sugerencias-separador"></div>`; 
     }
 
-    // Sección Principales
     if (principales.length > 0) {
         html += `<div class="sugerencias-seccion">
             <div class="sugerencias-seccion-titulo">Platos Principales / Main Courses</div>`;
@@ -272,7 +266,6 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
-    // NUEVO: Sección Vinos Recomendados
     if (vinos.length > 0) {
         html += `<div class="sugerencias-seccion">
             <div class="sugerencias-seccion-titulo">Vinos Recomendados / Recommended Wines</div>`;
@@ -291,7 +284,6 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
-    // Sección Postres
     if (postres.length > 0) {
         html += `<div class="sugerencias-seccion">
             <div class="sugerencias-seccion-titulo">Postres / Desserts</div>`;
@@ -310,38 +302,32 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
-    // NUEVO: Footer legal de alérgenos y QR con imagen
     html += `<div class="sugerencias-footer">
         <div class="sugerencias-aviso">
             ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
             If you have any food allergies, please inform our staff.
         </div>
         <div class="sugerencias-qr">
-            <img src="${IMG_URL}" class="sugerencias-qr-img">
+            <img src="${QR_URL}" class="sugerencias-qr-img" alt="QR Menu">
         </div>
     </div>`;
 
     if (platosActivos.length === 0) {
-        html = `<img src="${IMG_URL}" class="sugerencias-bg-img">
-                <div class="sugerencias-content-layer">
-                    <img src="${IMG_URL}" class="sugerencias-logo-img">
-                    <div class="sugerencias-header">
-                        <h2>SUGERENCIAS DEL CHEF</h2>
-                        <h3>CHEF'S SUGGESTIONS</h3>
+        html = `<img src="${LOGO_URL}" class="sugerencias-logo-img" alt="Roland Garros Restaurant">
+                <div class="sugerencias-header">
+                    <h2>SUGERENCIAS DEL CHEF</h2>
+                    <h3>CHEF'S SUGGESTIONS</h3>
+                </div>
+                <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px;">No hay sugerencias activas en la web para mostrar (IDs 12000-12999).</p>
+                <div class="sugerencias-footer">
+                    <div class="sugerencias-aviso">
+                        ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
+                        If you have any food allergies, please inform our staff.
                     </div>
-                    <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px;">No hay sugerencias activas en la web para mostrar (IDs 12000-12999).</p>
-                    <div class="sugerencias-footer">
-                        <div class="sugerencias-aviso">
-                            ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
-                            If you have any food allergies, please inform our staff.
-                        </div>
-                        <div class="sugerencias-qr">
-                            <img src="${IMG_URL}" class="sugerencias-qr-img">
-                        </div>
+                    <div class="sugerencias-qr">
+                        <img src="${QR_URL}" class="sugerencias-qr-img" alt="QR Menu">
                     </div>
                 </div>`;
-    } else {
-        html += `</div>`; // Cierra .sugerencias-content-layer
     }
 
     contenedor.innerHTML = html;
