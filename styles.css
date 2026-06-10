@@ -1,4 +1,4 @@
-/* Web Editor Pro - Styles CSS - Version 1.0.2 */
+/* Web Editor Pro - Styles CSS - Version 1.0.3 */
 :root { 
     --primario: #e67e22; 
     --fondo: #f4f7f6; 
@@ -112,26 +112,40 @@ body {
     margin: 0 auto;
     font-family: 'Montserrat', sans-serif;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
 }
 
-/* NUEVO: Logo superior derecho simulando carta */
-.sugerencias-logo {
+/* NUEVO: Fondo de la carta semitransparente */
+.sugerencias-bg-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+/* NUEVO: Capa de contenido para asegurar legibilidad */
+.sugerencias-content-layer {
+    position: relative;
+    z-index: 1;
+}
+
+/* NUEVO: Logo circular superior derecho extraído de la imagen mediante CSS */
+.sugerencias-logo-img {
     position: absolute;
     top: 30px;
     right: 40px;
     width: 80px;
     height: 80px;
-    background: #f8f9fa;
-    border: 1px solid #ddd;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #7f8c8d;
-    font-weight: bold;
-    font-size: 0.7rem;
-    text-align: center;
-    letter-spacing: 1px;
+    object-fit: cover;
+    object-position: top right; /* Aproximación para encastrar el logo de la foto */
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 2;
 }
 
 .sugerencias-header {
@@ -157,13 +171,6 @@ body {
     letter-spacing: 2px;
     font-size: 0.9rem;
     font-weight: 400;
-}
-
-.sugerencias-subtitle {
-    color: #7f8c8d;
-    margin-top: 5px;
-    font-size: 0.9rem;
-    font-style: italic;
 }
 
 .sugerencias-seccion {
@@ -253,17 +260,15 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
-.sugerencias-qr-placeholder {
-    width: 80px;
-    height: 80px;
-    background: 
-        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
-        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
-    background-size: 10px 10px;
-    background-position: 0 0, 5px 5px;
-    opacity: 0.5;
+/* NUEVO: Imagen del QR extraída de la esquina inferior derecha de la foto */
+.sugerencias-qr-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: bottom right; /* Aproximación para encastrar el QR de la foto */
 }
 
 .categoria-tarjeta { 
@@ -616,11 +621,12 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
         padding: 20px;
     }
     
-    .sugerencias-logo {
+    .sugerencias-logo-img {
         position: relative;
         top: auto;
         right: auto;
         margin: 0 auto 20px;
+        display: block;
     }
     
     .sugerencias-footer {
