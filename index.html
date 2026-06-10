@@ -3,249 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Editor Pro</title>
-    <!-- NUEVO: Favicon restaurado apuntando a setting.png -->
-    <link rel="icon" href="setting.png" type="image/png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Web Editor Pro - Roland Garros Restaurant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js" defer></script>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen pb-24">
 
-    <div class="container">
-        <!-- HEADER Y KEYS COMPARTIDAS -->
-        <div class="header-admin">
-            <!-- MODIFICADO: Contenedor de versiones dinámico -->
-            <h1>Web Editor Pro <span id="app-version" style="font-size: 0.65rem; color: #95a5a6; font-weight: 400; margin-left: 10px; vertical-align: middle; display: inline-block;"></span></h1>
-            <div id="status-carga" class="status-ok">⏳ Conectando...</div>
-            
-            <div class="api-keys-manager">
-                <label class="label-seccion">Gestión de API Keys Gemini</label>
-                <div class="api-keys-inputs">
-                    <input type="text" id="nuevaKey" placeholder="Pega tu Gemini Key aquí..." class="input-estandar">
-                    <button id="addKeyBtn" class="btn-add-key">Añadir Key</button>
-                </div>
-                <div class="api-keys-list">
-                    <div id="contenedorSelectKeys" class="flex-1">
-                        <select id="selectKeys" class="select-keys"></select>
-                    </div>
-                    <button id="btnEliminarKeySeleccionada" class="btn-delete-key" title="Eliminar key">✕</button>
+    <header class="header-admin bg-slate-800 border-b border-slate-700 p-4 shadow-md sticky top-0 z-50 transition-all">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-600 p-2 rounded-lg text-white font-bold text-xl shadow-inner">RG</div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white">Web Editor Pro <span class="text-amber-500 font-normal">v2.5</span></h1>
+                    <p class="text-xs text-slate-400" id="app-version">Cargando módulos de sistema...</p>
                 </div>
             </div>
-        </div>
-
-        <!-- SISTEMA DE PESTAÑAS -->
-        <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('editor', this)">📋 Editor de Menú</button>
-            <button class="tab-btn" onclick="switchTab('pro', this)">🛠️ Traductor Pro & Ajustes</button>
-            <!-- NUEVO: Pestaña de Sugerencias -->
-            <button class="tab-btn" onclick="switchTab('sugerencias', this)">📝 Sugerencias del Día</button>
-        </div>
-
-        <!-- PESTAÑA 1: EDITOR DE MENÚ PRINCIPAL -->
-        <div id="tab-editor" class="tab-content active">
-            <div id="editor-dinamico"></div>
-        </div>
-
-        <!-- PESTAÑA 2: TRADUCTOR PRO Y AJUSTES AVANZADOS -->
-        <div id="tab-pro" class="tab-content pro-panel" style="display: none;">
             
-            <div class="flex flex-col md:flex-row gap-4 mb-4">
+            <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-lg border border-slate-700">
+                <button class="px-4 py-2 rounded text-xs font-bold transition-all bg-amber-600 text-white shadow" id="tab-editor-btn" onclick="switchTab('editor')">EDITOR DE DATOS</button>
+                <button class="px-4 py-2 rounded text-xs font-bold transition-all text-slate-400 hover:text-slate-200" id="tab-sugerencias-btn" onclick="switchTab('sugerencias')">SUGERENCIAS DEL DÍA (A4)</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 transition-all">
+        
+        <section id="panel-editor" class="tab-content block view-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 
-                <div class="card md:w-3/10 flex-none flex flex-col justify-between h-[310px]" style="width: 30%; min-width: 340px;">
-                    <div class="space-y-1.5">
-                        <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">1. Orígenes de Datos</h3>
-                        
-                        <div class="grid grid-cols-1 gap-1 text-sm">
-                            <div class="flex gap-2 items-center">
-                                <label class="text-xs whitespace-nowrap">CSV Local:</label>
-                                <input type="file" id="archivoLocal" accept=".csv" class="text-xs flex-1 p-0.5">
-                            </div>
-                            <div class="flex gap-1.5">
-                                <input type="text" id="sheetsUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv" placeholder="URL CSV de Google Sheets..." class="flex-1 text-xs py-1 px-2">
-                                <button id="loadSheetsBtn" class="btn btn-secondary text-xs py-1 px-2 whitespace-nowrap">Cargar web</button>
-                            </div>
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Conexión Remota G-Sheets
+                        </h2>
+                        <div class="mb-3">
+                            <label class="block text-xs text-slate-400 mb-1">URL de Publicación en Web (Formato CSV)</label>
+                            <input type="url" id="sheetsUrl" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-500" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
                         </div>
                     </div>
-
-                    <div class="border-t pt-1.5 space-y-1.5 mt-2">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-medium">Rango de Filas:</span>
-                            <div class="flex items-center gap-2">
-                                <label class="text-slate-400">Desde: <input type="number" id="rangoInicio" value="2" min="2" class="w-20 text-center text-xs py-0.5 px-1 ml-1"></label>
-                                <label class="text-slate-400">Hasta: <input type="number" id="rangoFin" value="9999" min="2" class="w-20 text-center text-xs py-0.5 px-1 ml-1"></label>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-1.5 text-xs">
-                            <button id="btnIniciar" class="btn btn-success font-bold py-1 px-1 text-[11px] tracking-tight uppercase">Iniciar Traducción</button>
-                            <button id="btnPausa" class="btn btn-secondary font-bold py-1 px-1 uppercase">Pausar</button>
-                            <button id="btnCancelar" class="btn btn-danger font-bold py-1 px-1 uppercase">Cancelar</button>
-                            <button id="saveCsvBtn" class="btn btn-primary font-bold py-1 px-1 text-[11px] whitespace-nowrap uppercase">Descargar CSV</button>
-                        </div>
-                        
-                        <button id="btnSyncSheets" class="btn btn-success font-bold py-2 px-1 text-[11px] tracking-tight uppercase w-full col-span-2 mt-1 border border-emerald-400" style="grid-column: span 2;">
-                            ☁️ Sincronizar con Google Sheet
-                        </button>
+                    <div class="flex gap-2">
+                        <button id="loadSheetsBtn" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs py-2.5 px-4 rounded transition-colors shadow">DESCARGAR</button>
+                        <button id="btnSyncSheets" class="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs py-2.5 px-4 rounded transition-colors shadow">SINCRONIZAR</button>
                     </div>
                 </div>
 
-                <div class="card md:w-1/5 flex-none flex flex-col h-[310px]" style="width: 20%; min-width: 200px">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">2. Idioma Vista</h3>
-                    <div id="radiosIdiomas" class="w-full overflow-y-auto pr-1 flex-1"></div>
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Almacenamiento Local (PC)
+                        </h2>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">Importa archivos tabulares directamente desde tu disco local o exporta el estado actual mitigando pérdidas en la nube.</p>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-center font-semibold text-xs py-2.5 px-4 rounded cursor-pointer transition-colors shadow block">
+                            SELECCIONAR ARCHIVO CSV
+                            <input type="file" id="archivoLocal" accept=".csv" class="hidden">
+                        </label>
+                        <button id="saveCsvBtn" class="w-full bg-slate-900 border border-slate-700 hover:bg-slate-700 text-slate-300 font-semibold text-xs py-2.5 px-4 rounded transition-colors">EXPORTAR EN FILA FINAL</button>
+                    </div>
                 </div>
 
-                <div class="card flex-1 md:w-1/2 c-consola flex flex-col h-[310px]" style="width: 50%;">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">3. Monitor de Sistema</h3>
-                    <div id="consola"></div>
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-purple-500"></span> Balanceador IA (Gemini API)
+                    </h2>
+                    <div class="api-keys-manager">
+                        <div class="api-keys-inputs">
+                            <input type="password" id="nuevaKey" class="input-estandar bg-slate-900 border-slate-700 text-slate-300 placeholder-slate-500 text-xs rounded p-2" placeholder="AIzaSyA1...">
+                            <button id="addKeyBtn" class="btn-add-key">AÑADIR</button>
+                        </div>
+                        <div class="api-keys-list mt-3">
+                            <select id="selectKeys" class="select-keys bg-slate-900 border-slate-700 text-slate-300 text-xs rounded p-2"></select>
+                            <button id="btnEliminarKeySeleccionada" class="btn-delete-key bg-red-900/40 border border-red-700 text-red-200 hover:bg-red-700 rounded p-2 text-xs">🗑️</button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
-            <div class="card overflow-x-auto">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Previsualización de Datos en Memoria</h3>
-                <div class="max-h-[580px] overflow-y-auto">
-                    <table class="w-full">
-                        <thead id="tableHeadRow" class="sticky top-0 z-10"></thead>
-                        <tbody id="tablaBody" class="text-sm text-slate-300">
-                            <tr>
-                                <td colspan="4" class="text-center py-8 text-slate-500 italic">Ningún archivo cargado en el sistema. Selecciona un origen arriba.</td>
-                            </tr>
-                        </tbody>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-slate-400">RANGO FILAS:</span>
+                        <input type="number" id="rangoInicio" class="w-16 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-center text-white" value="2" min="2">
+                        <span class="text-xs text-slate-500">hasta</span>
+                        <input type="number" id="rangoFin" class="w-16 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-center text-white" value="100">
+                    </div>
+                    
+                    <div class="flex items-center gap-2" id="contenedorSelectorIdiomaDestino">
+                        <span class="text-xs font-semibold text-slate-400">IDIOMA ACTIVO DE VISTA:</span>
+                        <div id="radiosIdiomas"></div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="btnIniciar" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2.5 px-5 rounded shadow transition-all">TRADUCIR COLUMNAS VACÍAS</button>
+                    <button id="btnPausa" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2.5 px-4 rounded transition-all">PAUSAR</button>
+                    <button id="btnCancelar" class="bg-slate-900 border border-slate-700 text-slate-400 hover:bg-red-900/20 hover:text-red-400 text-xs font-semibold py-2.5 px-4 rounded transition-all">DETENER</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-4 font-mono text-xs border border-slate-800 shadow-inner mb-6">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2 text-slate-500">
+                    <span>CONSOLA COGNITIVA DEL PROCESADOR</span>
+                    <span id="status-carga" class="text-amber-500 font-semibold">Inactivo. Esperando instrucciones de datos...</span>
+                </div>
+                <div id="consola" class="h-32 overflow-y-auto space-y-1 text-slate-400 scrollbar-thin"></div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl border border-slate-700 shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse table-editor-main">
+                        <thead id="tableHeadRow" class="bg-slate-900 text-slate-300 text-xs font-bold uppercase tracking-wider border-b border-slate-700"></thead>
+                        <tbody id="tablaBody" class="text-xs divide-y divide-slate-700/50 text-slate-300 bg-slate-800/40"></tbody>
                     </table>
                 </div>
             </div>
+        </section>
 
-        </div>
-
-        <!-- NUEVO: PESTAÑA 3: SUGERENCIAS DEL DÍA -->
-        <div id="tab-sugerencias" class="tab-content sugerencias-panel" style="display: none;">
-            <div class="sugerencias-header">
-                <h2>Sugerencias del Día</h2>
-                <p class="sugerencias-subtitle">Platos activos en la web (Español / English)</p>
-            </div>
-            <div id="sugerencias-contenido" class="sugerencias-body"></div>
-        </div>
-
-    </div>
-
-    <!-- BOTONES FLOTANTES EDITOR -->
-    <button class="btn-add-float" onclick="abrirSelector()">+</button>
-    <button class="btn-guardar-main" onclick="enviarAlExcel()">GUARDAR CAMBIOS EN WEB</button>
-
-    <!-- MODAL SELECTOR NUEVO PLATO -->
-    <div id="modal-selector" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-top:0;">Añadir Nuevo Plato</h2>
-            <div id="lista-agrupada"></div>
-            <button class="btn-modal-cancelar" onclick="cerrarModal('modal-selector')" style="margin-top:20px;">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- MODAL EDITOR DE PLATO -->
-    <div id="modal-editor" class="modal">
-        <div class="modal-content modal-full-layout">
+        <section id="panel-sugerencias" class="tab-content hidden view-fade-in">
             
-            <div class="modal-col-izquierda">
-                <div class="input-group">
-                    <label id="label-uvas" class="label-seccion">Nombres y Detalles del Plato</label>
-                    <input id="edit-es" class="input-estandar" placeholder="Nombre en Español">
-                    <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Detalles / Uvas (Español)" style="display: none;">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm mb-6 flex justify-between items-center print:hidden">
+                <div>
+                    <h3 class="text-sm font-bold text-white mb-0.5">Maqueta Física Oficial A4</h3>
+                    <p class="text-xs text-slate-400">Este lienzo emula milimétricamente el papel físico de mesa. Los controles y menús web se auto-eliminarán en la impresión final.</p>
                 </div>
-                
-                <div class="input-group">
-                    <button id="btn-generar-en" class="btn-traducir-en" onclick="generarTraduccionEN()">🇬🇧 Generar opciones en Inglés con IA</button>
-                    <input id="edit-en" class="input-estandar" placeholder="Nombre en Inglés">
-                    <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Detalles / Uvas (Inglés)" style="display: none;">
-                </div>
-
-                <button id="btn-autotraducir" class="btn-traductor-magico" onclick="ejecutarTraduccionAutomatica()" disabled>✨ Auto-Traducir resto de idiomas con Gemini</button>
-
-                <div class="input-group">
-                    <label class="label-seccion">Resto de Idiomas</label>
-                    <div id="contenedor-resto-idiomas"></div>
-                </div>
+                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-6 rounded shadow flex items-center gap-2 transition-all">
+                    🖨️ IMPRIMIR MENÚ DE HOY (A4)
+                </button>
             </div>
 
-            <div class="modal-col-derecha">
-                <div class="input-group">
-                    <label class="label-seccion">Configuración</label>
-                    <div class="panel-control-precio">
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label style="font-size:0.7rem; font-weight:bold; color:#7f8c8d;">Precio (€)</label>
-                            <input id="edit-precio" type="number" step="0.01" class="input-estandar input-precio-super-mini input-precio-mini">
+            <div class="sugerencias-panel bg-white shadow-2xl mx-auto text-slate-900 relative" id="sugerencias-panel">
+                
+                <div class="sugerencias-top-row">
+                    <div class="sugerencias-header-titles">
+                        <h1 class="sugerencias-main-title-top">SUGERENCIAS</h1>
+                        <h2 class="sugerencias-main-title-bottom">DEL CHEF</h2>
+                        <h3 class="sugerencias-sub-lang-title">CHEF'S SUGGESTIONS</h3>
+                    </div>
+                    <div class="sugerencias-brand-wrapper">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/36/Roland_Garros_logo.svg/1200px-Roland_Garros_logo.svg.png" alt="Roland Garros Logo" class="sugerencias-logo-img" id="logoRG">
+                        <div class="sugerencias-brand-label">Restaurant</div>
+                    </div>
+                </div>
+
+                <div class="sugerencias-menu-body" id="sugerenciasContenidoDinamico">
+                    
+                    <div class="sugerencias-category-block">
+                        <h4 class="sugerencias-section-title">APERITIVOS / STARTERS</h4>
+                        
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Surtido de croquetas: 2 Puchero de cerdo - 2 Gambas - 2 Vacuno</div>
+                                <div class="sugerencias-item-en">Assortment of croquettes: 2 Pork stew - 2 Prawns - 2 Beef</div>
+                            </div>
+                            <div class="sugerencias-item-price">14,50€</div>
                         </div>
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label style="font-size:0.7rem; font-weight:bold; color:#7f8c8d;">Nombre Imagen</label>
-                            <input id="edit-imagen" class="input-estandar input-imagen-flexible" placeholder="ej: paella01.webp">
+
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Pasta con setas y salsa de trufa</div>
+                                <div class="sugerencias-item-en">Pasta with mushrooms and truffle sauce</div>
+                            </div>
+                            <div class="sugerencias-item-price">17,00€</div>
+                        </div>
+
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Pasta "Calamarata" (anillas de pasta) con salsa de brócoli, espinacas y gambas</div>
+                                <div class="sugerencias-item-en">"Calamarata" pasta (pasta rings) with broccoli, spinach and prawn sauce</div>
+                            </div>
+                            <div class="sugerencias-item-price">17,00€</div>
+                        </div>
+                    </div>
+
+                    <div class="sugerencias-category-block">
+                        <h4 class="sugerencias-section-title">PLATOS PRINCIPALES / MAINS</h4>
+                        
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Risotto de calabaza, almendra y queso gorgonzola</div>
+                                <div class="sugerencias-item-en">Pumpkin Risotto, with almond and gorgonzola cheese</div>
+                            </div>
+                            <div class="sugerencias-item-price">22,00€</div>
+                        </div>
+
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Bacalao frito con tatin de patata y salsa de puerro y gamba</div>
+                                <div class="sugerencias-item-en">Fried cod with potato tatin and leek and prawn sauce</div>
+                            </div>
+                            <div class="sugerencias-item-price">24,00€</div>
+                        </div>
+
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Carrillera de cerdo en su jugo con puré de patata y trufa</div>
+                                <div class="sugerencias-item-en">Carrillera de cerdo en su jugo con pure de patata y trufa</div>
+                            </div>
+                            <div class="sugerencias-item-price">22,00€</div>
+                        </div>
+                    </div>
+
+                    <div class="sugerencias-category-block">
+                        <h4 class="sugerencias-section-title">CARNES / MEATS</h4>
+                        
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Entrecot trinchado, con patata frita, encurtidos con rúcula y queso parmesano</div>
+                                <div class="sugerencias-item-en">Sliced entrecôte with French fries, pickles, arugula, and Parmesan cheeseV</div>
+                            </div>
+                            <div class="sugerencias-item-price">29,00€</div>
+                        </div>
+
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Solomillo de ternera, base de puré de patata, foie y demiglace de trufa y miel</div>
+                                <div class="sugerencias-item-en">Beef tenderloin, potato puree base, foie gras and truffle and honey demi-glace</div>
+                            </div>
+                            <div class="sugerencias-item-price">31,50€</div>
+                        </div>
+
+                        <div class="sugerencias-item-row">
+                            <div class="sugerencias-item-info">
+                                <div class="sugerencias-item-es">Entraña de ternera al Josper con patatas fritas y pimientos de padrón</div>
+                                <div class="sugerencias-item-en">Beef skirt steak cooked in the Josper oven with frites and fried green peppers</div>
+                            </div>
+                            <div class="sugerencias-item-price">24,00€</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="sugerencias-graphics-footer-container">
+                    <svg class="sugerencias-vector-lines" viewBox="0 0 800 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M -50 140 L 520 85 L 610 210" stroke="#c05c36" stroke-width="3" />
+                        <path d="M 60 145 L 560 110 L 630 210" stroke="#004d32" stroke-width="3" />
+                    </svg>
+                    
+                    <div class="sugerencias-footer">
+                        <div class="sugerencias-aviso">
+                            Si padece cualquier tipo de alergia alimentaria, rogamos se lo indique a cualquier miembro de nuestro personal.<br>
+                            <span class="sugerencias-aviso-en">If you suffer from any type of food allergy, please inform our staff.</span>
+                        </div>
+                        <div class="sugerencias-qr">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://rolandgarros-restaurant.menu" alt="QR Code" class="sugerencias-qr-img">
                         </div>
                     </div>
                 </div>
 
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal-editor-plato" class="modal">
+        <div class="modal-content modal-full-layout">
+            <div class="modal-col-izquierda">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b pb-2">Campos de Registro e Idiomas Homologados</h3>
                 <div class="input-group">
-                    <label class="label-seccion">Alérgenos</label>
-                    <div id="alergenos-grid" class="alergenos-grid"></div>
+                    <span class="label-seccion">Referencia Única Indexada</span>
+                    <input type="text" id="editor-plato-id" class="input-estandar bg-slate-50 border-slate-200 text-slate-700" disabled>
                 </div>
-
-                <div id="contenedor-croquetas"></div>
-
+                <div class="input-group">
+                    <span class="label-seccion">Textos en Castellano Base (Pivote)</span>
+                    <div class="input-row-lang">
+                        <span class="lang-tag">ES</span>
+                        <input type="text" id="editor-plato-es" class="input-estandar text-slate-900 font-semibold" placeholder="Nombre en Español">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <span class="label-seccion">Traducciones Dinámicas Registradas</span>
+                    <div id="modal-langs-dinamicos" class="langs-fluid-container"></div>
+                </div>
+            </div>
+            <div class="modal-col-derecha">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b pb-2">Metadatos, Alérgenos y Almacén</h3>
+                <div class="panel-control-precio">
+                    <div class="input-group input-precio-super-mini">
+                        <span class="label-seccion">Precio (€)</span>
+                        <input type="text" id="editor-plato-precio" class="input-estandar input-precio-mini text-slate-900" placeholder="0.00">
+                    </div>
+                    <div class="input-group input-imagen-flexible">
+                        <span class="label-seccion">URL Imagen Asociada</span>
+                        <input type="text" id="editor-plato-imagen" class="input-estandar text-slate-900" placeholder="https://dominio.com/foto.jpg">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <span class="label-seccion">Alérgenos Oficiales de la UE (Declaración Obligatoria)</span>
+                    <div id="modal-alergenos-grid" class="alergenos-grid"></div>
+                </div>
                 <div class="modal-acciones-footer">
-                    <button class="btn-modal-aceptar" onclick="aplicarCambiosPlato()">✅ Aplicar Cambios</button>
-                    <button class="btn-modal-cancelar" onclick="cerrarModal('modal-editor')">Cancelar</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- MODAL TRADUCCION INGLES -->
-    <div id="modal-traduccion-en" class="modal">
-        <div class="modal-content modal-box-en">
-            <h2 style="margin-top:0; margin-bottom: 10px;">Selecciona la mejor traducción al Inglés</h2>
-            <div id="opciones-en-container" class="opciones-en-scroll"></div>
-            <div class="footer-box-en">
-                <textarea id="editar-opcion-en" class="input-estandar" rows="3" placeholder="Puedes editar la opción seleccionada aquí antes de confirmar..."></textarea>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn-modal-aceptar" onclick="confirmarTraduccionEN()" style="margin:0;">Confirmar Selección</button>
-                    <button class="btn-modal-cancelar" onclick="cerrarModalTraduccionEN()" style="margin:0;">Cancelar</button>
+                    <button id="btn-modal-guardar" class="btn-modal-aceptar">GUARDAR CAMBIOS EN CALIENTE</button>
+                    <button id="btn-modal-cerrar" class="btn-modal-cancelar" onclick="cerrarModalEditor()">CANCELAR</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- SCRIPTS -->
-    <script src="languages.js"></script>
-    <script src="state.js"></script>
-    <script src="app.js"></script>
-    <script type="module" src="ui.js"></script>
 
     <script>
-        // Lógica nativa de Pestañas (Tabs)
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-                el.style.display = 'none';
-            });
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById('tab-' + tabId).classList.add('active');
-            document.getElementById('tab-' + tabId).style.display = 'block';
-            btnElement.classList.add('active');
+        // Declaración global de lenguajes permitida por el core
+        window.IDIOMAS_CONFIG = { 'ES': 'Castellano', 'EN': 'English', 'FR': 'Français', 'DE': 'Deutsch', 'IT': 'Italiano' };
+        window.APP_VERSIONS = window.APP_VERSIONS || {};
+        window.APP_VERSIONS.app = '2.5.1';
+
+        function switchTab(tabId) {
+            document.getElementById('panel-editor').classList.add('hidden');
+            document.getElementById('panel-sugerencias').classList.add('hidden');
+            document.getElementById('tab-editor-btn').classList.remove('bg-amber-600', 'text-white', 'shadow');
+            document.getElementById('tab-editor-btn').classList.add('text-slate-400', 'hover:text-slate-200');
+            document.getElementById('tab-sugerencias-btn').classList.remove('bg-amber-600', 'text-white', 'shadow');
+            document.getElementById('tab-sugerencias-btn').classList.add('text-slate-400', 'hover:text-slate-200');
 
             if (tabId === 'editor') {
-                document.querySelector('.btn-add-float').style.display = 'block';
-                document.querySelector('.btn-guardar-main').style.display = 'block';
+                document.getElementById('panel-editor').classList.remove('hidden');
+                document.getElementById('tab-editor-btn').classList.add('bg-amber-600', 'text-white', 'shadow');
+                document.getElementById('tab-editor-btn').classList.remove('text-slate-400', 'hover:text-slate-200');
             } else {
-                document.querySelector('.btn-add-float').style.display = 'none';
-                document.querySelector('.btn-guardar-main').style.display = 'none';
-            }
-
-            // NUEVO: Renderizar sugerencias al cambiar a la pestaña
-            if (tabId === 'sugerencias' && typeof renderizarSugerencias === 'function') {
-                renderizarSugerencias();
+                document.getElementById('panel-sugerencias').classList.remove('hidden');
+                document.getElementById('tab-sugerencias-btn').classList.add('bg-amber-600', 'text-white', 'shadow');
+                document.getElementById('tab-sugerencias-btn').classList.remove('text-slate-400', 'hover:text-slate-200');
             }
         }
+
+        function cerrarModalEditor() {
+            const modal = document.getElementById('modal-editor-plato');
+            if (modal) modal.style.display = "none";
+        }
+
+        // Mock utilitarios locales exigidos por ui.js para su aislamiento correcto
+        function getKeys() { return JSON.parse(localStorage.getItem('api_keys_v2') || '[]'); }
+        function saveKey(k) { let arr = getKeys(); arr.push(k); localStorage.setItem('api_keys_v2', JSON.stringify(arr)); }
+        function deleteKey(k) { let arr = getKeys().filter(x => x !== k); localStorage.setItem('api_keys_v2', JSON.stringify(arr)); }
+        function getWebAppUrl() { return document.getElementById('sheetsUrl')?.value || ''; }
     </script>
+    <script type="module" src="ui.js"></script>
 </body>
 </html>
