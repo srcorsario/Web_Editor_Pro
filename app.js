@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '1.0.29';
+window.APP_VERSIONS.app = '1.0.30';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
@@ -188,7 +188,7 @@ function renderizar() {
     document.getElementById('editor-dinamico').innerHTML = h;
 }
 
-// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Logo y QR reales integrados)
+// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Cabecera con imágenes y layout actualizado)
 function renderizarSugerencias() {
     const contenedor = document.getElementById('sugerencias-contenido');
     if (!contenedor) return;
@@ -217,15 +217,19 @@ function renderizarSugerencias() {
         }
     });
 
-    // NUEVO: URLs de imágenes reales (Logo y QR)
+    // NUEVO: URLs de imágenes reales
     const LOGO_URL = 'https://z-cdn-media.chatglm.cn/files/fc4b4919-b148-470d-97a2-c740c58d1178.png?auth_key=1881113734-9f1ef8e42c5a4eae8f4f0f9055730ecf-0-f7b585f0f08f5f78de683fb163bec75d';
     const QR_URL = 'https://z-cdn-media.chatglm.cn/files/b78052a5-e557-40d5-b6d7-b178fdcb24f0.png?auth_key=1881113482-d01441d334c1427982bb0a78a45f46bd-0-60430b647cd3b43f34b5ec212f6640b1';
+    const HEADER_TEXT_URL = 'https://z-cdn-media.chatglm.cn/files/ea3128c5-540d-482e-adee-1ecbc193dd9c.png?auth_key=1881116219-cf95c1daa2014b019656762380eb6c80-0-8816330462d4295fd9dfe95d1cfab6e5';
 
+    // NUEVO: Estructura de cabecera actualizada según diseño original
     let html = `
-        <img src="${LOGO_URL}" class="sugerencias-logo-img" alt="Roland Garros Restaurant">
-        <div class="sugerencias-header">
-            <h2>SUGERENCIAS DEL CHEF</h2>
-            <h3>CHEF'S SUGGESTIONS</h3>
+        <div class="sugerencias-top-row">
+            <h2 class="sugerencias-titulo-dia">Sugerencias del día</h2>
+            <img src="${LOGO_URL}" class="sugerencias-logo-img" alt="Roland Garros Restaurant">
+        </div>
+        <div class="sugerencias-subheader">
+            <img src="${HEADER_TEXT_URL}" class="sugerencias-header-img" alt="Sugerencias del Chef / Chef's Suggestions">
         </div>
     `;
 
@@ -313,10 +317,12 @@ function renderizarSugerencias() {
     </div>`;
 
     if (platosActivos.length === 0) {
-        html = `<img src="${LOGO_URL}" class="sugerencias-logo-img" alt="Roland Garros Restaurant">
-                <div class="sugerencias-header">
-                    <h2>SUGERENCIAS DEL CHEF</h2>
-                    <h3>CHEF'S SUGGESTIONS</h3>
+        html = `<div class="sugerencias-top-row">
+                    <h2 class="sugerencias-titulo-dia">Sugerencias del día</h2>
+                    <img src="${LOGO_URL}" class="sugerencias-logo-img" alt="Roland Garros Restaurant">
+                </div>
+                <div class="sugerencias-subheader">
+                    <img src="${HEADER_TEXT_URL}" class="sugerencias-header-img" alt="Sugerencias del Chef / Chef's Suggestions">
                 </div>
                 <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px;">No hay sugerencias activas en la web para mostrar (IDs 12000-12999).</p>
                 <div class="sugerencias-footer">
