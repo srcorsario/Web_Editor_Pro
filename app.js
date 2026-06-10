@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '1.0.24';
+window.APP_VERSIONS.app = '1.0.25';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
@@ -186,6 +186,104 @@ function renderizar() {
         h += `</div>`;
     });
     document.getElementById('editor-dinamico').innerHTML = h;
+}
+
+// NUEVO: Función para renderizar la pestaña de Sugerencias del Día (Estilo carta real)
+function renderizarSugerencias() {
+    const contenedor = document.getElementById('sugerencias-contenido');
+    if (!contenedor) return;
+
+    const platosActivos = datosLocales.filter(p => p.activa);
+    
+    let entrantes = [];
+    let principales = [];
+    let otros = [];
+
+    platosActivos.forEach(p => {
+        const id = p.id;
+        // Clasificación según los rangos de ID establecidos en ESTRUCTURA
+        if ((id >= 1000 && id < 3000) || (id >= 12000 && id < 13000)) {
+            entrantes.push(p);
+        } else if (id >= 3000 && id < 7000) {
+            principales.push(p);
+        } else if (id >= 8000) {
+            otros.push(p);
+        } else {
+            otros.push(p);
+        }
+    });
+
+    let html = '';
+
+    // Sección Entrantes y Sugerencias
+    if (entrantes.length > 0) {
+        html += `<div class="sugerencias-seccion">
+            <div class="sugerencias-seccion-titulo">Entrantes & Sugerencias / Starters & Suggestions</div>`;
+        entrantes.forEach(p => {
+            const nombreEs = desglosarNombre(p.es).nombre;
+            const nombreEn = desglosarNombre(p.en).nombre;
+            html += `<div class="sugerencias-plato">
+                <div class="sugerencias-plato-nombres">
+                    <div class="sugerencias-nombre-es">${nombreEs}</div>
+                    ${nombreEn ? `<div class="sugerencias-nombre-en">${nombreEn}</div>` : ''}
+                </div>
+                <div class="sugerencias-puntos"></div>
+                <div class="sugerencias-precio">${p.precio}€</div>
+            </div>`;
+        });
+        html += `</div>`;
+        html += `<div class="sugerencias-separador"></div>`; 
+    }
+
+    // Sección Principales
+    if (principales.length > 0) {
+        html += `<div class="sugerencias-seccion">
+            <div class="sugerencias-seccion-titulo">Platos Principales / Main Courses</div>`;
+        principales.forEach(p => {
+            const nombreEs = desglosarNombre(p.es).nombre;
+            const nombreEn = desglosarNombre(p.en).nombre;
+            html += `<div class="sugerencias-plato">
+                <div class="sugerencias-plato-nombres">
+                    <div class="sugerencias-nombre-es">${nombreEs}</div>
+                    ${nombreEn ? `<div class="sugerencias-nombre-en">${nombreEn}</div>` : ''}
+                </div>
+                <div class="sugerencias-puntos"></div>
+                <div class="sugerencias-precio">${p.precio}€</div>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+
+    // Sección Otros (Postres, Bebidas, etc.)
+    if (otros.length > 0) {
+        html += `<div class="sugerencias-seccion">
+            <div class="sugerencias-seccion-titulo">Otros / Others</div>`;
+        otros.forEach(p => {
+            const nombreEs = desglosarNombre(p.es).nombre;
+            const nombreEn = desglosarNombre(p.en).nombre;
+            html += `<div class="sugerencias-plato">
+                <div class="sugerencias-plato-nombres">
+                    <div class="sugerencias-nombre-es">${nombreEs}</div>
+                    ${nombreEn ? `<div class="sugerencias-nombre-en">${nombreEn}</div>` : ''}
+                </div>
+                <div class="sugerencias-puntos"></div>
+                <div class="sugerencias-precio">${p.precio}€</div>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+
+    // Aviso de alérgenos en el pie de página, replicando la carta real
+    html += `<div class="sugerencias-footer">
+        ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
+        If you have any food allergies, please inform our staff.
+    </div>`;
+
+    if (platosActivos.length === 0) {
+        html = '<p style="text-align: center; color: #7f8c8d; font-style: italic;">No hay platos activos en la web para mostrar.</p>';
+    }
+
+    contenedor.innerHTML = html;
 }
 
 function moverPlato(id, direccion) {
