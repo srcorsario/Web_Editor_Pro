@@ -1,4 +1,4 @@
-/* Web Editor Pro - Styles CSS - Version 1.0.1 */
+/* Web Editor Pro - Styles CSS - Version 1.0.2 */
 :root { 
     --primario: #e67e22; 
     --fondo: #f4f7f6; 
@@ -102,6 +102,7 @@ body {
 
 /* NUEVO: ESTILOS PARA LA PESTAÑA DE SUGERENCIAS (Estilo Carta Real Roland Garros) */
 .sugerencias-panel {
+    position: relative;
     background: white;
     padding: 40px 50px;
     border-radius: 0 0 10px 10px;
@@ -111,6 +112,26 @@ body {
     margin: 0 auto;
     font-family: 'Montserrat', sans-serif;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* NUEVO: Logo superior derecho simulando carta */
+.sugerencias-logo {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    width: 80px;
+    height: 80px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7f8c8d;
+    font-weight: bold;
+    font-size: 0.7rem;
+    text-align: center;
+    letter-spacing: 1px;
 }
 
 .sugerencias-header {
@@ -126,6 +147,16 @@ body {
     text-transform: uppercase;
     letter-spacing: 3px;
     font-size: 1.5rem;
+}
+
+/* NUEVO: Subtítulo en inglés bajo el principal */
+.sugerencias-header h3 {
+    margin: 5px 0 0;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    font-weight: 400;
 }
 
 .sugerencias-subtitle {
@@ -195,15 +226,44 @@ body {
     border-bottom: 1px solid var(--primario);
 }
 
-/* NUEVO: Footer legal de alérgenos simulando la carta */
+/* NUEVO: Footer legal de alérgenos y QR simulando la carta */
 .sugerencias-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
     margin-top: 50px;
     padding-top: 20px;
     border-top: 1px solid #ddd;
+}
+
+.sugerencias-aviso {
+    flex: 1;
     font-size: 0.75rem;
     color: #7f8c8d;
-    text-align: center;
     line-height: 1.6;
+    padding-right: 20px;
+}
+
+.sugerencias-qr {
+    width: 90px;
+    height: 90px;
+    background: white;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sugerencias-qr-placeholder {
+    width: 80px;
+    height: 80px;
+    background: 
+        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
+        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
+    background-size: 10px 10px;
+    background-position: 0 0, 5px 5px;
+    opacity: 0.5;
 }
 
 .categoria-tarjeta { 
@@ -554,5 +614,23 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
     /* --- Pestaña Sugerencias (MÓVIL) --- */
     .sugerencias-panel {
         padding: 20px;
+    }
+    
+    .sugerencias-logo {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 0 auto 20px;
+    }
+    
+    .sugerencias-footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .sugerencias-aviso {
+        padding-right: 0;
+        margin-bottom: 20px;
     }
 }
