@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '1.0.26';
+window.APP_VERSIONS.app = '1.0.27';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
 
@@ -188,7 +188,7 @@ function renderizar() {
     document.getElementById('editor-dinamico').innerHTML = h;
 }
 
-// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Estilo carta real y filtro 12000-12999)
+// MODIFICADO: Función para renderizar la pestaña de Sugerencias del Día (Estilo carta real, filtro y corrección de vinos)
 function renderizarSugerencias() {
     const contenedor = document.getElementById('sugerencias-contenido');
     if (!contenedor) return;
@@ -199,11 +199,16 @@ function renderizarSugerencias() {
     let entrantes = [];
     let principales = [];
     let postres = [];
+    let vinos = [];
 
     platosActivos.forEach(p => {
         const id = p.id;
-        // Clasificación basada en el rango 12000 definido en ESTRUCTURA
-        if ((id >= 12100 && id <= 12399)) { // Croquetas y Entrantes
+        const nombreEs = desglosarNombre(p.es).nombre.toLowerCase();
+        
+        // MODIFICADO: Los vinos recomendados van a su propia sección, no a postres
+        if (nombreEs.includes('vino')) {
+            vinos.push(p);
+        } else if ((id >= 12100 && id <= 12399)) { // Croquetas y Entrantes
             entrantes.push(p);
         } else if (id >= 12400 && id <= 12899) { // Pasta, Arroz, Pescado, Carne
             principales.push(p);
@@ -214,13 +219,18 @@ function renderizarSugerencias() {
         }
     });
 
-    // NUEVO: Estructura de plantilla tipo carta real Roland Garros
+    // NUEVO: Imagen de la carta proporcionada para fondo, logo y QR
+    const IMG_URL = 'https://z-cdn-media.chatglm.cn/files/86a86cae-b7e4-428b-92d5-555c19925653.jpg?auth_key=1881111788-d5409efdf712444680dbec6fb01f270b-0-c06ac64055f16052948be47903912b69';
+
+    // NUEVO: Estructura de plantilla tipo carta real Roland Garros con imágenes
     let html = `
-        <div class="sugerencias-logo">LOGO</div>
-        <div class="sugerencias-header">
-            <h2>SUGERENCIAS DEL CHEF</h2>
-            <h3>CHEF'S SUGGESTIONS</h3>
-        </div>
+        <img src="${IMG_URL}" class="sugerencias-bg-img">
+        <div class="sugerencias-content-layer">
+            <img src="${IMG_URL}" class="sugerencias-logo-img">
+            <div class="sugerencias-header">
+                <h2>SUGERENCIAS DEL CHEF</h2>
+                <h3>CHEF'S SUGGESTIONS</h3>
+            </div>
     `;
 
     // Sección Entrantes y Sugerencias
@@ -262,6 +272,25 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
+    // NUEVO: Sección Vinos Recomendados
+    if (vinos.length > 0) {
+        html += `<div class="sugerencias-seccion">
+            <div class="sugerencias-seccion-titulo">Vinos Recomendados / Recommended Wines</div>`;
+        vinos.forEach(p => {
+            const nombreEs = desglosarNombre(p.es).nombre;
+            const nombreEn = desglosarNombre(p.en).nombre;
+            html += `<div class="sugerencias-plato">
+                <div class="sugerencias-plato-nombres">
+                    <div class="sugerencias-nombre-es">${nombreEs}</div>
+                    ${nombreEn ? `<div class="sugerencias-nombre-en">${nombreEn}</div>` : ''}
+                </div>
+                <div class="sugerencias-puntos"></div>
+                <div class="sugerencias-precio">${p.precio}€</div>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+
     // Sección Postres
     if (postres.length > 0) {
         html += `<div class="sugerencias-seccion">
@@ -281,33 +310,38 @@ function renderizarSugerencias() {
         html += `</div>`;
     }
 
-    // NUEVO: Footer legal de alérgenos y QR simulando la carta
+    // NUEVO: Footer legal de alérgenos y QR con imagen
     html += `<div class="sugerencias-footer">
         <div class="sugerencias-aviso">
             ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
             If you have any food allergies, please inform our staff.
         </div>
         <div class="sugerencias-qr">
-            <div class="sugerencias-qr-placeholder"></div>
+            <img src="${IMG_URL}" class="sugerencias-qr-img">
         </div>
     </div>`;
 
     if (platosActivos.length === 0) {
-        html = `<div class="sugerencias-logo">LOGO</div>
-                <div class="sugerencias-header">
-                    <h2>SUGERENCIAS DEL CHEF</h2>
-                    <h3>CHEF'S SUGGESTIONS</h3>
-                </div>
-                <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px;">No hay sugerencias activas en la web para mostrar (IDs 12000-12999).</p>
-                <div class="sugerencias-footer">
-                    <div class="sugerencias-aviso">
-                        ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
-                        If you have any food allergies, please inform our staff.
+        html = `<img src="${IMG_URL}" class="sugerencias-bg-img">
+                <div class="sugerencias-content-layer">
+                    <img src="${IMG_URL}" class="sugerencias-logo-img">
+                    <div class="sugerencias-header">
+                        <h2>SUGERENCIAS DEL CHEF</h2>
+                        <h3>CHEF'S SUGGESTIONS</h3>
                     </div>
-                    <div class="sugerencias-qr">
-                        <div class="sugerencias-qr-placeholder"></div>
+                    <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px;">No hay sugerencias activas en la web para mostrar (IDs 12000-12999).</p>
+                    <div class="sugerencias-footer">
+                        <div class="sugerencias-aviso">
+                            ⚠️ Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
+                            If you have any food allergies, please inform our staff.
+                        </div>
+                        <div class="sugerencias-qr">
+                            <img src="${IMG_URL}" class="sugerencias-qr-img">
+                        </div>
                     </div>
                 </div>`;
+    } else {
+        html += `</div>`; // Cierra .sugerencias-content-layer
     }
 
     contenedor.innerHTML = html;
