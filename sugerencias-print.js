@@ -1,13 +1,17 @@
+=========================================
+REPOSITORIO: Web_Editor_Pro (PRINCIPAL)
+ARCHIVO: sugerencias-print.js
+=========================================
 // =========================================================================
 // ARCHIVO: sugerencias-print.js (COMPONENTE INTEGRAL DE IMPRESIÓN A4)
 // MODIFICADO: Ajuste de diseño adaptado a capturas reales de la aplicación.
-// Eliminadas cabeceras técnicas redundantes y estructuradas las sugerencias.
+// Posicionamiento estricto de logos corporativos y códigos QR en esquinas.
 // =========================================================================
 
 (function () {
     'use strict';
 
-    // NUEVO: Estilos estéticos ultra-fieles para simular el papel A4 en pantalla e impresión
+    // MODIFICADO: Estilos estéticos ultra-fieles adaptados para el posicionamiento correcto de elementos de marca
     const stylePrint = document.createElement('style');
     stylePrint.innerHTML = `
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
@@ -48,10 +52,12 @@
             line-height: 1.4 !important;
         }
 
+        /* NUEVO/MODIFICADO: Ubicación explícita y forzada del logo RG en la esquina superior derecha */
         .sugerencias-logo-rg {
             width: 75px !important;
             height: auto !important;
             object-fit: contain !important;
+            margin-left: auto !important; 
         }
 
         /* Contenedor del banner central decorativo (negro.png) */
@@ -78,11 +84,11 @@
             margin-bottom: 25px !important;
         }
 
-        /* Títulos de sección: Naranja Corporativo / Verde Arcilla de las capturas */
+        /* Títulos de sección: Naranja Corporativo */
         .sugerencias-categoria-titulo {
             font-size: 0.85rem !important;
             font-weight: 700 !important;
-            color: #d97706 !important; /* Tono naranja de la captura */
+            color: #d97706 !important;
             text-transform: uppercase !important;
             letter-spacing: 1px !important;
             border-bottom: 2px solid #334155 !important;
@@ -91,7 +97,7 @@
         }
 
         .sugerencias-categoria-block:nth-child(2) .sugerencias-categoria-titulo {
-            border-bottom: 2px solid #d97706 !important; /* Línea divisoria naranja intermedia */
+            border-bottom: 2px solid #d97706 !important;
         }
 
         /* Estructura de filas de platos individuales */
@@ -145,6 +151,7 @@
             margin-top: 30px !important;
             padding-top: 15px !important;
             border-top: 1px solid #f1f5f9 !important;
+            width: 100% !important;
         }
 
         .sugerencias-info-legal {
@@ -159,10 +166,12 @@
             margin-right: 4px !important;
         }
 
+        /* NUEVO/MODIFICADO: Ubicación explícita y forzada del QR en la esquina inferior derecha */
         .sugerencias-qr-box {
             width: 65px !important;
             height: 65px !important;
             flex-shrink: 0 !important;
+            margin-left: auto !important;
         }
 
         .sugerencias-qr-element {
@@ -199,7 +208,6 @@
                 margin: 0;
             }
             
-            /* Ocultar dinámicamente toda la interfaz de administración y edición web */
             body *, 
             #app-version, 
             .header-admin, 
@@ -211,7 +219,6 @@
                 display: none !important;
             }
 
-            /* Forzado total del contenedor blanco de sugerencias a tamaño de papel físico */
             html, body {
                 background: #ffffff !important;
                 margin: 0 !important;
@@ -225,7 +232,7 @@
                 display: flex !important;
                 width: 210mm !important;
                 height: 297mm !important;
-                padding: 15mm 20mm !important; /* Margenes limpios de impresión comercial */
+                padding: 15mm 20mm !important;
                 margin: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
@@ -236,12 +243,12 @@
     `;
     document.head.appendChild(stylePrint);
 
-    // MODIFICADO: Generador dinámico defensivo del DOM
+    // Generador dinámico defensivo del DOM
     function inicializarPestañaSugerenciasA4() {
         const panelContenedor = document.querySelector('.sugerencias-panel');
         if (!panelContenedor) return; // Validación defensiva preventiva
 
-        // MODIFICADO: Estructuración limpia eliminando los encabezados técnicos repetidos
+        // MODIFICADO: Maquetación limpia inyectando las imágenes correspondientes con validación de posición
         panelContenedor.innerHTML = `
             <div class="sugerencias-header-layout">
                 <div class="sugerencias-brand-title" id="sugerencias-fecha-titulo">
@@ -344,7 +351,7 @@
             </div>
         `;
 
-        // NUEVO: Generación e inyección controlada del botón de impresión interactivo para evitar duplicidad de listeners
+        // Generación e inyección controlada del botón de impresión interactivo para evitar duplicidad de listeners
         if (!document.getElementById('btnDisparadorImpresionA4')) {
             const btnPrint = document.createElement('button');
             btnPrint.id = 'btnDisparadorImpresionA4';
