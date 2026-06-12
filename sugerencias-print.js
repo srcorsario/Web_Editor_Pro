@@ -29,7 +29,7 @@
         
         .sugerencias-plato { display: flex !important; align-items: baseline !important; margin-bottom: 12px !important; width: 100% !important; }
         
-        /* MODIFICADO: Ampliado al 93% para máxima ocupación horizontal antes del salto de línea */
+        /* Nombres ocupando hasta el 93% */
         .sugerencias-plato-nombres { 
             flex: 0 1 auto !important; 
             max-width: 93% !important;
@@ -52,18 +52,20 @@
         /* Footer con QR controlado */
         .sugerencias-footer { margin-top: auto !important; border-top: 1px solid #e2e8f0 !important; padding-top: 20px !important; display: flex !important; justify-content: space-between !important; align-items: center !important; }
         .sugerencias-aviso { font-size: 0.75rem !important; color: #64748b !important; max-width: 60% !important; }
-        .sugerencias-qr-img { width: 80px !important; height: 80px !important; object-fit: contain !important; }
+        
+        /* MODIFICADO: Tamaño del QR duplicado a 160px para mejor lectura en impresión */
+        .sugerencias-qr-img { width: 160px !important; height: 160px !important; object-fit: contain !important; }
         
         @media print { body { -webkit-print-color-adjust: exact !important; } }
     `;
     document.head.appendChild(stylePrint);
 
     function cargarCarta() {
-        // MODIFICADO: Verificar si los datos han sido cargados mirando el indicador de estado del sistema
+        // Verificar si los datos han sido cargados mirando el indicador de estado del sistema
         const statusCarga = document.getElementById('status-carga');
         const isLoaded = statusCarga && statusCarga.innerText.includes('✅');
 
-        // MODIFICADO: Si los datos no existen, o están vacíos y aún no termina la carga, reintentar en 500ms
+        // Si los datos no existen, o están vacíos y aún no termina la carga, reintentar en 500ms
         if (typeof datosLocales === 'undefined' || (datosLocales.length === 0 && !isLoaded)) { 
             setTimeout(cargarCarta, 500); 
             return; 
@@ -72,7 +74,7 @@
         const contenedor = document.querySelector('.sugerencias-panel');
         if (!contenedor) return;
 
-        // MODIFICADO: Restringir estrictamente el filtrado a IDs de Sugerencias (12000-12999)
+        // Restringir estrictamente el filtrado a IDs de Sugerencias (12000-12999)
         const activosSugerencias = datosLocales.filter(p => p.activa && p.id >= 12000 && p.id <= 12999);
 
         let entrantes = [];
@@ -80,7 +82,7 @@
         let postres = [];
         let vinos = [];
 
-        // MODIFICADO: Clasificación inteligente basada en rangos de ID para evitar falsos positivos con la palabra "vino"
+        // Clasificación inteligente basada en rangos de ID para evitar falsos positivos con la palabra "vino"
         activosSugerencias.forEach(p => {
             const id = p.id;
             const nombreEs = desglosarNombre(p.es).nombre.toLowerCase();
@@ -147,7 +149,7 @@
         contenedor.innerHTML = html;
     }
 
-    // NUEVO: Sobrescribir la función global de app.js para que index.html ejecute esta (la A4) al cambiar de pestaña
+    // Sobrescribir la función global de app.js para que index.html ejecute esta (la A4) al cambiar de pestaña
     window.renderizarSugerencias = cargarCarta;
 
     cargarCarta();
