@@ -1,8 +1,7 @@
 // =========================================================================
 // ARCHIVO: sugerencias-print.js (COMPONENTE INTEGRAL DE IMPRESIÓN A4)
-// MODIFICADO: Duplicado el tamaño del logotipo logo RG_REST.png.
-// MODIFICADO: Distribución estética con separación de Entrantes/Principales.
-// MODIFICADO: Posicionamiento de Vinos Recomendados en la parte inferior.
+// MODIFICADO: Restaurada la estructura vertical fluida.
+// MODIFICADO: Optimización de espacios para evitar amontonamiento.
 // =========================================================================
 
 (function () {
@@ -12,7 +11,6 @@
     stylePrint.innerHTML = `
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
-        /* Contenedor principal de la pestaña de sugerencias estilo folio A4 blanco limpio */
         .sugerencias-panel {
             background: #ffffff !important;
             color: #333333 !important;
@@ -30,83 +28,64 @@
             font-family: 'Montserrat', sans-serif !important;
         }
 
-        /* Cabecera superior alineada con logotipo lateral */
         .sugerencias-header-layout {
             display: flex !important;
             justify-content: space-between !important;
-            align-items: center !important; /* MODIFICADO: Alineación centrada para el logo grande */
-            margin-bottom: 35px !important;
+            align-items: center !important;
+            margin-bottom: 40px !important;
             width: 100% !important;
         }
 
-        /* Contenedor del título tipográfico de sugerencias */
         .sugerencias-brand-title-group {
             display: flex !important;
             flex-direction: column !important;
             gap: 12px !important;
         }
 
-        /* Estilo exacto para SUGERENCIAS DEL CHEF */
         .sugerencias-title-es {
             font-family: 'Montserrat', sans-serif !important;
             font-weight: 300 !important;
             font-size: 2.15rem !important;
             color: #e05a2b !important;
             line-height: 0.95 !important;
-            letter-spacing: 0.5px !important;
             text-transform: uppercase !important;
             margin: 0 !important;
-            padding: 0 !important;
         }
 
-        /* Estilo exacto para CHEF'S SUGGESTIONS */
         .sugerencias-title-en {
             font-family: 'Montserrat', sans-serif !important;
             font-weight: 300 !important;
             font-size: 1.7rem !important;
             color: #0d5c63 !important;
             line-height: 0.95 !important;
-            letter-spacing: 0.5px !important;
             text-transform: uppercase !important;
             margin-top: 4px !important;
-            padding: 0 !important;
         }
 
-        /* MODIFICADO: Escala del logo RG duplicada (de 90px a 180px) para máxima presencia de marca */
         .sugerencias-logo-rg {
             width: 180px !important;
             height: auto !important;
             object-fit: contain !important;
-            margin-left: auto !important; 
         }
 
-        /* MODIFICADO: El cuerpo ahora es un contenedor flex vertical para controlar la distribución */
         .sugerencias-body-menu {
             flex-grow: 1 !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: flex-start !important;
+            gap: 30px !important; /* MODIFICADO: Espacio uniforme entre categorías */
         }
 
-        /* NUEVO: Contenedor en rejilla para separar limpiamente Entrantes y Platos Principales */
-        .sugerencias-grid-principales {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 40px !important;
-            margin-bottom: 30px !important;
-        }
-
+        /* MODIFICADO: Eliminado Grid, vuelta al flujo normal con márgenes amplios */
         .sugerencias-categoria-block {
-            margin-bottom: 25px !important;
-        }
-
-        /* NUEVO/MODIFICADO: Fijar la sección de vinos al final de la carta de forma elegante */
-        .sugerencias-categoria-block.sugerencias-vinos-bottom {
-            margin-top: auto !important; /* Empuja el bloque al fondo del flex de forma limpia */
             margin-bottom: 10px !important;
         }
 
-        /* Títulos de sección: Naranja Corporativo */
+        /* Sección de vinos al fondo */
+        .sugerencias-vinos-bottom {
+            margin-top: auto !important;
+            margin-bottom: 20px !important;
+        }
+
         .sugerencias-categoria-titulo {
             font-size: 0.85rem !important;
             font-weight: 700 !important;
@@ -115,42 +94,33 @@
             letter-spacing: 1px !important;
             border-bottom: 2px solid #334155 !important;
             padding-bottom: 6px !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 20px !important; /* Más aire bajo el título */
         }
 
-        /* Variación estética de bordes alternos para dinamismo visual */
-        .sugerencias-grid-principales .sugerencias-categoria-block:nth-child(2) .sugerencias-categoria-titulo {
-            border-bottom: 2px solid #d97706 !important;
-        }
-
-        /* Estructura de filas de platos individuales */
         .sugerencias-item-plato {
             display: flex !important;
             align-items: baseline !important;
-            margin-bottom: 14px !important;
+            margin-bottom: 20px !important; /* Más aire entre platos */
             page-break-inside: avoid !important;
         }
 
         .sugerencias-item-textos {
             flex: 0 0 auto !important;
-            max-width: 75% !important;
+            max-width: 80% !important;
         }
 
         .sugerencias-plato-es {
-            font-size: 0.9rem !important;
+            font-size: 0.95rem !important;
             font-weight: 600 !important;
             color: #1e293b !important;
-            line-height: 1.3 !important;
         }
 
         .sugerencias-plato-en {
-            font-size: 0.75rem !important;
+            font-size: 0.8rem !important;
             color: #64748b !important;
             font-style: italic !important;
-            margin-top: 2px !important;
         }
 
-        /* Puntos de guía suspensivos dinámicos hacia el precio */
         .sugerencias-item-puntos {
             flex: 1 !important;
             border-bottom: 1.5px dotted #cbd5e1 !important;
@@ -160,202 +130,128 @@
         }
 
         .sugerencias-item-precio {
-            flex: 0 0 auto !important;
-            font-size: 0.9rem !important;
+            font-size: 0.95rem !important;
             font-weight: 700 !important;
-            color: #0f172a !important;
         }
 
-        /* Sección de pie de página de la hoja */
         .sugerencias-footer-layout {
             display: flex !important;
             justify-content: space-between !important;
             align-items: flex-end !important;
-            margin-top: 30px !important;
+            margin-top: 20px !important;
             padding-top: 15px !important;
             border-top: 1px solid #f1f5f9 !important;
-            width: 100% !important;
         }
 
         .sugerencias-info-legal {
-            font-size: 0.65rem !important;
+            font-size: 0.7rem !important;
             color: #64748b !important;
-            line-height: 1.5 !important;
-            max-width: 65% !important;
+            max-width: 60% !important;
         }
 
-        .sugerencias-info-legal span {
-            color: #d97706 !important;
-            margin-right: 4px !important;
-        }
-
-        /* Tamaño del contenedor QR maximizado */
         .sugerencias-qr-box {
             width: 120px !important;
             height: 120px !important;
-            flex-shrink: 0 !important;
-            margin-left: auto !important;
         }
 
         .sugerencias-qr-element {
             width: 100% !important;
             height: 100% !important;
-            object-fit: contain !important;
         }
 
-        /* Botón de acción para el gestor en pantalla */
         .btn-imprimir-sugerencias {
             display: block;
             margin: 20px auto;
             padding: 10px 24px;
             background-color: #d97706;
             color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
             font-weight: 700;
-            font-size: 0.85rem;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
-            transition: opacity 0.2s;
             text-transform: uppercase;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .btn-imprimir-sugerencias:hover {
-            opacity: 0.9;
         }
 
-        /* Modificaciones del comportamiento nativo del motor de impresión */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 0;
-            }
-            
-            body > :not(.sugerencias-panel):not(#btnDisparadorImpresionA4),
-            #app-version, 
-            .header-admin, 
-            .tabs-container, 
-            .pro-panel, 
-            .btn-guardar-main, 
-            .btn-add-float,
-            .btn-imprimir-sugerencias {
-                display: none !important;
-            }
-
-            html, body {
-                background: #ffffff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                height: 100% !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .sugerencias-panel {
-                display: flex !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                padding: 15mm 20mm !important;
-                margin: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-                page-break-after: avoid !important;
-                page-break-before: avoid !important;
-            }
+            @page { size: A4 portrait; margin: 0; }
+            body > :not(.sugerencias-panel):not(#btnDisparadorImpresionA4) { display: none !important; }
+            .sugerencias-panel { border: none !important; box-shadow: none !important; }
         }
     `;
     document.head.appendChild(stylePrint);
 
-    // Generador dinámico del DOM
     function inicializarPestañaSugerenciasA4() {
         const panelContenedor = document.querySelector('.sugerencias-panel');
         if (!panelContenedor) return;
 
-        // MODIFICADO: Reestructurado con contenedores Grid y Flex para organizar secciones y mover vinos al fondo
         panelContenedor.innerHTML = `
             <div class="sugerencias-header-layout">
                 <div class="sugerencias-brand-title-group">
-                    <div class="sugerencias-title-es">
-                        SUGERENCIAS<br>DEL CHEF
-                    </div>
-                    <div class="sugerencias-title-en">
-                        CHEF'S<br>SUGGESTIONS
-                    </div>
+                    <div class="sugerencias-title-es">SUGERENCIAS<br>DEL CHEF</div>
+                    <div class="sugerencias-title-en">CHEF'S<br>SUGGESTIONS</div>
                 </div>
                 <img src="logo RG_REST.png" alt="Roland Garros Restaurant" class="sugerencias-logo-rg" onerror="this.style.display='none';">
             </div>
 
             <div class="sugerencias-body-menu">
                 
-                <div class="sugerencias-grid-principales">
-                    
-                    <div class="sugerencias-categoria-block">
-                        <div class="sugerencias-categoria-titulo">Entrantes / Starters</div>
-                        
-                        <div class="sugerencias-item-plato">
-                            <div class="sugerencias-item-textos">
-                                <div class="sugerencias-plato-es">Surtido de croquetas: 2 Pollo - 2 Jamón Ibérico - 2 Setas</div>
-                                <div class="sugerencias-plato-en">Assortment of Croquettes: 2 Chicken - 2 Iberian Ham - 2 Mushroom</div>
-                            </div>
-                            <div class="sugerencias-item-puntos"></div>
-                            <div class="sugerencias-item-precio">14.50€</div>
+                <div class="sugerencias-categoria-block">
+                    <div class="sugerencias-categoria-titulo">Entrantes / Starters</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Surtido de croquetas: 2 Pollo - 2 Jamón Ibérico - 2 Setas</div>
+                            <div class="sugerencias-plato-en">Assortment of Croquettes: 2 Chicken - 2 Iberian Ham - 2 Mushroom</div>
                         </div>
-
-                        <div class="sugerencias-item-plato">
-                            <div class="sugerencias-item-textos">
-                                <div class="sugerencias-plato-es">Surtido de Croquetas Vegetarianas: 6 Setas</div>
-                                <div class="sugerencias-plato-en">Vegetarian Croquette Assortment: 6 Mushrooms</div>
-                            </div>
-                            <div class="sugerencias-item-puntos"></div>
-                            <div class="sugerencias-item-precio">14.50€</div>
-                        </div>
-
-                        <div class="sugerencias-item-plato">
-                            <div class="sugerencias-item-textos">
-                                <div class="sugerencias-plato-es">Flor de alcachofas al horno Josper con salsa tonnato</div>
-                                <div class="sugerencias-plato-en">Charcoal-grilled artichoke with tonnato sauce</div>
-                            </div>
-                            <div class="sugerencias-item-puntos"></div>
-                            <div class="sugerencias-item-precio">18.50€</div>
-                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">14.50€</div>
                     </div>
-
-                    <div class="sugerencias-categoria-block">
-                        <div class="sugerencias-categoria-titulo">Platos Principales / Main Courses</div>
-                        
-                        <div class="sugerencias-item-plato">
-                            <div class="sugerencias-item-textos">
-                                <div class="sugerencias-plato-es">Arroz meloso de cigala</div>
-                                <div class="sugerencias-plato-en">Meloso Rice of Norway Lobster</div>
-                            </div>
-                            <div class="sugerencias-item-puntos"></div>
-                            <div class="sugerencias-item-precio">22.00€</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Surtido de Croquetas Vegetarianas: 6 Setas</div>
+                            <div class="sugerencias-plato-en">Vegetarian Croquette Assortment: 6 Mushrooms</div>
                         </div>
-
-                        <div class="sugerencias-item-plato">
-                            <div class="sugerencias-item-textos">
-                                <div class="sugerencias-plato-es">Entrecot trinchado con patata frita, encurtidos con rúcula y queso parmesano</div>
-                                <div class="sugerencias-plato-en">Sliced Entrecote with French fries, pickles, rocket, and Parmesan</div>
-                            </div>
-                            <div class="sugerencias-item-puntos"></div>
-                            <div class="sugerencias-item-precio">29.00€</div>
-                        </div>
-
-                        <div class="sugerencias-item-plato">
-                            <div class="sugerencias-item-textos">
-                                <div class="sugerencias-plato-es">Tagliata de calamar al horno Josper con ratatouille y espuma de albahaca</div>
-                                <div class="sugerencias-plato-en">Tagliata of Josper-roasted squid with ratatouille and basil foam</div>
-                            </div>
-                            <div class="sugerencias-item-puntos"></div>
-                            <div class="sugerencias-item-precio">18.50€</div>
-                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">14.50€</div>
                     </div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Flor de alcachofas al horno Josper con salsa tonnato</div>
+                            <div class="sugerencias-plato-en">Charcoal-grilled artichoke with tonnato sauce</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">18.50€</div>
+                    </div>
+                </div>
 
+                <div class="sugerencias-categoria-block">
+                    <div class="sugerencias-categoria-titulo">Platos Principales / Main Courses</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Arroz meloso de cigala</div>
+                            <div class="sugerencias-plato-en">Meloso Rice of Norway Lobster</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">22.00€</div>
+                    </div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Entrecot trinchado con patata frita, encurtidos con rúcula y queso parmesano</div>
+                            <div class="sugerencias-plato-en">Sliced Entrecote with French fries, pickles, rocket, and Parmesan</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">29.00€</div>
+                    </div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Tagliata de calamar al horno Josper con ratatouille y espuma de albahaca</div>
+                            <div class="sugerencias-plato-en">Tagliata of Josper-roasted squid with ratatouille and basil foam</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">18.50€</div>
+                    </div>
                 </div>
 
                 <div class="sugerencias-categoria-block sugerencias-vinos-bottom">
                     <div class="sugerencias-categoria-titulo">Vinos Recomendados / Recommended Wines</div>
-                    
                     <div class="sugerencias-item-plato">
                         <div class="sugerencias-item-textos">
                             <div class="sugerencias-plato-es">Vino Tinto - EL TENISTA (D.O.P. Jumilla)</div>
@@ -370,11 +266,10 @@
 
             <div class="sugerencias-footer-layout">
                 <div class="sugerencias-info-legal">
-                    <span>⚠️</span> Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
-                    <span style="color:#64748b !important; font-style:italic;">If you have any food allergies, please inform our staff.</span>
+                    <span>⚠️</span> Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.
                 </div>
                 <div class="sugerencias-qr-box">
-                    <img src="qr-code.png" alt="Código QR Menú" class="sugerencias-qr-element" onerror="this.style.display='none';">
+                    <img src="qr-code.png" alt="QR" class="sugerencias-qr-element" onerror="this.style.display='none';">
                 </div>
             </div>
         `;
@@ -383,10 +278,8 @@
             const btnPrint = document.createElement('button');
             btnPrint.id = 'btnDisparadorImpresionA4';
             btnPrint.className = 'btn-imprimir-sugerencias';
-            btnPrint.innerText = '🖨️ Imprimir Carta en Formato A4';
-            btnPrint.onclick = function () {
-                window.print();
-            };
+            btnPrint.innerText = '🖨️ Imprimir Carta';
+            btnPrint.onclick = () => window.print();
             panelContenedor.parentNode.insertBefore(btnPrint, panelContenedor.nextSibling);
         }
     }
@@ -396,5 +289,4 @@
     } else {
         inicializarPestañaSugerenciasA4();
     }
-
 })();
