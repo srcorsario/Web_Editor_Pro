@@ -29,10 +29,10 @@
         
         .sugerencias-plato { display: flex !important; align-items: baseline !important; margin-bottom: 12px !important; width: 100% !important; }
         
-        /* MODIFICADO: El contenedor de nombres toma el espacio que necesita y cede el sobrante a los puntos */
+        /* MODIFICADO: Ampliado el max-width al 88% para aprovechar más espacio horizontal en el A4 */
         .sugerencias-plato-nombres { 
             flex: 0 1 auto !important; 
-            max-width: 80% !important;
+            max-width: 88% !important;
             display: flex !important; 
             flex-direction: column !important; 
         }
@@ -40,7 +40,6 @@
         .sugerencias-nombre-es { font-size: 0.95rem !important; font-weight: 600 !important; color: #1e293b !important; }
         .sugerencias-nombre-en { font-size: 0.8rem !important; color: #64748b !important; font-style: italic !important; }
         
-        /* MODIFICADO: Los puntos ocupan únicamente el espacio que dejan los nombres */
         .sugerencias-puntos { 
             flex: 1 !important; 
             border-bottom: 1px dotted #94a3b8 !important; 
@@ -86,23 +85,18 @@
             const id = p.id;
             const nombreEs = desglosarNombre(p.es).nombre.toLowerCase();
             
-            // 1. El ID especial 12990 va a vinos, o si contiene "vino" pero NO es "copa" ni "vinagreta" (para evitar el salpicón)
             if (id === 12990 || (nombreEs.includes('vino') && !nombreEs.includes('copa') && !nombreEs.includes('vinagreta'))) {
                 vinos.push(p);
             } 
-            // 2. Rango de Entrantes y Croquetas
             else if (id >= 12100 && id <= 12399) {
                 entrantes.push(p);
             } 
-            // 3. Rango de Principales
             else if (id >= 12400 && id <= 12899) {
                 principales.push(p);
             } 
-            // 4. Rango de Postres
             else if (id >= 12900 && id <= 12999) {
                 postres.push(p);
             } 
-            // 5. Fallback para IDs entre 12000-12099
             else {
                 entrantes.push(p);
             }
