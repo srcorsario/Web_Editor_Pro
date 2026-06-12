@@ -1,197 +1,205 @@
 // =========================================================================
-// ARCHIVO: sugerencias-print.js (NUEVO COMPONENTE MODULAR DE IMPRESIÓN A4)
-// MODIFICADO: Sistema de Renderizado de la pestaña "Sugerencias del día" 
-// Objetivo: Adaptación quirúrgica estilo Roland Garros para impresión A4.
+// ARCHIVO: sugerencias-print.js (COMPONENTE INTEGRAL DE IMPRESIÓN A4)
+// MODIFICADO: Ajuste de diseño adaptado a capturas reales de la aplicación.
+// Eliminadas cabeceras técnicas redundantes y estructuradas las sugerencias.
 // =========================================================================
 
 (function () {
     'use strict';
 
-    // NUEVO: Estilos CSS inyectados de forma aislada dedicados exclusivamente a la maquetación A4 y Media Query de impresión
+    // NUEVO: Estilos estéticos ultra-fieles para simular el papel A4 en pantalla e impresión
     const stylePrint = document.createElement('style');
     stylePrint.innerHTML = `
-        /* Estilos en pantalla para la previsualización fidedigna */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+
+        /* Contenedor principal de la pestaña de sugerencias estilo folio A4 blanco limpio */
         .sugerencias-panel {
             background: #ffffff !important;
-            color: #2c3e50 !important;
-            padding: 45px 55px !important;
-            max-width: 210mm !important; /* Ancho proporcional exacto A4 */
-            min-height: 297mm !important; /* Alto proporcional exacto A4 */
-            margin: 0 auto !important;
+            color: #333333 !important;
+            padding: 40px 50px !important;
+            max-width: 210mm !important;
+            min-height: 297mm !important;
+            margin: 15px auto !important;
             box-sizing: border-box !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
-            border: 1px solid #ddd !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
             position: relative !important;
             font-family: 'Montserrat', sans-serif !important;
         }
 
-        .sugerencias-top-row {
+        /* Cabecera superior alineada con logotipo lateral */
+        .sugerencias-header-layout {
             display: flex !important;
             justify-content: space-between !important;
             align-items: flex-start !important;
-            margin-bottom: 25px !important;
+            margin-bottom: 20px !important;
+            width: 100% !important;
         }
 
-        .sugerencias-titulo-dia {
-            font-size: 1.4rem !important;
+        .sugerencias-brand-title {
+            font-size: 1.1rem !important;
             font-weight: 700 !important;
-            color: #2c3e50 !important;
+            color: #1e293b !important;
+            letter-spacing: 0.5px !important;
             text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            line-height: 1.3 !important;
+            line-height: 1.4 !important;
         }
 
-        .sugerencias-logo-img {
-            width: 140px !important;
+        .sugerencias-logo-rg {
+            width: 75px !important;
             height: auto !important;
             object-fit: contain !important;
         }
 
-        .sugerencias-subheader {
-            text-align: center !important;
+        /* Contenedor del banner central decorativo (negro.png) */
+        .sugerencias-banner-container {
+            text-align: left !important;
             margin-bottom: 35px !important;
-            border-bottom: 3px solid #e67e22 !important; /* Color primario de acento */
-            padding-bottom: 20px !important;
-        }
-
-        .sugerencias-header-img {
             width: 100% !important;
-            max-width: 550px !important;
+        }
+
+        .sugerencias-banner-img {
+            max-width: 240px !important;
             height: auto !important;
-            display: inline-block !important;
+            display: block !important;
         }
 
-        .sugerencias-contenido-platos {
+        /* Cuerpo de listados */
+        .sugerencias-body-menu {
             flex-grow: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
 
-        .sugerencias-seccion {
-            margin-bottom: 35px !important;
+        .sugerencias-categoria-block {
+            margin-bottom: 25px !important;
         }
 
-        .sugerencias-seccion-titulo {
-            font-size: 1.15rem !important;
+        /* Títulos de sección: Naranja Corporativo / Verde Arcilla de las capturas */
+        .sugerencias-categoria-titulo {
+            font-size: 0.85rem !important;
             font-weight: 700 !important;
-            color: #e67e22 !important;
+            color: #d97706 !important; /* Tono naranja de la captura */
             text-transform: uppercase !important;
-            margin-bottom: 20px !important;
-            letter-spacing: 1.5px !important;
-            border-left: 4px solid #e67e22 !important;
-            padding-left: 10px !important;
+            letter-spacing: 1px !important;
+            border-bottom: 2px solid #334155 !important;
+            padding-bottom: 6px !important;
+            margin-bottom: 16px !important;
         }
 
-        .sugerencias-plato {
+        .sugerencias-categoria-block:nth-child(2) .sugerencias-categoria-titulo {
+            border-bottom: 2px solid #d97706 !important; /* Línea divisoria naranja intermedia */
+        }
+
+        /* Estructura de filas de platos individuales */
+        .sugerencias-item-plato {
             display: flex !important;
             align-items: baseline !important;
-            margin-bottom: 18px !important;
+            margin-bottom: 14px !important;
             page-break-inside: avoid !important;
         }
 
-        .sugerencias-plato-nombres {
+        .sugerencias-item-textos {
             flex: 0 0 auto !important;
-            max-width: 80% !important;
+            max-width: 78% !important;
         }
 
-        .sugerencias-nombre-es {
+        .sugerencias-plato-es {
+            font-size: 0.9rem !important;
             font-weight: 600 !important;
-            color: #2c3e50 !important;
-            font-size: 1.05rem !important;
+            color: #1e293b !important;
+            line-height: 1.3 !important;
         }
 
-        .sugerencias-nombre-en {
-            font-size: 0.85rem !important;
-            color: #7f8c8d !important;
+        .sugerencias-plato-en {
+            font-size: 0.75rem !important;
+            color: #64748b !important;
             font-style: italic !important;
-            margin-top: 3px !important;
+            margin-top: 2px !important;
         }
 
-        .sugerencias-puntos {
+        /* Puntos de guía suspensivos dinámicos hacia el precio */
+        .sugerencias-item-puntos {
             flex: 1 !important;
-            border-bottom: 2px dotted #b2bec3 !important;
-            margin: 0 12px !important;
+            border-bottom: 1.5px dotted #cbd5e1 !important;
+            margin: 0 10px !important;
             position: relative !important;
-            top: -4px !important;
+            top: -3px !important;
         }
 
-        .sugerencias-precio {
+        .sugerencias-item-precio {
             flex: 0 0 auto !important;
+            font-size: 0.9rem !important;
             font-weight: 700 !important;
-            color: #2c3e50 !important;
-            font-size: 1.1rem !important;
+            color: #0f172a !important;
         }
 
-        .sugerencias-separador {
-            height: 1px !important;
-            margin: 35px 0 !important;
-            background: linear-gradient(to right, transparent, #e67e22, transparent) !important;
-        }
-
-        .sugerencias-footer {
+        /* Sección de pie de página de la hoja */
+        .sugerencias-footer-layout {
             display: flex !important;
             justify-content: space-between !important;
             align-items: flex-end !important;
-            margin-top: 40px !important;
-            padding-top: 25px !important;
-            border-top: 1px solid #dfe6e9 !important;
+            margin-top: 30px !important;
+            padding-top: 15px !important;
+            border-top: 1px solid #f1f5f9 !important;
         }
 
-        .sugerencias-aviso {
-            flex: 1 !important;
-            font-size: 0.8rem !important;
-            color: #636e72 !important;
-            line-height: 1.6 !important;
-            padding-right: 35px !important;
+        .sugerencias-info-legal {
+            font-size: 0.65rem !important;
+            color: #64748b !important;
+            line-height: 1.5 !important;
+            max-width: 75% !important;
         }
 
-        .sugerencias-qr {
-            width: 130px !important;
-            height: 130px !important;
-            background: #ffffff !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
+        .sugerencias-info-legal span {
+            color: #d97706 !important;
+            margin-right: 4px !important;
+        }
+
+        .sugerencias-qr-box {
+            width: 65px !important;
+            height: 65px !important;
             flex-shrink: 0 !important;
         }
 
-        .sugerencias-qr-img {
+        .sugerencias-qr-element {
             width: 100% !important;
             height: 100% !important;
             object-fit: contain !important;
         }
 
-        /* Botón exclusivo para disparar la impresión de la hoja */
-        .btn-imprimir-a4 {
+        /* Botón de acción para el gestor en pantalla */
+        .btn-imprimir-sugerencias {
             display: block;
             margin: 20px auto;
-            padding: 12px 30px;
-            background-color: #2c3e50;
+            padding: 10px 24px;
+            background-color: #d97706;
             color: #ffffff;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: opacity 0.2s;
             text-transform: uppercase;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .btn-imprimir-a4:hover {
-            background-color: #e67e22;
+        .btn-imprimir-sugerencias:hover {
+            opacity: 0.9;
         }
 
-        /* =========================================================================
-           ⚡ CRÍTICO: REGLAS DIRECTAS DE CONFIGURACIÓN DE IMPRESIÓN PARA EL FORMATO A4
-           ========================================================================= */
+        /* Modificaciones del comportamiento nativo del motor de impresión */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0mm; /* El margen está controlado internamente por el padding del contenedor */
+                margin: 0;
             }
             
-            /* Ocultar absolutamente toda la interfaz web, cabeceras, menús e inputs */
+            /* Ocultar dinámicamente toda la interfaz de administración y edición web */
             body *, 
             #app-version, 
             .header-admin, 
@@ -199,11 +207,11 @@
             .pro-panel, 
             .btn-guardar-main, 
             .btn-add-float,
-            .btn-imprimir-a4 {
+            .btn-imprimir-sugerencias {
                 display: none !important;
             }
 
-            /* Forzar visualización única del contenedor de sugerencias en A4 exacto */
+            /* Forzado total del contenedor blanco de sugerencias a tamaño de papel físico */
             html, body {
                 background: #ffffff !important;
                 margin: 0 !important;
@@ -217,7 +225,7 @@
                 display: flex !important;
                 width: 210mm !important;
                 height: 297mm !important;
-                padding: 20mm !important; /* Margen estandarizado de impresión A4 */
+                padding: 15mm 20mm !important; /* Margenes limpios de impresión comercial */
                 margin: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
@@ -228,99 +236,120 @@
     `;
     document.head.appendChild(stylePrint);
 
-    // NUEVO: Renderizador Inteligente y defensivo del DOM para la pestaña de Sugerencias del Día
-    function renderTabSugerenciasA4() {
+    // MODIFICADO: Generador dinámico defensivo del DOM
+    function inicializarPestañaSugerenciasA4() {
         const panelContenedor = document.querySelector('.sugerencias-panel');
-        if (!panelContenedor) return; // Manejo defensivo del DOM
+        if (!panelContenedor) return; // Validación defensiva preventiva
 
-        // NUEVO: Bloque de Inyección Estructural con las imágenes solicitadas incorporadas de manera elegante
+        // MODIFICADO: Estructuración limpia eliminando los encabezados técnicos repetidos
         panelContenedor.innerHTML = `
-            <div class="sugerencias-top-row">
-                <h2 class="sugerencias-titulo-dia" id="sugerencia-fecha-titulo">
-                    SUGERENCIAS DEL DIA<br>
-                    <span style="font-size: 0.95rem; font-weight: 400; color: #7f8c8d;" id="sugerencia-fecha-dinamica"></span>
-                </h2>
-                <img src="RG_REST.png" alt="Logo RG Rest" class="sugerencias-logo-img" onerror="this.style.display='none';">
+            <div class="sugerencias-header-layout">
+                <div class="sugerencias-brand-title" id="sugerencias-fecha-titulo">
+                    SUGERENCIAS DEL CARTA
+                </div>
+                <img src="RG_REST.png" alt="Roland Garros Restaurant" class="sugerencias-logo-rg" onerror="this.style.display='none';">
             </div>
 
-            <div class="sugerencias-subheader">
-                <img src="negro.png" alt="Cabecera Carta" class="sugerencias-header-img" onerror="this.style.display='none';">
+            <div class="sugerencias-banner-container">
+                <img src="negro.png" alt="SUGERENCIAS DEL CHEF / CHEF'S SUGGESTIONS" class="sugerencias-banner-img" onerror="this.style.display='none';">
             </div>
 
-            <div class="sugerencias-contenido-platos">
+            <div class="sugerencias-body-menu">
                 
-                <div class="sugerencias-seccion">
-                    <div class="sugerencias-seccion-titulo">Entrantes / Starters</div>
+                <div class="sugerencias-categoria-block">
+                    <div class="sugerencias-categoria-titulo">Entrantes & Sugerencias / Starters & Suggestions</div>
                     
-                    <div class="sugerencias-plato">
-                        <div class="sugerencias-plato-nombres">
-                            <div class="sugerencias-nombre-es">Jamón Ibérico de Bellota con Pan de Cristal</div>
-                            <div class="sugerencias-nombre-en">Acorn-fed Iberian Ham with Crispy Crystal Bread</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Surtido de croquetas: 2 Pollo - 2 Jamón Ibérico - 2 Setas</div>
+                            <div class="sugerencias-plato-en">Assortment of Croquettes: 2 Chicken - 2 Iberian Ham - 2 Mushroom</div>
                         </div>
-                        <div class="sugerencias-puntos"></div>
-                        <div class="sugerencias-precio">28,50€</div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">14.50€</div>
                     </div>
 
-                    <div class="sugerencias-plato">
-                        <div class="sugerencias-plato-nombres">
-                            <div class="sugerencias-nombre-es">Croquetas Artesanas de la Casa (Variadas)</div>
-                            <div class="sugerencias-nombre-en">Homemade Artisanal Croquettes Selection</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Surtido de Croquetas Vegetarianas: 6 Setas</div>
+                            <div class="sugerencias-plato-en">Vegetarian Croquette Assortment: 6 Mushrooms</div>
                         </div>
-                        <div class="sugerencias-puntos"></div>
-                        <div class="sugerencias-precio">14,00€</div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">14.50€</div>
+                    </div>
+
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Tagliata de calamar al horno Josper con ratatouille y espuma de albahaca</div>
+                            <div class="sugerencias-plato-en">Tagliata of Josper-roasted squid with ratatouille and basil foam</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">18.50€</div>
+                    </div>
+
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Flor de alcachofas al horno Josper con salsa tonnato</div>
+                            <div class="sugerencias-plato-en">Charcoal-grilled artichoke with tonnato sauce</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">18.50€</div>
                     </div>
                 </div>
 
-                <div class="sugerencias-separador"></div>
-
-                <div class="sugerencias-seccion">
-                    <div class="sugerencias-seccion-titulo">Principales / Main Courses</div>
+                <div class="sugerencias-categoria-block">
+                    <div class="sugerencias-categoria-titulo">Platos Principales / Main Courses</div>
                     
-                    <div class="sugerencias-plato">
-                        <div class="sugerencias-plato-nombres">
-                            <div class="sugerencias-nombre-es">Rodaballo Salvaje a la Brasa con Verduras de Temporada</div>
-                            <div class="sugerencias-nombre-en">Wild Grilled Turbot served with Seasonal Vegetables</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Arroz meloso de cigala</div>
+                            <div class="sugerencias-plato-en">Meloso Rice of Norway Lobster</div>
                         </div>
-                        <div class="sugerencias-puntos"></div>
-                        <div class="sugerencias-precio">32,00€</div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">22.00€</div>
                     </div>
 
-                    <div class="sugerencias-plato">
-                        <div class="sugerencias-plato-nombres">
-                            <div class="sugerencias-nombre-es">Solomillo de Buey Maduro con Reducción de Oporto</div>
-                            <div class="sugerencias-nombre-en">Aged Beef Tenderloin with Port Wine Reduction</div>
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Entrecot trinchado con patata frita, encurtidos con rúcula y queso parmesano</div>
+                            <div class="sugerencias-plato-en">Sliced Entrecote with French fries, pickles, rocket, and Parmesan</div>
                         </div>
-                        <div class="sugerencias-puntos"></div>
-                        <div class="sugerencias-precio">29,50€</div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">29.00€</div>
+                    </div>
+                </div>
+
+                <div class="sugerencias-categoria-block">
+                    <div class="sugerencias-categoria-titulo">Vinos Recomendados / Recommended Wines</div>
+                    
+                    <div class="sugerencias-item-plato">
+                        <div class="sugerencias-item-textos">
+                            <div class="sugerencias-plato-es">Vino Tinto - EL TENISTA (D.O.P. Jumilla)</div>
+                            <div class="sugerencias-plato-en">EL TENISTA (D.O.P. Jumilla)</div>
+                        </div>
+                        <div class="sugerencias-item-puntos"></div>
+                        <div class="sugerencias-item-precio">56.00€</div>
                     </div>
                 </div>
 
             </div>
 
-            <div class="sugerencias-footer">
-                <div class="sugerencias-aviso">
-                    *De acuerdo con el Reglamento (UE) Nº 1169/2011, disponemos de la información detallada sobre alérgenos en nuestra carta general. Por favor, consulte a nuestro personal si padece alguna intolerancia alimentaria.<br>
-                    <span style="font-weight: 600; margin-top: 5px; display: inline-block;">Roland Garros Restaurant &copy; 2026</span>
+            <div class="sugerencias-footer-layout">
+                <div class="sugerencias-info-legal">
+                    <span>⚠️</span> Si usted tiene algún tipo de alergia alimentaria, por favor comuníquelo a nuestro personal.<br>
+                    <span style="color:#64748b !important; font-style:italic;">If you have any food allergies, please inform our staff.</span>
                 </div>
-                <div class="sugerencias-qr">
-                    <img src="qr-code.png" alt="Carta Digital QR" class="sugerencias-qr-img" onerror="this.parentNode.innerHTML='[QR CODE]';">
+                <div class="sugerencias-qr-box">
+                    <img src="qr-code.png" alt="Código QR Menú" class="sugerencias-qr-element" onerror="this.style.display='none';">
                 </div>
             </div>
         `;
 
-        // NUEVO: Inserción de la fecha actual en tiempo real de forma elegante en el encabezado
-        const fechaEl = document.getElementById('sugerencia-fecha-dinamica');
-        if (fechaEl) {
-            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            fechaEl.innerText = new Date().toLocaleDateString('es-ES', opcionesFecha);
-        }
-
-        // NUEVO: Inyección del disparador de impresión físico para el formato A4
-        if (!document.getElementById('btnDisparadorImpresion')) {
+        // NUEVO: Generación e inyección controlada del botón de impresión interactivo para evitar duplicidad de listeners
+        if (!document.getElementById('btnDisparadorImpresionA4')) {
             const btnPrint = document.createElement('button');
-            btnPrint.id = 'btnDisparadorImpresion';
-            btnPrint.className = 'btn-imprimir-a4';
-            btnPrint.innerText = '🖨️ Imprimir Carta en A4';
+            btnPrint.id = 'btnDisparadorImpresionA4';
+            btnPrint.className = 'btn-imprimir-sugerencias';
+            btnPrint.innerText = '🖨️ Imprimir Carta en Formato A4';
             btnPrint.onclick = function () {
                 window.print();
             };
@@ -328,11 +357,11 @@
         }
     }
 
-    // NUEVO: Enganche seguro al ciclo de carga del árbol DOM sin sobreescribir listeners globales antiguos
+    // Ejecución segura dependiendo del ciclo de vida del árbol DOM
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderTabSugerenciasA4);
+        document.addEventListener('DOMContentLoaded', inicializarPestañaSugerenciasA4);
     } else {
-        renderTabSugerenciasA4();
+        inicializarPestañaSugerenciasA4();
     }
 
 })();
