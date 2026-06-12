@@ -1,8 +1,8 @@
 // =========================================================================
 // ARCHIVO: sugerencias-print.js (COMPONENTE INTEGRAL DE IMPRESIÓN A4)
-// MODIFICADO: Incremento del tamaño del código QR al doble de su proporción.
-// MODIFICADO: Actualización del nombre del archivo del logotipo a logo RG_REST.png.
-// Fix: Preservación estricta de la estructura limpia de impresión A4.
+// MODIFICADO: Duplicado el tamaño del logotipo logo RG_REST.png.
+// MODIFICADO: Distribución estética con separación de Entrantes/Principales.
+// MODIFICADO: Posicionamiento de Vinos Recomendados en la parte inferior.
 // =========================================================================
 
 (function () {
@@ -34,7 +34,7 @@
         .sugerencias-header-layout {
             display: flex !important;
             justify-content: space-between !important;
-            align-items: flex-start !important;
+            align-items: center !important; /* MODIFICADO: Alineación centrada para el logo grande */
             margin-bottom: 35px !important;
             width: 100% !important;
         }
@@ -46,7 +46,7 @@
             gap: 12px !important;
         }
 
-        /* Estilo exacto para SUGERENCIAS DEL CHEF (Líneas 1 y 2) */
+        /* Estilo exacto para SUGERENCIAS DEL CHEF */
         .sugerencias-title-es {
             font-family: 'Montserrat', sans-serif !important;
             font-weight: 300 !important;
@@ -59,7 +59,7 @@
             padding: 0 !important;
         }
 
-        /* Estilo exacto para CHEF'S SUGGESTIONS (Líneas 3 y 4) */
+        /* Estilo exacto para CHEF'S SUGGESTIONS */
         .sugerencias-title-en {
             font-family: 'Montserrat', sans-serif !important;
             font-weight: 300 !important;
@@ -72,23 +72,38 @@
             padding: 0 !important;
         }
 
-        /* MODIFICADO: Dimensionamiento del logo adaptado al nuevo nombre de recurso logo RG_REST.png */
+        /* MODIFICADO: Escala del logo RG duplicada (de 90px a 180px) para máxima presencia de marca */
         .sugerencias-logo-rg {
-            width: 90px !important;
+            width: 180px !important;
             height: auto !important;
             object-fit: contain !important;
             margin-left: auto !important; 
         }
 
-        /* Cuerpo de listados */
+        /* MODIFICADO: El cuerpo ahora es un contenedor flex vertical para controlar la distribución */
         .sugerencias-body-menu {
             flex-grow: 1 !important;
             display: flex !important;
             flex-direction: column !important;
+            justify-content: flex-start !important;
+        }
+
+        /* NUEVO: Contenedor en rejilla para separar limpiamente Entrantes y Platos Principales */
+        .sugerencias-grid-principales {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 40px !important;
+            margin-bottom: 30px !important;
         }
 
         .sugerencias-categoria-block {
             margin-bottom: 25px !important;
+        }
+
+        /* NUEVO/MODIFICADO: Fijar la sección de vinos al final de la carta de forma elegante */
+        .sugerencias-categoria-block.sugerencias-vinos-bottom {
+            margin-top: auto !important; /* Empuja el bloque al fondo del flex de forma limpia */
+            margin-bottom: 10px !important;
         }
 
         /* Títulos de sección: Naranja Corporativo */
@@ -103,7 +118,8 @@
             margin-bottom: 16px !important;
         }
 
-        .sugerencias-categoria-block:nth-child(2) .sugerencias-categoria-titulo {
+        /* Variación estética de bordes alternos para dinamismo visual */
+        .sugerencias-grid-principales .sugerencias-categoria-block:nth-child(2) .sugerencias-categoria-titulo {
             border-bottom: 2px solid #d97706 !important;
         }
 
@@ -173,7 +189,7 @@
             margin-right: 4px !important;
         }
 
-        /* MODIFICADO: Incremento del tamaño del contenedor QR a casi el doble de su proporción original (de 65px a 120px) */
+        /* Tamaño del contenedor QR maximizado */
         .sugerencias-qr-box {
             width: 120px !important;
             height: 120px !important;
@@ -250,12 +266,12 @@
     `;
     document.head.appendChild(stylePrint);
 
-    // Generador dinámico defensivo del DOM
+    // Generador dinámico del DOM
     function inicializarPestañaSugerenciasA4() {
         const panelContenedor = document.querySelector('.sugerencias-panel');
         if (!panelContenedor) return;
 
-        // MODIFICADO: Actualización de la ruta de la imagen superior a logo RG_REST.png
+        // MODIFICADO: Reestructurado con contenedores Grid y Flex para organizar secciones y mover vinos al fondo
         panelContenedor.innerHTML = `
             <div class="sugerencias-header-layout">
                 <div class="sugerencias-brand-title-group">
@@ -271,69 +287,73 @@
 
             <div class="sugerencias-body-menu">
                 
-                <div class="sugerencias-categoria-block">
-                    <div class="sugerencias-categoria-titulo">Entrantes & Sugerencias / Starters & Suggestions</div>
+                <div class="sugerencias-grid-principales">
                     
-                    <div class="sugerencias-item-plato">
-                        <div class="sugerencias-item-textos">
-                            <div class="sugerencias-plato-es">Surtido de croquetas: 2 Pollo - 2 Jamón Ibérico - 2 Setas</div>
-                            <div class="sugerencias-plato-en">Assortment of Croquettes: 2 Chicken - 2 Iberian Ham - 2 Mushroom</div>
+                    <div class="sugerencias-categoria-block">
+                        <div class="sugerencias-categoria-titulo">Entrantes / Starters</div>
+                        
+                        <div class="sugerencias-item-plato">
+                            <div class="sugerencias-item-textos">
+                                <div class="sugerencias-plato-es">Surtido de croquetas: 2 Pollo - 2 Jamón Ibérico - 2 Setas</div>
+                                <div class="sugerencias-plato-en">Assortment of Croquettes: 2 Chicken - 2 Iberian Ham - 2 Mushroom</div>
+                            </div>
+                            <div class="sugerencias-item-puntos"></div>
+                            <div class="sugerencias-item-precio">14.50€</div>
                         </div>
-                        <div class="sugerencias-item-puntos"></div>
-                        <div class="sugerencias-item-precio">14.50€</div>
+
+                        <div class="sugerencias-item-plato">
+                            <div class="sugerencias-item-textos">
+                                <div class="sugerencias-plato-es">Surtido de Croquetas Vegetarianas: 6 Setas</div>
+                                <div class="sugerencias-plato-en">Vegetarian Croquette Assortment: 6 Mushrooms</div>
+                            </div>
+                            <div class="sugerencias-item-puntos"></div>
+                            <div class="sugerencias-item-precio">14.50€</div>
+                        </div>
+
+                        <div class="sugerencias-item-plato">
+                            <div class="sugerencias-item-textos">
+                                <div class="sugerencias-plato-es">Flor de alcachofas al horno Josper con salsa tonnato</div>
+                                <div class="sugerencias-plato-en">Charcoal-grilled artichoke with tonnato sauce</div>
+                            </div>
+                            <div class="sugerencias-item-puntos"></div>
+                            <div class="sugerencias-item-precio">18.50€</div>
+                        </div>
                     </div>
 
-                    <div class="sugerencias-item-plato">
-                        <div class="sugerencias-item-textos">
-                            <div class="sugerencias-plato-es">Surtido de Croquetas Vegetarianas: 6 Setas</div>
-                            <div class="sugerencias-plato-en">Vegetarian Croquette Assortment: 6 Mushrooms</div>
+                    <div class="sugerencias-categoria-block">
+                        <div class="sugerencias-categoria-titulo">Platos Principales / Main Courses</div>
+                        
+                        <div class="sugerencias-item-plato">
+                            <div class="sugerencias-item-textos">
+                                <div class="sugerencias-plato-es">Arroz meloso de cigala</div>
+                                <div class="sugerencias-plato-en">Meloso Rice of Norway Lobster</div>
+                            </div>
+                            <div class="sugerencias-item-puntos"></div>
+                            <div class="sugerencias-item-precio">22.00€</div>
                         </div>
-                        <div class="sugerencias-item-puntos"></div>
-                        <div class="sugerencias-item-precio">14.50€</div>
+
+                        <div class="sugerencias-item-plato">
+                            <div class="sugerencias-item-textos">
+                                <div class="sugerencias-plato-es">Entrecot trinchado con patata frita, encurtidos con rúcula y queso parmesano</div>
+                                <div class="sugerencias-plato-en">Sliced Entrecote with French fries, pickles, rocket, and Parmesan</div>
+                            </div>
+                            <div class="sugerencias-item-puntos"></div>
+                            <div class="sugerencias-item-precio">29.00€</div>
+                        </div>
+
+                        <div class="sugerencias-item-plato">
+                            <div class="sugerencias-item-textos">
+                                <div class="sugerencias-plato-es">Tagliata de calamar al horno Josper con ratatouille y espuma de albahaca</div>
+                                <div class="sugerencias-plato-en">Tagliata of Josper-roasted squid with ratatouille and basil foam</div>
+                            </div>
+                            <div class="sugerencias-item-puntos"></div>
+                            <div class="sugerencias-item-precio">18.50€</div>
+                        </div>
                     </div>
 
-                    <div class="sugerencias-item-plato">
-                        <div class="sugerencias-item-textos">
-                            <div class="sugerencias-plato-es">Tagliata de calamar al horno Josper con ratatouille y espuma de albahaca</div>
-                            <div class="sugerencias-plato-en">Tagliata of Josper-roasted squid with ratatouille and basil foam</div>
-                        </div>
-                        <div class="sugerencias-item-puntos"></div>
-                        <div class="sugerencias-item-precio">18.50€</div>
-                    </div>
-
-                    <div class="sugerencias-item-plato">
-                        <div class="sugerencias-item-textos">
-                            <div class="sugerencias-plato-es">Flor de alcachofas al horno Josper con salsa tonnato</div>
-                            <div class="sugerencias-plato-en">Charcoal-grilled artichoke with tonnato sauce</div>
-                        </div>
-                        <div class="sugerencias-item-puntos"></div>
-                        <div class="sugerencias-item-precio">18.50€</div>
-                    </div>
                 </div>
 
-                <div class="sugerencias-categoria-block">
-                    <div class="sugerencias-categoria-titulo">Platos Principales / Main Courses</div>
-                    
-                    <div class="sugerencias-item-plato">
-                        <div class="sugerencias-item-textos">
-                            <div class="sugerencias-plato-es">Arroz meloso de cigala</div>
-                            <div class="sugerencias-plato-en">Meloso Rice of Norway Lobster</div>
-                        </div>
-                        <div class="sugerencias-item-puntos"></div>
-                        <div class="sugerencias-item-precio">22.00€</div>
-                    </div>
-
-                    <div class="sugerencias-item-plato">
-                        <div class="sugerencias-item-textos">
-                            <div class="sugerencias-plato-es">Entrecot trinchado con patata frita, encurtidos con rúcula y queso parmesano</div>
-                            <div class="sugerencias-plato-en">Sliced Entrecote with French fries, pickles, rocket, and Parmesan</div>
-                        </div>
-                        <div class="sugerencias-item-puntos"></div>
-                        <div class="sugerencias-item-precio">29.00€</div>
-                    </div>
-                </div>
-
-                <div class="sugerencias-categoria-block">
+                <div class="sugerencias-categoria-block sugerencias-vinos-bottom">
                     <div class="sugerencias-categoria-titulo">Vinos Recomendados / Recommended Wines</div>
                     
                     <div class="sugerencias-item-plato">
