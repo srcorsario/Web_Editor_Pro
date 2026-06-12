@@ -28,11 +28,27 @@
         .sugerencias-seccion-titulo { font-size: 0.9rem !important; font-weight: 700 !important; color: #d97706 !important; border-bottom: 2px solid #334155 !important; margin-bottom: 15px !important; text-transform: uppercase !important; }
         
         .sugerencias-plato { display: flex !important; align-items: baseline !important; margin-bottom: 12px !important; width: 100% !important; }
-        .sugerencias-plato-nombres { flex: 1 !important; display: flex !important; flex-direction: column !important; }
+        
+        /* MODIFICADO: El contenedor de nombres toma el espacio que necesita y cede el sobrante a los puntos */
+        .sugerencias-plato-nombres { 
+            flex: 0 1 auto !important; 
+            max-width: 80% !important;
+            display: flex !important; 
+            flex-direction: column !important; 
+        }
+        
         .sugerencias-nombre-es { font-size: 0.95rem !important; font-weight: 600 !important; color: #1e293b !important; }
         .sugerencias-nombre-en { font-size: 0.8rem !important; color: #64748b !important; font-style: italic !important; }
-        .sugerencias-puntos { flex: 1 !important; border-bottom: 1px dotted #94a3b8 !important; margin: 0 10px !important; height: 1px !important; }
-        .sugerencias-precio { font-size: 0.95rem !important; font-weight: 700 !important; }
+        
+        /* MODIFICADO: Los puntos ocupan únicamente el espacio que dejan los nombres */
+        .sugerencias-puntos { 
+            flex: 1 !important; 
+            border-bottom: 1px dotted #94a3b8 !important; 
+            margin: 0 10px !important; 
+            height: 1px !important; 
+        }
+        
+        .sugerencias-precio { font-size: 0.95rem !important; font-weight: 700 !important; flex-shrink: 0 !important; }
         
         /* Footer con QR controlado */
         .sugerencias-footer { margin-top: auto !important; border-top: 1px solid #e2e8f0 !important; padding-top: 20px !important; display: flex !important; justify-content: space-between !important; align-items: center !important; }
