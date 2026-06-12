@@ -113,12 +113,7 @@
         </div>
 
         <div id="tab-sugerencias" class="tab-content sugerencias-panel" style="display: none;">
-            <div class="sugerencias-header">
-                <h2>Sugerencias del Día</h2>
-                <p class="sugerencias-subtitle">Platos activos en la web (Español / English)</p>
             </div>
-            <div id="sugerencias-contenido" class="sugerencias-body"></div>
-        </div>
 
     </div>
 
@@ -213,25 +208,40 @@
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(el => {
                 el.classList.remove('active');
+                // MODIFICADO: Evitamos forzar 'none' inline a la hoja de sugerencias si está activa para que no rompa los estilos A4
                 el.style.display = 'none';
             });
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
-            document.getElementById('tab-' + tabId).classList.add('active');
-            document.getElementById('tab-' + tabId).style.display = 'block';
+            const targetTab = document.getElementById('tab-' + tabId);
+            targetTab.classList.add('active');
+            
+            // MODIFICADO: Manejo defensivo inteligente para respetar el display flex del folio A4 impreso
+            if (tabId === 'sugerencias') {
+                targetTab.style.setProperty('display', 'flex', 'important');
+            } else {
+                targetTab.style.display = 'block';
+            }
+            
             btnElement.classList.add('active');
 
             if (tabId === 'editor') {
                 document.querySelector('.btn-add-float').style.display = 'block';
                 document.querySelector('.btn-guardar-main').style.display = 'block';
             } else {
-                document.querySelector('.btn-add-float').style.display = 'none';
-                document.querySelector('.btn-guardar-main').style.display = 'none';
+                if (document.querySelector('.btn-add-float')) document.querySelector('.btn-add-float').style.display = 'none';
+                if (document.querySelector('.btn-guardar-main')) document.querySelector('.btn-guardar-main').style.display = 'none';
             }
 
-            // NUEVO: Renderizar sugerencias al cambiar a la pestaña
-            if (tabId === 'sugerencias' && typeof renderizarSugerencias === 'function') {
-                renderizarSugerencias();
+            // MODIFICADO: Enlazar con el inicializador real de sugerencias-print.js de manera segura
+            if (tabId === 'sugerencias') {
+                // Forzamos la regeneración limpia del folio A4 dentro de la pestaña activa
+                const panelSugerencias = document.querySelector('.sugerencias-panel');
+                if (panelSugerencias && panelSugerencias.innerHTML.trim() === "") {
+                    // Si por el ciclo de vida asíncrono estuviera vacío, despachamos un evento para forzar el repintado
+                    const event = new Event('DOMContentLoaded');
+                    document.dispatchEvent(event);
+                }
             }
         }
     </script>
