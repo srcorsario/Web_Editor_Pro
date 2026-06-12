@@ -226,10 +226,14 @@
                 if (document.querySelector('.btn-guardar-main')) document.querySelector('.btn-guardar-main').style.display = 'none';
             }
 
-            // MODIFICADO: Lanzar un refresco forzado y seguro al cambiar a la pestaña para pintar el A4 si estaba oculto
+            // MODIFICADO: Puente inteligente y seguro para forzar el renderizado real de la hoja A4
             if (tabId === 'sugerencias') {
-                const panelSugerencias = document.querySelector('.sugerencias-panel');
-                if (panelSugerencias && panelSugerencias.innerHTML.trim() === "") {
+                // 1. Intentamos ejecutar la función global de renderizado si el script la expuso abiertamente
+                if (typeof renderizarSugerencias === 'function') {
+                    renderizarSugerencias();
+                } 
+                // 2. Si el script viene empaquetado de forma aislada, despertamos su inicializador secundario mediante eventos nativos
+                else {
                     const event = new Event('DOMContentLoaded');
                     document.dispatchEvent(event);
                 }
