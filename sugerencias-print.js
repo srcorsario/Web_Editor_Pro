@@ -1,11 +1,8 @@
-=========================================
-REPOSITORIO: Web_Editor_Pro (PRINCIPAL)
-ARCHIVO: sugerencias-print.js
-=========================================
 // =========================================================================
 // ARCHIVO: sugerencias-print.js (COMPONENTE INTEGRAL DE IMPRESIÓN A4)
 // MODIFICADO: Ajuste de diseño adaptado a capturas reales de la aplicación.
 // Posicionamiento estricto de logos corporativos y códigos QR en esquinas.
+// Fix: Corrección de visibilidad de pantalla para evitar panel en blanco.
 // =========================================================================
 
 (function () {
@@ -208,7 +205,8 @@ ARCHIVO: sugerencias-print.js
                 margin: 0;
             }
             
-            body *, 
+            /* MODIFICADO: Aislamiento selectivo en cascada exclusivo para preservar el nodo contenedor principal de sugerencias en impresión */
+            body > :not(.sugerencias-panel):not(#btnDisparadorImpresionA4),
             #app-version, 
             .header-admin, 
             .tabs-container, 
