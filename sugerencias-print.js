@@ -29,10 +29,10 @@
         
         .sugerencias-plato { display: flex !important; align-items: baseline !important; margin-bottom: 12px !important; width: 100% !important; }
         
-        /* MODIFICADO: Ampliado el max-width al 88% para aprovechar más espacio horizontal en el A4 */
+        /* MODIFICADO: Ampliado al 93% para máxima ocupación horizontal antes del salto de línea */
         .sugerencias-plato-nombres { 
             flex: 0 1 auto !important; 
-            max-width: 88% !important;
+            max-width: 93% !important;
             display: flex !important; 
             flex-direction: column !important; 
         }
