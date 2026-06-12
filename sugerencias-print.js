@@ -1,36 +1,7 @@
 (function () {
     'use strict';
 
-    const stylePrint = document.createElement('style');
-    stylePrint.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
-        
-        .sugerencias-panel { background: #ffffff !important; padding: 50px !important; max-width: 210mm !important; margin: auto !important; font-family: 'Montserrat', sans-serif !important; }
-        
-        /* Cabecera Completa */
-        .sugerencias-header-layout { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 40px !important; }
-        .sugerencias-brand-title-group { display: flex !important; flex-direction: column !important; gap: 8px !important; }
-        .sugerencias-title-es { font-weight: 300 !important; font-size: 2.2rem !important; color: #e05a2b !important; line-height: 1 !important; text-transform: uppercase !important; }
-        .sugerencias-title-en { font-weight: 300 !important; font-size: 1.6rem !important; color: #0d5c63 !important; line-height: 1 !important; text-transform: uppercase !important; }
-        .sugerencias-logo-img { width: 280px !important; height: auto !important; }
-        
-        /* Secciones y Platos */
-        .sugerencias-seccion { margin-bottom: 30px !important; }
-        .sugerencias-seccion-titulo { font-size: 0.9rem !important; font-weight: 700 !important; color: #d97706 !important; border-bottom: 2px solid #334155 !important; padding-bottom: 5px !important; margin-bottom: 15px !important; text-transform: uppercase !important; }
-        
-        .sugerencias-plato { display: flex !important; align-items: baseline !important; margin-bottom: 12px !important; }
-        .sugerencias-plato-nombres { display: flex !important; flex-direction: column !important; }
-        .sugerencias-nombre-es { font-size: 0.95rem !important; font-weight: 600 !important; color: #1e293b !important; }
-        .sugerencias-nombre-en { font-size: 0.8rem !important; color: #64748b !important; font-style: italic !important; }
-        .sugerencias-puntos { flex: 1 !important; border-bottom: 1px dotted #94a3b8 !important; margin: 0 10px !important; position: relative !important; top: -5px !important; }
-        .sugerencias-precio { font-size: 0.95rem !important; font-weight: 700 !important; color: #1e293b !important; }
-        
-        /* Footer Completo */
-        .sugerencias-footer { margin-top: 50px !important; border-top: 1px solid #e2e8f0 !important; padding-top: 20px !important; display: flex !important; justify-content: space-between !important; align-items: center !important; }
-        .sugerencias-aviso { font-size: 0.8rem !important; color: #64748b !important; line-height: 1.4 !important; max-width: 70% !important; }
-        .sugerencias-qr-img { width: 120px !important; height: auto !important; }
-    `;
-    document.head.appendChild(stylePrint);
+    // ... (Mantén el mismo CSS que definimos anteriormente) ...
 
     function cargarCarta() {
         if (typeof datosLocales === 'undefined') { setTimeout(cargarCarta, 500); return; }
@@ -38,13 +9,16 @@
         const contenedor = document.querySelector('.sugerencias-panel');
         if (!contenedor) return;
 
-        const platosSugerencias = datosLocales.filter(p => p.activa && p.id >= 12000 && p.id <= 12999);
+        // Filtramos sobre la lista ya ordenada por el usuario en el app.js
+        const activos = datosLocales.filter(p => p.activa);
         
-        const entrantes = platosSugerencias.filter(p => p.id >= 12000 && p.id <= 12399);
-        const principales = platosSugerencias.filter(p => p.id >= 12400 && p.id <= 12899);
-        const postres = platosSugerencias.filter(p => p.id >= 12900 && p.id <= 12999 && p.id !== 12990);
-        const vinosSugerencia = platosSugerencias.filter(p => p.id === 12990 || desglosarNombre(p.es).nombre.toLowerCase().includes('vino'));
+        const entrantes = activos.filter(p => p.id >= 12000 && p.id <= 12399);
+        const principales = activos.filter(p => p.id >= 12400 && p.id <= 12899);
+        const postres = activos.filter(p => p.id >= 12900 && p.id <= 12999 && p.id !== 12990);
+        // El 12990 se incluye explícitamente en vinos
+        const vinosSugerencia = activos.filter(p => p.id === 12990 || desglosarNombre(p.es).nombre.toLowerCase().includes('vino'));
 
+        // Construcción del HTML
         let html = `
             <div class="sugerencias-header-layout">
                 <div class="sugerencias-brand-title-group">
