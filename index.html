@@ -112,8 +112,10 @@
 
         </div>
 
-        <div id="tab-sugerencias" class="tab-content sugerencias-panel" style="display: none;">
-            </div>
+        <div id="tab-sugerencias" class="tab-content" style="display: none;">
+            <div class="sugerencias-panel">
+                </div>
+        </div>
 
     </div>
 
@@ -208,21 +210,12 @@
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(el => {
                 el.classList.remove('active');
-                // MODIFICADO: Evitamos forzar 'none' inline a la hoja de sugerencias si está activa para que no rompa los estilos A4
                 el.style.display = 'none';
             });
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
-            const targetTab = document.getElementById('tab-' + tabId);
-            targetTab.classList.add('active');
-            
-            // MODIFICADO: Manejo defensivo inteligente para respetar el display flex del folio A4 impreso
-            if (tabId === 'sugerencias') {
-                targetTab.style.setProperty('display', 'flex', 'important');
-            } else {
-                targetTab.style.display = 'block';
-            }
-            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('tab-' + tabId).style.display = 'block';
             btnElement.classList.add('active');
 
             if (tabId === 'editor') {
@@ -233,12 +226,10 @@
                 if (document.querySelector('.btn-guardar-main')) document.querySelector('.btn-guardar-main').style.display = 'none';
             }
 
-            // MODIFICADO: Enlazar con el inicializador real de sugerencias-print.js de manera segura
+            // MODIFICADO: Lanzar un refresco forzado y seguro al cambiar a la pestaña para pintar el A4 si estaba oculto
             if (tabId === 'sugerencias') {
-                // Forzamos la regeneración limpia del folio A4 dentro de la pestaña activa
                 const panelSugerencias = document.querySelector('.sugerencias-panel');
                 if (panelSugerencias && panelSugerencias.innerHTML.trim() === "") {
-                    // Si por el ciclo de vida asíncrono estuviera vacío, despachamos un evento para forzar el repintado
                     const event = new Event('DOMContentLoaded');
                     document.dispatchEvent(event);
                 }
