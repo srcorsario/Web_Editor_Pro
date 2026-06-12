@@ -1,17 +1,17 @@
 // =========================================================================
 // ARCHIVO: sugerencias-print.js (COMPONENTE INTEGRAL DE IMPRESIÓN A4)
-// MODIFICADO: Ajuste de diseño adaptado a capturas reales de la aplicación.
-// Posicionamiento estricto de logos corporativos y códigos QR en esquinas.
-// Fix: Corrección de visibilidad de pantalla para evitar panel en blanco.
+// MODIFICADO: Adaptación tipográfica exacta de la cabecera corporativa.
+// Reemplazo de banners antiguos por textos nativos estilizados en alta definición.
+// Fix: Colores, familias de fuentes y maquetación fiel al diseño original.
 // =========================================================================
 
 (function () {
     'use strict';
 
-    // MODIFICADO: Estilos estéticos ultra-fieles adaptados para el posicionamiento correcto de elementos de marca
+    // MODIFICADO: Inclusión de los pesos finos (300) y estilos de color exactos de la imagen institucional
     const stylePrint = document.createElement('style');
     stylePrint.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
         /* Contenedor principal de la pestaña de sugerencias estilo folio A4 blanco limpio */
         .sugerencias-panel {
@@ -36,38 +36,49 @@
             display: flex !important;
             justify-content: space-between !important;
             align-items: flex-start !important;
-            margin-bottom: 20px !important;
+            margin-bottom: 35px !important;
             width: 100% !important;
         }
 
-        .sugerencias-brand-title {
-            font-size: 1.1rem !important;
-            font-weight: 700 !important;
-            color: #1e293b !important;
-            letter-spacing: 0.5px !important;
-            text-transform: uppercase !important;
-            line-height: 1.4 !important;
+        /* NUEVO: Contenedor del título tipográfico de sugerencias */
+        .sugerencias-brand-title-group {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
         }
 
-        /* NUEVO/MODIFICADO: Ubicación explícita y forzada del logo RG en la esquina superior derecha */
+        /* NUEVO: Estilo exacto para SUGERENCIAS DEL CHEF (Líneas 1 y 2) */
+        .sugerencias-title-es {
+            font-family: 'Montserrat', sans-serif !important;
+            font-weight: 300 !important; /* Trazo fino elegante */
+            font-size: 2.15rem !important;
+            color: #e05a2b !important; /* Color Naranja/Terracota exacto de la imagen */
+            line-height: 0.95 !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* NUEVO: Estilo exacto para CHEF'S SUGGESTIONS (Líneas 3 y 4) */
+        .sugerencias-title-en {
+            font-family: 'Montserrat', sans-serif !important;
+            font-weight: 300 !important; /* Trazo fino elegante */
+            font-size: 1.7rem !important;
+            color: #0d5c63 !important; /* Color Azul Verdoso/Marino exacto de la imagen */
+            line-height: 0.95 !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            margin-top: 4px !important;
+            padding: 0 !important;
+        }
+
+        /* Ubicación explícita y forzada del logo RG en la esquina superior derecha */
         .sugerencias-logo-rg {
             width: 75px !important;
             height: auto !important;
             object-fit: contain !important;
             margin-left: auto !important; 
-        }
-
-        /* Contenedor del banner central decorativo (negro.png) */
-        .sugerencias-banner-container {
-            text-align: left !important;
-            margin-bottom: 35px !important;
-            width: 100% !important;
-        }
-
-        .sugerencias-banner-img {
-            max-width: 240px !important;
-            height: auto !important;
-            display: block !important;
         }
 
         /* Cuerpo de listados */
@@ -163,7 +174,7 @@
             margin-right: 4px !important;
         }
 
-        /* NUEVO/MODIFICADO: Ubicación explícita y forzada del QR en la esquina inferior derecha */
+        /* Ubicación explícita y forzada del QR en la esquina inferior derecha */
         .sugerencias-qr-box {
             width: 65px !important;
             height: 65px !important;
@@ -205,7 +216,6 @@
                 margin: 0;
             }
             
-            /* MODIFICADO: Aislamiento selectivo en cascada exclusivo para preservar el nodo contenedor principal de sugerencias en impresión */
             body > :not(.sugerencias-panel):not(#btnDisparadorImpresionA4),
             #app-version, 
             .header-admin, 
@@ -246,17 +256,18 @@
         const panelContenedor = document.querySelector('.sugerencias-panel');
         if (!panelContenedor) return; // Validación defensiva preventiva
 
-        // MODIFICADO: Maquetación limpia inyectando las imágenes correspondientes con validación de posición
+        // MODIFICADO: Maquetación limpia inyectando los títulos vectoriales nativos en lugar de la imagen estática removida
         panelContenedor.innerHTML = `
             <div class="sugerencias-header-layout">
-                <div class="sugerencias-brand-title" id="sugerencias-fecha-titulo">
-                    SUGERENCIAS DEL CARTA
+                <div class="sugerencias-brand-title-group">
+                    <div class="sugerencias-title-es">
+                        SUGERENCIAS<br>DEL CHEF
+                    </div>
+                    <div class="sugerencias-title-en">
+                        CHEF'S<br>SUGGESTIONS
+                    </div>
                 </div>
                 <img src="RG_REST.png" alt="Roland Garros Restaurant" class="sugerencias-logo-rg" onerror="this.style.display='none';">
-            </div>
-
-            <div class="sugerencias-banner-container">
-                <img src="negro.png" alt="SUGERENCIAS DEL CHEF / CHEF'S SUGGESTIONS" class="sugerencias-banner-img" onerror="this.style.display='none';">
             </div>
 
             <div class="sugerencias-body-menu">
@@ -349,7 +360,7 @@
             </div>
         `;
 
-        // Generación e inyección controlada del botón de impresión interactivo para evitar duplicidad de listeners
+        // Generación e inyección del botón de impresión interactivo
         if (!document.getElementById('btnDisparadorImpresionA4')) {
             const btnPrint = document.createElement('button');
             btnPrint.id = 'btnDisparadorImpresionA4';
