@@ -57,11 +57,40 @@
         const contenedor = document.querySelector('.sugerencias-panel');
         if (!contenedor) return;
 
-        const activos = datosLocales.filter(p => p.activa);
-        const entrantes = activos.filter(p => p.id >= 12000 && p.id <= 12399);
-        const principales = activos.filter(p => p.id >= 12400 && p.id <= 12899);
-        const postres = activos.filter(p => p.id >= 12900 && p.id <= 12999 && p.id !== 12990);
-        const vinosSugerencia = activos.filter(p => p.id === 12990 || desglosarNombre(p.es).nombre.toLowerCase().includes('vino'));
+        // MODIFICADO: Restringir estrictamente el filtrado a IDs de Sugerencias (12000-12999)
+        const activosSugerencias = datosLocales.filter(p => p.activa && p.id >= 12000 && p.id <= 12999);
+
+        let entrantes = [];
+        let principales = [];
+        let postres = [];
+        let vinos = [];
+
+        // MODIFICADO: Clasificación inteligente basada en rangos de ID para evitar falsos positivos con la palabra "vino"
+        activosSugerencias.forEach(p => {
+            const id = p.id;
+            const nombreEs = desglosarNombre(p.es).nombre.toLowerCase();
+            
+            // 1. El ID especial 12990 va a vinos, o si contiene "vino" pero NO es "copa" ni "vinagreta" (para evitar el salpicón)
+            if (id === 12990 || (nombreEs.includes('vino') && !nombreEs.includes('copa') && !nombreEs.includes('vinagreta'))) {
+                vinos.push(p);
+            } 
+            // 2. Rango de Entrantes y Croquetas
+            else if (id >= 12100 && id <= 12399) {
+                entrantes.push(p);
+            } 
+            // 3. Rango de Principales
+            else if (id >= 12400 && id <= 12899) {
+                principales.push(p);
+            } 
+            // 4. Rango de Postres
+            else if (id >= 12900 && id <= 12999) {
+                postres.push(p);
+            } 
+            // 5. Fallback para IDs entre 12000-12099
+            else {
+                entrantes.push(p);
+            }
+        });
 
         let html = `
             <div class="sugerencias-header-layout">
@@ -93,7 +122,7 @@
         html += renderCat('Entrantes / Starters', entrantes);
         html += renderCat('Platos Principales / Main Courses', principales);
         html += renderCat('Postres / Desserts', postres);
-        html += renderCat('Vinos Recomendados / Recommended Wines', vinosSugerencia);
+        html += renderCat('Vinos Recomendados / Recommended Wines', vinos);
 
         html += `
             <div class="sugerencias-footer">
